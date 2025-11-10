@@ -23,7 +23,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <Scale className="h-9 w-9 text-primary" />
+            <Scale className="h-12 w-9 text-primary" />
             <span className="text-2xl font-bold text-foreground">وكيلي</span>
           </div>
           {/* Links */}
@@ -54,7 +54,7 @@ const Navigation = () => {
             </a>
             <a
               href="#services"
-              className="text-foreground hover:text-primary transition-colors"
+              className="text-foreground cursor-pointer hover:text-primary transition-colors"
             >
               من نحن
             </a>
@@ -88,14 +88,18 @@ const Hero = () => {
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               {/* First Button */}
-              <Button variant="cta" size="xl" className="shadow-glow">
+              <Button
+                variant="cta"
+                size="xl"
+                className="shadow-glow cursor-pointer"
+              >
                 <Users className="ml-2" />
                 احجز استشارة قانونية
               </Button>
               <Button
                 variant="outline"
                 size="xl"
-                className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                className="cursor-pointer border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
               >
                 <MessageCircle className="ml-2" />
                 تحدث مع الذكاء الاصطناعي
