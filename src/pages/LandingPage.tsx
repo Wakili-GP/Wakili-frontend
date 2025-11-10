@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, FC } from "react";
 import {
   Scale,
   Users,
@@ -10,6 +10,9 @@ import {
   Clock,
   BookOpen,
   Video,
+  Award,
+  Briefcase,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import legalHeroImage from "../assets/legal-hero.jpg";
@@ -22,6 +25,10 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import Marquee from "react-fast-marquee";
+import lawyer_1 from "../assets/lawyer-1.jpg";
+import lawyer_2 from "../assets/lawyer-2.png";
+import lawyer_3 from "../assets/lawyer-3.png";
 const LandingPage = () => {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -35,6 +42,7 @@ const LandingPage = () => {
       <Hero />
       <MobileApp />
       <Services />
+      <Lawyers />
     </div>
   );
 };
@@ -57,7 +65,7 @@ const Navigation = () => {
               الخدمات
             </a>
             <a
-              href="#services"
+              href="#lawyers"
               className="text-foreground hover:text-primary transition-colors"
             >
               أهم محامينا
@@ -439,6 +447,162 @@ const Services = () => {
             </Card>
           </motion.div>
         </div>
+      </div>
+    </section>
+  );
+};
+interface LawyerCardProps {
+  lawyerImg: string;
+  lawyerName: string;
+  lawyerCases: number | string;
+  lawyerSpecialization: string;
+  lawyerRating: number | string;
+  lawyerExperience: string;
+}
+const LawyerCard: FC<LawyerCardProps> = ({
+  lawyerImg,
+  lawyerName,
+  lawyerCases,
+  lawyerSpecialization,
+  lawyerRating,
+  lawyerExperience,
+}) => {
+  const ratingValue = Number(lawyerRating);
+
+  return (
+    <Card className="min-w-[320px] mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
+      <CardContent>
+        {/* Avatar + Info */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className="relative">
+            <img
+              src={lawyerImg}
+              alt={lawyerName}
+              className="w-16 h-16 rounded-full object-cover shadow-card"
+            />
+            <div className="absolute -bottom-1 -right-1 bg-secondary rounded-full p-1">
+              <Award className="w-3 h-3 text-secondary-foreground" />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-foreground mb-1">
+              {lawyerName}
+            </h3>
+            <p className="text-sm text-muted-foreground">{lawyerExperience}</p>
+          </div>
+        </div>
+
+        {/* Specialization + Stats */}
+        <div className="mb-3">
+          <p className="text-sm font-medium text-primary mb-2">
+            {lawyerSpecialization}
+          </p>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center">
+              <Briefcase className="w-4 h-4 ml-1" />
+              <span>{lawyerCases} قضية</span>
+            </div>
+
+            <div className="flex items-center">
+              <Star className="w-4 h-4 ml-1 text-warning-amber fill-current" />
+              <span className="font-medium">{lawyerRating}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Rating Stars */}
+        <div className="flex justify-between items-center">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`w-4 h-4 ${
+                  i < Math.floor(ratingValue)
+                    ? "text-warning-amber fill-current"
+                    : "text-muted-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            متاح للاستشارة
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const Lawyers: FC = () => {
+  return (
+    <section id="lawyers" className="py-16 bg-muted">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center">
+        <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          أهم محامينا
+        </h2>
+        <p className="text-xl text-muted-foreground">
+          نخبة من أفضل المحامين المتخصصين في مختلف فروع القانون
+        </p>
+      </div>
+
+      <div className="relative">
+        {/* Fade gradients */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10 pointer-events-none"></div>
+
+        <Marquee gradient={false} speed={50} pauseOnHover autoFill={true}>
+          <LawyerCard
+            lawyerImg={lawyer_1}
+            lawyerName="د. أحمد المحامي"
+            lawyerCases={350}
+            lawyerSpecialization="القانون الجنائي والمدني"
+            lawyerRating={4.9}
+            lawyerExperience="15 سنة خبرة"
+          />
+          <LawyerCard
+            lawyerImg={lawyer_2}
+            lawyerName="د. فاطمة علي"
+            lawyerCases={280}
+            lawyerSpecialization="قانون الأسرة والأحوال الشخصية"
+            lawyerRating={4.8}
+            lawyerExperience="12 سنة خبرة"
+          />
+          <LawyerCard
+            lawyerImg={lawyer_3}
+            lawyerName="د. محمد حسن"
+            lawyerCases={420}
+            lawyerSpecialization="القانون التجاري والشركات"
+            lawyerRating={4.9}
+            lawyerExperience="20 سنة خبرة"
+          />
+          <LawyerCard
+            lawyerImg={lawyer_2}
+            lawyerName="د. سارة أحمد"
+            lawyerCases={195}
+            lawyerSpecialization="قانون العقارات والاستثمار"
+            lawyerRating={4.7}
+            lawyerExperience="8 سنوات خبرة"
+          />
+          <LawyerCard
+            lawyerImg={lawyer_1}
+            lawyerName="د. خالد محمود"
+            lawyerCases={310}
+            lawyerSpecialization="القانون الدولي والتحكيم"
+            lawyerRating={4.8}
+            lawyerExperience="18 سنة خبرة"
+          />
+          <LawyerCard
+            lawyerImg={lawyer_3}
+            lawyerName="د. نور الدين"
+            lawyerCases={240}
+            lawyerSpecialization="قانون العمل والضمان الاجتماعي"
+            lawyerRating={4.6}
+            lawyerExperience="10 سنوات خبرة"
+          />
+        </Marquee>
       </div>
     </section>
   );
