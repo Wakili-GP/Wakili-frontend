@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { Scale } from "lucide-react";
+import { Scale, Users, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import legalHeroImage from "../assets/legal-hero.jpg";
 const LandingPage = () => {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -11,6 +12,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
       <Navigation />
+      <Hero />
     </div>
   );
 };
@@ -63,6 +65,53 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
+  );
+};
+const Hero = () => {
+  return (
+    <section className="relative pt-28 pb-16 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-hero opacity-90" />
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: `url(${legalHeroImage})` }}
+      />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="text-center lg:text-right">
+            <h1 className="text-4xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-18">
+              أول منصة قانونية شاملة في مصر
+            </h1>
+            <p className="text-xl text-primary-foreground/90 mb-8">
+              منصة كلاينت نيكسوس - الحل الرقمي المبتكر للربط بين العملاء ومقدمي
+              الخدمات القانونية. من الاستشارة إلى الدعم المستمر
+            </p>
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              {/* First Button */}
+              <Button variant="cta" size="xl" className="shadow-glow">
+                <Users className="ml-2" />
+                احجز استشارة قانونية
+              </Button>
+              <Button
+                variant="outline"
+                size="xl"
+                className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              >
+                <MessageCircle className="ml-2" />
+                تحدث مع الذكاء الاصطناعي
+              </Button>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <img
+              src={legalHeroImage}
+              alt="منصة وكيلي القانونية"
+              className="w-full h-auto rounded-lg shadow-elegant"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 export default LandingPage;
