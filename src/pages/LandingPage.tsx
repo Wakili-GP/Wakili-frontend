@@ -7,11 +7,21 @@ import {
   Smartphone,
   Shield,
   Zap,
+  Clock,
+  BookOpen,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import legalHeroImage from "../assets/legal-hero.jpg";
 import { motion } from "framer-motion";
 import mobileMockup from "../assets/floating-iphones.png";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 const LandingPage = () => {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -24,6 +34,7 @@ const LandingPage = () => {
       <Navigation />
       <Hero />
       <MobileApp />
+      <Services />
     </div>
   );
 };
@@ -257,6 +268,175 @@ const MobileApp = () => {
                 <Zap className="w-6 h-6 text-accent" />
               </motion.div>
             </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+const Services = () => {
+  return (
+    <section id="services" className="py-20 bg-muted">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            خدماتنا القانونية الشاملة
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            نقدم حلولاً قانونية متكاملة تلبي جميع احتياجاتك من الاستشارة الفورية
+            إلى الدعم طويل المدى
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Clock className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  حجز المواعيد السهل
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  احجز استشارتك القانونية في المكتب أو عبر الهاتف أو الإنترنت
+                  بكل سهولة ومرونة
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="h-6 w-6 text-secondary" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  دعم الطوارئ الفوري
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  خدمة دعم قانوني فوري في الحالات العاجلة والطارئة على مدار
+                  الساعة
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-success-green/10 rounded-lg flex items-center justify-center mb-4">
+                  <MessageCircle className="h-6 w-6 text-success-green" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  الذكي الاصطناعي القانوني
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  مساعد ذكي يجيب على استفساراتك القانونية بناءً على القانون
+                  المصري مع إمكانية التوجيه للمحامين
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-warning-amber/10 rounded-lg flex items-center justify-center mb-4">
+                  <BookOpen className="h-6 w-6 text-warning-amber" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  منتدى الأسئلة والأجوبة
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  مجتمع تفاعلي لطرح الأسئلة القانونية والحصول على إجابات من
+                  خبراء قانونيين
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Video className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  الاستشارات عبر الإنترنت
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  استشارات قانونية مرئية عالية الجودة من راحة منزلك باستخدام
+                  تقنية Zoom
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 transform hover:-translate-y-2 h-full">
+              <CardHeader>
+                <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Smartphone className="h-6 w-6 text-secondary" />
+                </div>
+                <CardTitle className="text-xl text-foreground">
+                  تطبيق الهاتف المحمول
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground text-base leading-relaxed">
+                  تطبيق محمول متطور يتيح لك الوصول لجميع الخدمات من هاتفك بسهولة
+                  تامة
+                </CardDescription>
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </div>
