@@ -44,6 +44,7 @@ const LandingPage = () => {
       <Services />
       <Lawyers />
       <Testimonials />
+      <Features />
     </div>
   );
 };
@@ -78,13 +79,13 @@ const Navigation = () => {
               ماذا يقول عملاؤنا عنا
             </a>
             <a
-              href="#services"
+              href="#features"
               className="text-foreground hover:text-primary transition-colors"
             >
               المميزات
             </a>
             <a
-              href="#services"
+              href="#"
               className="text-foreground cursor-pointer hover:text-primary transition-colors"
             >
               من نحن
@@ -858,6 +859,117 @@ const Testimonials = () => {
               </CardContent>
             </Card>
           </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+const Features = () => {
+  return (
+    <section id="features" className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            التقنيات المتقدمة التي نستخدمها
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            نعتمد على أحدث التقنيات لضمان أفضل تجربة قانونية رقمية في مصر
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="gap-6">
+            <div className="flex items-start space-x-4 mb-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  ذكاء اصطناعي متطور
+                </h3>
+                <p className="text-muted-foreground">
+                  نستخدم تقنيات GPT-4o مع نموذج RAG للإجابة على الاستفسارات
+                  القانونية بدقة عالية
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4 mb-4">
+              <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-secondary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  أمان وموثوقية
+                </h3>
+                <p className="text-muted-foreground">
+                  بنية تحتية آمنة مع تشفير البيانات وحماية الخصوصية باستخدام
+                  ASP.NET Core
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4 mb-4">
+              <div className="w-10 h-10 bg-success-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Users className="h-5 w-5 text-success-green" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  تجربة مستخدم متميزة
+                </h3>
+                <p className="text-muted-foreground">
+                  واجهات سهلة الاستخدام مع دعم كامل للغة العربية وتجربة محمولة
+                  متطورة
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 bg-warning-amber/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Scale className="h-5 w-5 text-warning-amber" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  قاعدة بيانات قانونية شاملة
+                </h3>
+                <p className="text-muted-foreground">
+                  مجموعة واسعة من القوانين والتشريعات المصرية مع تحديثات مستمرة
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-card rounded-2xl p-8 shadow-elegant">
+            <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
+              إحصائيات المنصة
+            </h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">
+                  1000+
+                </div>
+                <div className="text-muted-foreground">محامي معتمد</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-secondary mb-2">
+                  5000+
+                </div>
+                <div className="text-muted-foreground">استشارة مكتملة</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-success-green mb-2">
+                  24/7
+                </div>
+                <div className="text-muted-foreground">دعم مستمر</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-warning-amber mb-2">
+                  99%
+                </div>
+                <div className="text-muted-foreground">رضا العملاء</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
