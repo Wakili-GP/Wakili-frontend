@@ -43,6 +43,7 @@ const LandingPage = () => {
       <MobileApp />
       <Services />
       <Lawyers />
+      <Testimonials />
     </div>
   );
 };
@@ -71,7 +72,7 @@ const Navigation = () => {
               أهم محامينا
             </a>
             <a
-              href="#services"
+              href="#testimonials"
               className="text-foreground hover:text-primary transition-colors"
             >
               ماذا يقول عملاؤنا عنا
@@ -548,7 +549,7 @@ const Lawyers: FC = () => {
         </p>
       </div>
 
-      <div className="relative">
+      <div className="container relative">
         {/* Fade gradients */}
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10 pointer-events-none"></div>
@@ -603,6 +604,261 @@ const Lawyers: FC = () => {
             lawyerExperience="10 سنوات خبرة"
           />
         </Marquee>
+      </div>
+    </section>
+  );
+};
+const Testimonials = () => {
+  return (
+    <section id="testimonials" className="py-20 bg-muted">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            ماذا يقول عملاؤنا عنا
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            اكتشف تجارب عملائنا وآرائهم حول الخدمات القانونية التي نقدمها
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "خدمة ممتازة ومحامون محترفون. حلوا مشكلتي القانونية بسرعة
+                  وكفاءة عالية. أنصح بشدة بهذه المنصة."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-primary font-semibold">أ</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">أحمد محمد</h4>
+                    <p className="text-sm text-muted-foreground">رجل أعمال</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "المنصة سهلة الاستخدام والذكي الاصطناعي مفيد جداً. وفرت علي
+                  الكثير من الوقت والجهد في البحث عن المعلومات القانونية."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-secondary font-semibold">س</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">سارة أحمد</h4>
+                    <p className="text-sm text-muted-foreground">محاسبة</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "تجربة رائعة مع فريق محترف. الاستشارة كانت مفصلة ومفيدة،
+                  والمحامي كان صبوراً في الشرح والتوضيح."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-success-green font-semibold">م</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">محمد علي</h4>
+                    <p className="text-sm text-muted-foreground">مهندس</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "خدمة جيدة وسعر مناسب. كان هناك تأخير بسيط في الرد ولكن بشكل
+                  عام التجربة إيجابية وأنصح بها."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-warning-amber/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-warning-amber font-semibold">ف</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">فاطمة حسن</h4>
+                    <p className="text-sm text-muted-foreground">طبيبة</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "استثنائي! المحامي كان خبيراً في مجاله وقدم نصائح قيمة جداً.
+                  المنصة آمنة وموثوقة بنسبة 100%."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-primary font-semibold">ك</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">كريم يوسف</h4>
+                    <p className="text-sm text-muted-foreground">صاحب شركة</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex text-warning-amber">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          true
+                            ? "text-warning-amber fill-current"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  "منصة مبتكرة ومفيدة جداً. الذكي الاصطناعي أجاب على كل
+                  استفساراتي بدقة، وعندما احتجت استشارة شخصية كان الحجز سهل."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center ml-3">
+                    <span className="text-secondary font-semibold">ن</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">
+                      نورا إبراهيم
+                    </h4>
+                    <p className="text-sm text-muted-foreground">مصممة</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
