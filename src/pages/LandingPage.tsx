@@ -13,6 +13,7 @@ import {
   Award,
   Briefcase,
   Star,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import legalHeroImage from "../assets/legal-hero.jpg";
@@ -45,6 +46,8 @@ const LandingPage = () => {
       <Lawyers />
       <Testimonials />
       <Features />
+      <CTA />
+      <Footer />
     </div>
   );
 };
@@ -114,8 +117,8 @@ const Hero = () => {
               أول منصة قانونية شاملة في مصر
             </h1>
             <p className="text-xl text-primary-foreground/90 mb-8">
-              منصة كلاينت نيكسوس - الحل الرقمي المبتكر للربط بين العملاء ومقدمي
-              الخدمات القانونية. من الاستشارة إلى الدعم المستمر
+              منصة وكيلي - الحل الرقمي المبتكر للربط بين العملاء ومقدمي الخدمات
+              القانونية. من الاستشارة إلى الدعم المستمر
             </p>
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -973,6 +976,111 @@ const Features = () => {
         </div>
       </div>
     </section>
+  );
+};
+const CTA = () => {
+  return (
+    <section className="py-20 bg-gradient-hero relative overflow-hidden">
+      <div className="absolute inset-0 bg-primary/90" />
+      <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl lg:text-4xl font-bold text-primary-foreground mb-6">
+          ابدأ رحلتك القانونية معنا اليوم
+        </h2>
+        <p className="text-xl text-primary-foreground/90 mb-8">
+          انضم إلى آلاف العملاء الذين يثقون في منصة وكيلي للحصول على أفضل
+          الخدمات القانونية
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button variant="cta" size="xl" className="shadow-glow">
+            <Phone className="ml-2" />
+            احجز استشارة مجانية
+          </Button>
+          <Button
+            variant="outline"
+            size="xl"
+            className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+          >
+            <MessageCircle className="ml-2" />
+            تجربة الذكي الاصطناعي
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+const Footer = () => {
+  return (
+    <footer className="bg-foreground text-background py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-4 gap-8">
+          <div className="col-span-2">
+            <div className="flex items-center space-x-3 mb-4">
+              <Scale className="h-8 w-8 text-secondary" />
+              <span className="text-2xl font-bold">منصة وكيلي</span>
+            </div>
+            <p className="text-background/80 mb-4">
+              أول منصة قانونية شاملة في مصر تقدم حلولاً رقمية متطورة لربط
+              العملاء بالخدمات القانونية
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">روابط سريعة</h3>
+            <ul className="space-y-2 text-background/80">
+              <li>
+                <a
+                  href="#services"
+                  className="hover:text-secondary transition-colors"
+                >
+                  الخدمات
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#lawyers"
+                  className="hover:text-secondary transition-colors"
+                >
+                  أهم محامينا
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#testimonials"
+                  className="hover:text-secondary transition-colors"
+                >
+                  آراء العملاء
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#features"
+                  className="hover:text-secondary transition-colors"
+                >
+                  المميزات
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-secondary transition-colors">
+                  من نحن
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">اتصل بنا</h3>
+            <div className="space-y-2 text-background/80">
+              <p>القاهرة، مصر</p>
+              <p>+20 11 4495 8064</p>
+              <p>info@wakiliy.com</p>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-background/20 mt-8 pt-8 text-center text-background/60">
+          <p>
+            &copy; {new Date().getFullYear()} منصة وكيلي . جميع الحقوق محفوظة.
+          </p>
+        </div>
+      </div>
+    </footer>
   );
 };
 export default LandingPage;
