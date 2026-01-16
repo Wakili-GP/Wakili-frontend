@@ -1,4 +1,5 @@
-import { useEffect, FC } from "react";
+import { useEffect } from "react";
+import type { FC } from "react";
 import {
   Scale,
   Users,
@@ -1070,7 +1071,7 @@ const Footer = () => {
             <div className="space-y-2 text-background/80">
               <p>القاهرة، مصر</p>
               <p>+20 11 4495 8064</p>
-              <p>info@wakiliy.com</p>
+              <p>info@wakili.me</p>
             </div>
           </div>
         </div>
