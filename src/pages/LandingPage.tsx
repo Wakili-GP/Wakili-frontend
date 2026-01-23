@@ -87,7 +87,7 @@ const LandingPage = () => {
                 variant="hero"
                 size="lg"
                 onClick={() => {
-                  setAuthMode("register");
+                  setAuthMode("reset-password");
                   setAuthOpen(true);
                 }}
               >

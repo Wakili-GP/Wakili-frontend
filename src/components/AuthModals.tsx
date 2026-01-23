@@ -11,7 +11,6 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-import { div, span } from "framer-motion/client";
 
 export type AuthMode =
   | "login"
@@ -52,6 +51,8 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<string>("");
+  const [resetCode, setResetCode] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
   };
@@ -59,6 +60,9 @@ const AuthModals: React.FC<AuthModalProps> = ({
     e.preventDefault();
   };
   const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+  const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
   };
   const userTypes = [
@@ -286,6 +290,64 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 تسجيل الدخول
               </button>
             </p>
+          </div>
+        )}
+        {mode === "reset-password" && (
+          <div>
+            <form className="space-y-4" onSubmit={handleResetPassword}>
+              <div className="space-y-2">
+                <Label htmlFor="reset-code">رمز التحقق</Label>
+                <Input
+                  id="reset-code"
+                  type="text"
+                  placeholder="000000"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widset"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">تأكيد كلمة المرور</Label>
+                <Input
+                  id="confirm-new-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widset"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={isLoading}
+              >
+                {isLoading ? "جاري التحديث..." : "تحديث كلمة المرور"}
+              </Button>
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                العودة إلى
+                <button
+                  type="button"
+                  className="cursor-pointer text-primary underline underline-offset-4"
+                  onClick={() => onSwitchMode("login")}
+                >
+                  تسجيل الدخول
+                </button>
+              </p>
+            </form>
           </div>
         )}
       </DialogContent>
