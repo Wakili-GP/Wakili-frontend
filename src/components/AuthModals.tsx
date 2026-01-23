@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
+import { div } from "framer-motion/client";
 
 export type AuthMode =
   | "login"
@@ -50,7 +51,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedUserType, setSelectedUserType] = useState<string>("");
   const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+  const handleForgotPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
   };
   const userTypes = [
@@ -156,6 +164,41 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 onClick={() => onSwitchMode("register")}
               >
                 سجل الآن
+              </button>
+            </p>
+          </div>
+        )}
+
+        {mode === "forgot-password" && (
+          <div>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">البريد الإلكتروني</Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={isLoading}
+              >
+                {isLoading ? "جاري الإرسال..." : "إرسال رمز التحقق"}
+              </Button>
+            </form>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              تذكرت كلمة المرور؟{" "}
+              <button
+                type="button"
+                className="cursor-pointer text-primary underline underline-offset-4"
+                onClick={() => onSwitchMode("login")}
+              >
+                تسجيل الدخول
               </button>
             </p>
           </div>
