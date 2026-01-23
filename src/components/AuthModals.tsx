@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-import { div } from "framer-motion/client";
+import { div, span } from "framer-motion/client";
 
 export type AuthMode =
   | "login"
@@ -196,6 +196,91 @@ const AuthModals: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 className="cursor-pointer text-primary underline underline-offset-4"
+                onClick={() => onSwitchMode("login")}
+              >
+                تسجيل الدخول
+              </button>
+            </p>
+          </div>
+        )}
+        {mode === "register" && (
+          <div>
+            <Button type="button" variant="secondary" className="w-full mb-4">
+              <Globe />
+              التسجيل باستخدام Google
+            </Button>
+            <Divider />
+            <form className="space-y-4" onSubmit={handleRegister}>
+              <div className="space-y-4">
+                <Label className="text-base font-medium">نوع المستخدم</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {userTypes.map((type) => {
+                    const IconComponent = type.icon;
+                    const isDisabled = type.comingSoon;
+                    return (
+                      <div
+                        key={type.id}
+                        onClick={() =>
+                          !isDisabled && setSelectedUserType(type.id)
+                        }
+                        className={`relative rounded-lg border-2 p-4 text-center transition-all ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-60 border-border"
+                            : `cursor-pointer hover:shadow-md ${selectedUserType === type.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary-50"}`
+                        }`}
+                      >
+                        {type.comingSoon && (
+                          <span className="absolute -top-2 right-1/2 translate-x-1/2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
+                            قريباً
+                          </span>
+                        )}
+                        <IconComponent
+                          className={`mx-auto mb-2 h-6 w-6 ${isDisabled ? "text-muted-foreground/50" : selectedUserType === type.id ? "text-primary" : "text-muted-foreground"}`}
+                        />
+                        <p
+                          className={`text-sm font-medium $${isDisabled ? "text-muted-foreground/50" : selectedUserType == type.id ? "text-primary" : "text-foreground"}`}
+                        >
+                          {type.label}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">الاسم الكامل</Label>
+                <Input id="name" type="text" placeholder="الاسم" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-email">البريد الإلكتروني</Label>
+                <Input
+                  id="reg-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reg-password">كلمة المرور</Label>
+                <Input id="reg-password" type="password" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
+                <Input id="confirm-password" type="password" required />
+              </div>
+              <Button
+                type="submit"
+                className="cursor-pointer w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+              </Button>
+            </form>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              لديك حساب بالفعل؟
+              <button
+                type="button"
+                className="cursor-pointer text-primary mr-2 underline underline-offset-4"
                 onClick={() => onSwitchMode("login")}
               >
                 تسجيل الدخول
