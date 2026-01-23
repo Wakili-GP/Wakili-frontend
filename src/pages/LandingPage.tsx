@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { FC } from "react";
 import {
   Scale,
@@ -27,11 +27,14 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import AuthModals, { type AuthMode } from "@/components/AuthModals";
 import Marquee from "react-fast-marquee";
 import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.png";
 import lawyer_3 from "../assets/lawyer-3.png";
 const LandingPage = () => {
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
     return () => {
@@ -40,7 +43,60 @@ const LandingPage = () => {
   });
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
-      <Navigation />
+      <nav className="bg-background/95 backdrop-blur-sm border-b border-border fixed top-0 w-full z-50 shadow-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <Scale className="h-12 w-9 text-primary" />
+              <span className="text-2xl font-bold text-foreground">وكيلي</span>
+            </div>
+            {/* Links */}
+            <div className="hidden md:flex items-center gap-8">
+              <a
+                href="#services"
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                الخدمات
+              </a>
+              <a
+                href="#lawyers"
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                أهم محامينا
+              </a>
+              <a
+                href="#testimonials"
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                ماذا يقول عملاؤنا عنا
+              </a>
+              <a
+                href="#features"
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                المميزات
+              </a>
+              <a
+                href="#"
+                className="text-foreground cursor-pointer hover:text-primary transition-colors"
+              >
+                من نحن
+              </a>
+              <Button
+                variant="hero"
+                size="lg"
+                onClick={() => {
+                  setAuthMode("login");
+                  setAuthOpen(true);
+                }}
+              >
+                ابدأ الآن
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
       <Hero />
       <MobileApp />
       <Services />
@@ -49,58 +105,13 @@ const LandingPage = () => {
       <Features />
       <CTA />
       <Footer />
+      <AuthModals
+        open={authOpen}
+        mode={authMode}
+        onOpenChange={setAuthOpen}
+        onSwitchMode={setAuthMode}
+      />
     </div>
-  );
-};
-const Navigation = () => {
-  return (
-    <nav className="bg-background/95 backdrop-blur-sm border-b border-border fixed top-0 w-full z-50 shadow-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <Scale className="h-12 w-9 text-primary" />
-            <span className="text-2xl font-bold text-foreground">وكيلي</span>
-          </div>
-          {/* Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#services"
-              className="text-foreground hover:text-primary transition-colors"
-            >
-              الخدمات
-            </a>
-            <a
-              href="#lawyers"
-              className="text-foreground hover:text-primary transition-colors"
-            >
-              أهم محامينا
-            </a>
-            <a
-              href="#testimonials"
-              className="text-foreground hover:text-primary transition-colors"
-            >
-              ماذا يقول عملاؤنا عنا
-            </a>
-            <a
-              href="#features"
-              className="text-foreground hover:text-primary transition-colors"
-            >
-              المميزات
-            </a>
-            <a
-              href="#"
-              className="text-foreground cursor-pointer hover:text-primary transition-colors"
-            >
-              من نحن
-            </a>
-            <Button variant="hero" size="lg">
-              ابدأ الآن
-            </Button>
-          </div>
-        </div>
-      </div>
-    </nav>
   );
 };
 const Hero = () => {
