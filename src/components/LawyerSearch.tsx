@@ -12,9 +12,25 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Card, CardContent } from "./ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
+import { Slider } from "./ui/slider";
+import { Checkbox } from "./ui/checkbox";
 
 interface Lawyer {
   id: number;
@@ -168,6 +184,19 @@ const LawyerSearch = () => {
     const saved = localStorage.getItem("favoriteLawyers");
     return saved ? JSON.parse(saved) : [];
   });
+  const toggleSessionType = (type: string) => {
+    setSessionTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedArea("all");
+    setSelectedLocation("all");
+    setPriceRange([0, 1000]);
+    setMinRating(0);
+    setSessionTypes([]);
+  };
   const activeFiltersCount = [
     selectedArea && selectedArea !== "all",
     selectedLocation && selectedLocation !== "all",
@@ -175,6 +204,157 @@ const LawyerSearch = () => {
     minRating > 0,
     sessionTypes.length > 0,
   ].filter(Boolean).length;
+
+  const areaFilter = (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+        <span className="flex items-center gap-2">
+          <Scale className="w-4 h-4" />
+          التخصص القانوني
+        </span>
+        <ChevronDown className="cursor-pointer w-4 h-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2">
+        <Select value={selectedArea} onValueChange={setSelectedArea}>
+          <SelectTrigger className="cursor-pointer w-full flex-row-reverse text-right">
+            <SelectValue placeholder="اختر التخصص" />
+          </SelectTrigger>
+
+          <SelectContent
+            align="end"
+            className="w-full min-w-[--radix-select-trigger-width] text-right"
+          >
+            <SelectItem value="all">جميع التخصصات</SelectItem>
+            {practiceAreas.map((area) => (
+              <SelectItem className="cursor-pointer " key={area} value={area}>
+                {area}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+  const locationFilter = (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+        <span className="flex items-center gap-2">
+          <MapPin className="w-4 h-4" />
+          الموقع
+        </span>
+        <ChevronDown className="cursor-pointer w-4 h-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2">
+        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+          <SelectTrigger className="cursor-pointer w-full flex-row-reverse text-right">
+            <SelectValue placeholder="اختر المدينة" />
+          </SelectTrigger>
+
+          <SelectContent
+            align="end"
+            className="w-full min-w-[--radix-select-trigger-width] text-right"
+          >
+            <SelectItem value="all">جميع المدن</SelectItem>
+            {locations.map((location) => (
+              <SelectItem
+                className="cursor-pointer "
+                key={location}
+                value={location}
+              >
+                {location}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+  const priceFilter = (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+        <span className="flex items-center gap-2">
+          <DollarSign className="w-4 h-4" />
+          سعر الجلسة
+        </span>
+        <ChevronDown className="cursor-pointer w-4 h-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-4 space-y-4">
+        <Slider
+          value={priceRange}
+          max={1000}
+          min={0}
+          step={50}
+          className="w-full space-x-reverse"
+          onValueChange={setPriceRange}
+        />
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>{priceRange[0]} ج.م</span>
+          <span>{priceRange[1]} ج.م</span>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+  const ratingFilter = (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+        <span className="flex items-center gap-2">
+          <Star className="w-4 h-4" />
+          التقييم
+        </span>
+        <ChevronDown className="cursor-pointer w-4 h-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2 space-y-2">
+        {[4, 3, 2, 1].map((rating) => (
+          <label
+            key={rating}
+            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+              minRating === rating ? "bg-primary/10" : "hover:bg-muted"
+            }`}
+            onClick={() => setMinRating(minRating === rating ? 0 : rating)}
+          >
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${i < rating ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
+                />
+              ))}
+            </div>
+            <span className="text-sm">وأعلى</span>
+          </label>
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+  const sessionTypeFilter = (
+    <Collapsible defaultOpen>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+        <span className="flex items-center gap-2">
+          <Phone className="w-4 h-4" />
+          نوع الجلسة
+        </span>
+        <ChevronDown className="cursor-pointer w-4 h-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2 space-y-2">
+        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer">
+          <Checkbox
+            checked={sessionTypes.includes("مكتب")}
+            onCheckedChange={() => toggleSessionType("مكتب")}
+          />
+          <Building2 className="w-4 h-4" />
+          <span>جلسة في المكتب</span>
+        </label>
+        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer">
+          <Checkbox
+            checked={sessionTypes.includes("هاتف")}
+            onCheckedChange={() => toggleSessionType("هاتف")}
+          />
+          <Phone className="w-4 h-4" />
+          <span>جلسة هاتفية</span>
+        </label>
+      </CollapsibleContent>
+    </Collapsible>
+  );
   return (
     <div className="space-y-8">
       <Header />
@@ -204,6 +384,45 @@ const LawyerSearch = () => {
           </Button>
         </div>
       </div>
+      {/* Fitlers */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="lg:w-80 shrink-0"
+          >
+            <Card className="sticky top-4">
+              <CardContent className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <Filter className="w-5 h-5" />
+                    تصفية النتائج
+                  </h3>
+                  {activeFiltersCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="cursor-pointer"
+                    >
+                      <X className="w-4 h-4 ml-1" /> مسح الكل
+                    </Button>
+                  )}
+                </div>
+                {/* Practice Area Filter */}
+                {areaFilter}
+                {locationFilter}
+                {priceFilter}
+                {ratingFilter}
+                {sessionTypeFilter}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      {/* Results Section */}
     </div>
   );
 };
