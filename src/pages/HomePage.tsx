@@ -24,8 +24,10 @@ import {
   ChevronDown,
   User,
   LogOut,
+  Divide,
 } from "lucide-react";
 import Footer from "../components/Footer.tsx";
+import ComingSoon from "../components/ComingSoon.tsx";
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState("محامي");
   const handleLogout = (e: React.FormEvent) => {
@@ -60,8 +62,82 @@ const HomePage = () => {
     switch (activeSection) {
       case "محامي":
         return <LawyerSearch />;
+
+      case "حلل عقدا":
+        return (
+          <div className="space-y-12">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                هل تريد تحليل عقدك؟
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                حلّل عقودك القانونية باستخدام الذكاء الاصطناعي لاكتشاف المخاطر،
+                فهم البنود المعقّدة، والحصول على ملخص واضح ودقيق خلال ثوانٍ.
+              </p>
+            </div>
+
+            <ComingSoon
+              title="تحليل العقود بالذكاء الاصطناعي"
+              description="نعمل حالياً على تطوير أداة متقدمة لتحليل العقود بدقة عالية"
+              featureTitle="تحليل العقود تلقائياً"
+              featureDescription="مراجعة وتحليل العقود واكتشاف الثغرات القانونية باستخدام الذكاء الاصطناعي"
+              badgeText="قيد التطوير"
+              progress={60}
+            />
+          </div>
+        );
+
+      case "اسئلة شائعة":
+        return (
+          <div className="space-y-12">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                الأسئلة الشائعة
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                إجابات شاملة ودقيقة للأسئلة الأكثر شيوعاً في المجال القانوني
+              </p>
+            </div>
+
+            <ComingSoon
+              title="مركز الأسئلة الشائعة"
+              description="نعمل على إعداد قاعدة معرفية قانونية شاملة"
+              featureTitle="أسئلة وأجوبة قانونية"
+              featureDescription="إجابات دقيقة ومدعومة من خبراء قانونيين"
+              badgeText="قريباً"
+              progress={40}
+            />
+          </div>
+        );
+
+      case "مقالات":
+        return (
+          <div className="space-y-12">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                المقالات القانونية
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                مقالات قانونية متخصصة وتحليلات معمّقة
+              </p>
+            </div>
+
+            <ComingSoon
+              title="مكتبة المقالات القانونية"
+              description="نعمل على إطلاق مكتبة مقالات قانونية عالية الجودة"
+              featureTitle="مقالات وتحليلات قانونية"
+              featureDescription="محتوى قانوني موثوق مكتوب من خبراء ومتخصصين"
+              badgeText="قيد التحضير"
+              progress={50}
+            />
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
+
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
       <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
@@ -70,12 +146,13 @@ const HomePage = () => {
             <Logo />
             <div className="hidden md:flex items-center space-x-8">
               {[
+                { id: "home", label: "الرئيسية", icon: Scale },
                 {
                   id: "الذكاء الاصطناعي",
                   label: "الذكاء الاصطناعي",
                   icon: MessageCircle,
                 },
-                { id: "اختر محامي", label: "محامي", icon: Users },
+                { id: "محامي", label: "محامي", icon: Users },
                 { id: "حلل عقدا", label: "حلل عقدا", icon: FileText },
                 { id: "اسئلة شائعة", label: "اسئلة شائعة", icon: HelpCircle },
                 { id: "مقالات", label: "مقالات", icon: BookOpen },
@@ -169,7 +246,9 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
-      <div className="container mx-auto px-4 py-8">{renderSection()}</div>
+      <div className="container mx-auto px-4 py-8">
+        {activeSection === "home" ? renderHomeContent() : renderSection()}
+      </div>
       <Footer />
     </div>
   );
