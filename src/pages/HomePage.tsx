@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button.tsx";
 import { Badge } from "@/components/ui/badge";
-
+import LawyerSearch from "../components/LawyerSearch.tsx";
 import { useState } from "react";
 import {
   Scale,
@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import Footer from "../components/Footer.tsx";
 const HomePage = () => {
-  const [activeSection, setActiveSection] = useState("");
+  const [activeSection, setActiveSection] = useState("محامي");
   const handleLogout = (e: React.FormEvent) => {
     e.preventDefault();
   };
@@ -56,6 +56,12 @@ const HomePage = () => {
       <HeroSection />
     </div>
   );
+  const renderSection = () => {
+    switch (activeSection) {
+      case "محامي":
+        return <LawyerSearch />;
+    }
+  };
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
       <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
@@ -163,7 +169,7 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
-      <div className="container mx-auto px-4 py-8">{renderHomeContent()}</div>
+      <div className="container mx-auto px-4 py-8">{renderSection()}</div>
       <Footer />
     </div>
   );
