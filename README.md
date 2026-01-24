@@ -2,6 +2,7 @@
 
 - Add a Loader Component
 - Add a Toaster
+- Add a Skeleton
 
 # Issues
 
