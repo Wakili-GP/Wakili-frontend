@@ -51,6 +51,11 @@ const HomePage = () => {
       time: "منذ 3 ساعات",
     },
   ];
+  const renderHomeContent = () => (
+    <div className="space-y-20">
+      <HeroSection />
+    </div>
+  );
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
       <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
@@ -65,7 +70,7 @@ const HomePage = () => {
                   icon: MessageCircle,
                 },
                 { id: "اختر محامي", label: "محامي", icon: Users },
-                { id: "حلل عقدا", label: "ابرم عقدا", icon: FileText },
+                { id: "حلل عقدا", label: "حلل عقدا", icon: FileText },
                 { id: "اسئلة شائعة", label: "اسئلة شائعة", icon: HelpCircle },
                 { id: "مقالات", label: "مقالات", icon: BookOpen },
               ].map((tab) => (
@@ -158,19 +163,34 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
+      <div className="container mx-auto px-4 py-8">{renderHomeContent()}</div>
       <Footer />
     </div>
   );
 };
-export default HomePage;
 
+const HeroSection = () => {
+  return (
+    <div className="text-center py-20">
+      <h1 className="text-5xl md:text-7xl font-bold bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-tight">
+        مرحبا بك في وكيلي
+      </h1>
+      <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+        منصتك القانونية الشاملة للحصول على الاستشارات والخدمات القانونية
+        المتميزة
+      </p>
+    </div>
+  );
+};
 const Logo = () => {
   return (
     <div className="flex items-center">
       <Scale className="w-8 h-8 text-primary ml-2" />
       <span className="text-2xl font-bold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-        وكيلك
+        وكيلي
       </span>
     </div>
   );
 };
+
+export default HomePage;
