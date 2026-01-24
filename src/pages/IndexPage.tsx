@@ -32,7 +32,7 @@ import Marquee from "react-fast-marquee";
 import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.png";
 import lawyer_3 from "../assets/lawyer-3.png";
-const LandingPage = () => {
+const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   useEffect(() => {
@@ -87,7 +87,7 @@ const LandingPage = () => {
                 variant="hero"
                 size="lg"
                 onClick={() => {
-                  setAuthMode("reset-password");
+                  setAuthMode("login");
                   setAuthOpen(true);
                 }}
               >
@@ -1095,4 +1095,4 @@ const Footer = () => {
     </footer>
   );
 };
-export default LandingPage;
+export default IndexPage;

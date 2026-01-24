@@ -1,8 +1,11 @@
-# To Do List
+# Future Edits
+
+- Add a Loader Component
+- Add a Toaster
+
+# Issues
 
 - Fix the Laywers Marquee
-- Work on the Chatbot for Landing Page
-- Work on the Authentication Modals (Login / Register)
 
 # Notes
 

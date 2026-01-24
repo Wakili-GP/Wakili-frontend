@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-
+import { toast } from "sonner";
 export type AuthMode =
   | "login"
   | "register"
@@ -53,8 +53,23 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const [selectedUserType, setSelectedUserType] = useState<string>("");
   const [resetCode, setResetCode] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const handleLogin = (e: React.FormEvent) => {
+  const FAKE_EMAIL = "email@email.com";
+  const FAKE_PASSWORD = "1234";
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (email === FAKE_EMAIL && password === FAKE_PASSWORD) {
+      toast.success("تم تسجيل الدخول بنجاح!", {
+        description: "مرحباً بك في وكيلك",
+      });
+      onOpenChange(false);
+    } else {
+      toast.error("خطأ في تسجيل الدخول", {
+        description: "تأكد من البريد الإلكتروني وكلمة المرور",
+      });
+    }
+    setIsLoading(false);
   };
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
@@ -341,7 +356,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 العودة إلى
                 <button
                   type="button"
-                  className="cursor-pointer text-primary underline underline-offset-4"
+                  className="mr-2 cursor-pointer text-primary underline underline-offset-4"
                   onClick={() => onSwitchMode("login")}
                 >
                   تسجيل الدخول
