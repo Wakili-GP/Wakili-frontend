@@ -184,10 +184,58 @@ const LawyerSearch = () => {
     const saved = localStorage.getItem("favoriteLawyers");
     return saved ? JSON.parse(saved) : [];
   });
-  const toggleSessionType = (type: string) => {
-    setSessionTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-    );
+  const filteredLawyers = mockLawyers
+    .filter((lawyer) => {
+      if (
+        searchQuery &&
+        !lawyer.name.includes(searchQuery) &&
+        !lawyer.specialty.includes(searchQuery)
+      )
+        return false;
+      if (
+        selectedArea &&
+        selectedArea !== "all" &&
+        lawyer.specialty !== selectedArea
+      )
+        return false;
+      if (
+        selectedLocation &&
+        selectedLocation !== "all" &&
+        lawyer.location !== selectedLocation
+      )
+        return false;
+      if (lawyer.price < priceRange[0] || lawyer.price > priceRange[1])
+        return false;
+      if (lawyer.rating < minRating) return false;
+      if (
+        sessionTypes.length > 0 &&
+        !sessionTypes.some((t) => lawyer.sessionTypes.includes(t))
+      )
+        return false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "rating":
+          return b.rating - a.rating;
+        case "price-low":
+          return a.price - b.price;
+        case "price-high":
+          return b.price - a.price;
+        case "reviews":
+          return b.reviewCount - a.reviewCount;
+        default:
+          return 0;
+      }
+    });
+  const toggleFavorite = (lawyerID: number) => {
+    setFavorites((prev) => {
+      const newFavorites = prev.includes(lawyerID)
+        ? prev.filter((id) => id !== lawyerID)
+        : [...prev, lawyerID];
+      localStorage.setItem("favoriteLawyers", JSON.stringify(newFavorites));
+      return newFavorites;
+    });
   };
   const clearFilters = () => {
     setSearchQuery("");
@@ -421,8 +469,154 @@ const LawyerSearch = () => {
             </Card>
           </motion.div>
         </AnimatePresence>
+        {/* Results Section */}
+        <div className="flex-1 space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <p className="text-muted-foreground">
+              عرض{" "}
+              <span className="font-bold text-foreground">
+                {filteredLawyers.length}
+              </span>{" "}
+              محامي
+            </p>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="ترتيب حسب" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rating">الأعلى تقييماً</SelectItem>
+                <SelectItem value="reviews">الأكثر تقييمات</SelectItem>
+                <SelectItem value="price-low">
+                  السعر: من الأقل للأعلى
+                </SelectItem>
+                <SelectItem value="price-high">
+                  السعر: من الأعلى للأقل
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Lawyers */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <AnimatePresence>
+              {filteredLawyers.map((lawyer, index) => (
+                <motion.div
+                  key={lawyer.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-primary/30">
+                    <CardContent className="p-0">
+                      <div className="flex">
+                        {/* Lawyer Image */}
+                        <div className="relative w-32 h-40 shrink-0">
+                          <img
+                            src={lawyer.image}
+                            alt={lawyer.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(lawyer.id);
+                            }}
+                            className="cursor-pointer absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
+                          >
+                            <Heart
+                              className={`w-5 h-5 transition-colors ${
+                                favorites.includes(lawyer.id)
+                                  ? "text-red-500 fill-red-500"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Lawyer Info */}
+                        <div className="flex-1 p-4 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
+                                {lawyer.name}
+                              </h3>
+                              <Badge variant="secondary" className="mt-1">
+                                {lawyer.specialty}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              {lawyer.location}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <span className="font-semibold text-foreground">
+                                {lawyer.rating}
+                              </span>
+                              <span>({lawyer.reviewCount})</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {lawyer.sessionTypes.map((type) => (
+                              <Badge
+                                key={type}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {type === "مكتب" ? (
+                                  <Building2 className="w-3 h-3 ml-1" />
+                                ) : (
+                                  <Phone className="w-3 h-3 ml-1" />
+                                )}
+                                {type}
+                              </Badge>
+                            ))}
+                            <span className="text-sm text-muted-foreground">
+                              • {lawyer.yearsExperience} سنة خبرة
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <div className="text-lg font-bold text-primary">
+                              {lawyer.price} ج.م
+                              <span className="text-sm font-normal text-muted-foreground">
+                                /جلسة
+                              </span>
+                            </div>
+                            <Button size="sm" className="cursor-pointer">
+                              عرض الملف
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+          {filteredLawyers.length === 0 && (
+            <Card className="p-12 text-center">
+              <Scale className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-bold mb-2">لا توجد نتائج</h3>
+              <p className="text-muted-foreground mb-4">
+                جرب تعديل معايير البحث للعثور على محامين مناسبين
+              </p>
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+                onClick={clearFilters}
+              >
+                مسح الفلاتر
+              </Button>
+            </Card>
+          )}
+        </div>
       </div>
-      {/* Results Section */}
     </div>
   );
 };

@@ -4,10 +4,6 @@
 - Add a Toaster
 - Add a Skeleton
 
-# Issues
-
-- Fix the Laywers Marquee
-
 # Notes
 
 - Use the below links to add the mobile app photo inside to be embedded in the landing page
