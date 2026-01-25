@@ -1,20 +1,17 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
 import AccountSettingsModals from "@/components/AccountSettingsModal";
+import CoverImageEditModal from "@/components/CoverImageEditModal";
 import ProfileEditModal from "@/components/ProfileEditModal";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
   MapPin,
   Calendar,
-  FileText,
-  MessageSquare,
   CheckCircle,
   Clock,
   X,
   Edit,
-  BadgeCheck,
-  ShieldCheck,
   Heart,
   Star,
   Phone,
@@ -175,6 +172,9 @@ const ClientProfile = () => {
       default:
         return <Badge>{status}</Badge>;
     }
+  };
+  const handleCoverSave = (imageUrl: string) => {
+    setClientData((prev) => ({ ...prev, coverImage: imageUrl }));
   };
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -340,6 +340,12 @@ const ClientProfile = () => {
           onOpenChange={setIsProfileModalOpen}
           currentData={clientData}
           onSave={handleProfileSave}
+        />
+        <CoverImageEditModal
+          open={isCoverModalOpen}
+          onOpenChange={setIsCoverModalOpen}
+          currentCover={clientData.coverImage}
+          onSave={handleCoverSave}
         />
       </div>
       <Footer />
