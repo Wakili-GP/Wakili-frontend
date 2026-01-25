@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
 import AccountSettingsModals from "@/components/AccountSettingsModal";
+import ProfileEditModal from "@/components/ProfileEditModal";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -121,7 +122,7 @@ interface ClientData {
   coverImage: string;
   profileImage: string;
   memberSince: string;
-  email: "mohamed@example.com";
+  email: string;
 }
 const ClientProfile = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -136,7 +137,16 @@ const ClientProfile = () => {
     profileImage:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
     memberSince: "2023",
+    email: "mohamed@example.com",
   });
+  const handleProfileSave = (data: {
+    name: string;
+    location: string;
+    bio: string;
+    profileImage: string;
+  }) => {
+    setClientData((prev) => ({ ...prev, ...data }));
+  };
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "مؤكد":
@@ -169,7 +179,7 @@ const ClientProfile = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="relative">
-        <div className="h-48 overflow-hidden relative group">
+        <div className="h-64 overflow-hidden relative group">
           <img
             src={clientData.coverImage}
             alt="Cover"
@@ -324,6 +334,12 @@ const ClientProfile = () => {
           open={isSettingsModalOpen}
           onOpenChange={setIsSettingsModalOpen}
           currentEmail={clientData.email}
+        />
+        <ProfileEditModal
+          open={isProfileModalOpen}
+          onOpenChange={setIsProfileModalOpen}
+          currentData={clientData}
+          onSave={handleProfileSave}
         />
       </div>
       <Footer />
