@@ -29,7 +29,7 @@ import {
 import Footer from "../components/Footer.tsx";
 import ComingSoon from "../components/ComingSoon.tsx";
 const HomePage = () => {
-  const [activeSection, setActiveSection] = useState("محامي");
+  const [activeSection, setActiveSection] = useState("home");
   const handleLogout = (e: React.FormEvent) => {
     e.preventDefault();
   };
