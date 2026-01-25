@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
+import AccountSettingsModals from "@/components/AccountSettingsModal";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -120,10 +121,12 @@ interface ClientData {
   coverImage: string;
   profileImage: string;
   memberSince: string;
+  email: "mohamed@example.com";
 }
 const ClientProfile = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [clientData, setClientData] = useState<ClientData>({
     name: "محمد أحمد",
     location: "القاهرة، مصر",
@@ -208,13 +211,23 @@ const ClientProfile = () => {
                       <div>عضو منذ {clientData.memberSince}</div>
                     </div>
                   </div>
-                  <Button
-                    className="cursor-pointer"
-                    onClick={() => setIsProfileModalOpen(true)}
-                  >
-                    <Edit className="w-4 h-4 ml-2" />
-                    تعديل الملف الشخصي
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setIsSettingsModalOpen(true)}
+                      className="cursor-pointer h-10 w-10"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      className="cursor-pointer"
+                      onClick={() => setIsProfileModalOpen(true)}
+                    >
+                      <Edit className="w-4 h-4 ml-2" />
+                      تعديل الملف الشخصي
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -307,6 +320,11 @@ const ClientProfile = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        <AccountSettingsModals
+          open={isSettingsModalOpen}
+          onOpenChange={setIsSettingsModalOpen}
+          currentEmail={clientData.email}
+        />
       </div>
       <Footer />
     </div>
