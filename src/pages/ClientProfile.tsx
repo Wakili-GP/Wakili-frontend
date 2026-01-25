@@ -64,6 +64,55 @@ const mockBookings = [
     specialty: "القانون التجاري",
   },
 ];
+interface Lawyer {
+  id: number;
+  name: string;
+  specialty: string;
+  location: string;
+  rating: number;
+  reviewCount: number;
+  price: number;
+  sessionTypes: string[];
+  image: string;
+}
+const mockFavoriteLawyers: Lawyer[] = [
+  {
+    id: 1,
+    name: "د. أحمد سليمان",
+    specialty: "قانون تجاري",
+    location: "القاهرة",
+    rating: 4.9,
+    reviewCount: 127,
+    price: 500,
+    sessionTypes: ["مكتب", "هاتف"],
+    image:
+      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop",
+  },
+  {
+    id: 2,
+    name: "أ. سارة محمود",
+    specialty: "قانون الأسرة",
+    location: "الإسكندرية",
+    rating: 4.8,
+    reviewCount: 89,
+    price: 350,
+    sessionTypes: ["مكتب", "هاتف"],
+    image:
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop",
+  },
+  {
+    id: 4,
+    name: "د. فاطمة حسن",
+    specialty: "قانون العمل",
+    location: "القاهرة",
+    rating: 4.9,
+    reviewCount: 203,
+    price: 450,
+    sessionTypes: ["هاتف"],
+    image:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
+  },
+];
 interface ClientData {
   name: string;
   location: string;
@@ -159,7 +208,10 @@ const ClientProfile = () => {
                       <div>عضو منذ {clientData.memberSince}</div>
                     </div>
                   </div>
-                  <Button onClick={() => setIsProfileModalOpen(true)}>
+                  <Button
+                    className="cursor-pointer"
+                    onClick={() => setIsProfileModalOpen(true)}
+                  >
                     <Edit className="w-4 h-4 ml-2" />
                     تعديل الملف الشخصي
                   </Button>
@@ -224,14 +276,95 @@ const ClientProfile = () => {
                 </Table>
               </div>
               <div className="mt-6">
-                <Button>احجز استشارة جديدة</Button>
+                <Button className="cursor-pointer">احجز استشارة جديدة</Button>
               </div>
+            </Card>
+          </TabsContent>
+          <TabsContent value="favorites">
+            <Card dir="rtl" className="p-6">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Heart className="w-6 h-6 text-red-500" />
+                <span>المحامون المفضلون</span>
+              </h2>
+              {mockFavoriteLawyers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {mockFavoriteLawyers.map((fav) => (
+                    <FavLawyer fav={fav} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    لا يوجد محامون في المفضلة
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    ابحث عن محامين وأضفهم إلى قائمة المفضلة للوصول إليهم بسهولة
+                  </p>
+                  <Button className="cursor-pointer">ابحث عن محامي</Button>
+                </div>
+              )}
             </Card>
           </TabsContent>
         </Tabs>
       </div>
       <Footer />
     </div>
+  );
+};
+const FavLawyer = ({ fav }: Lawyer) => {
+  return (
+    <Card
+      key={fav.id}
+      className="overflow-hidden border hover:shadow-lg transition-shadow"
+    >
+      <div className="flex">
+        <div className="relative w-48 h-full shrink-0">
+          <img
+            src={fav.image}
+            alt={fav.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-1 p-4 space-y-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-bold">{fav.name}</h3>
+              <Badge variant="secondary" className="text-xs mt-1">
+                {fav.specialty}
+              </Badge>
+            </div>
+            <button className="cursor-pointer p-1 rounded-full hover:bg-muted transition-colors">
+              <Heart className="w-7 h-7 text-red-500 fill-red-500" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="w-3 h-3" />
+            {fav.location}
+            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-2" />
+            {fav.rating}
+          </div>
+          <div className="flex items-center gap-1 flex-wrap">
+            {fav.sessionTypes.map((type: string) => (
+              <Badge key={type} variant="outline" className="text-xs">
+                {type === "مكتب" ? (
+                  <Building2 className="w-3 h-3 ml-1" />
+                ) : (
+                  <Phone className="w-3 h-3 ml-1" />
+                )}
+                {type}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-primary font-bold">{fav.price} ج.م/جلسة</span>
+            <Button className="cursor-pointer" size="sm">
+              عرض الملف
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 };
 export default ClientProfile;
