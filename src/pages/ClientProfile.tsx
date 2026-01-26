@@ -333,7 +333,6 @@ const ClientProfile = () => {
         <AccountSettingsModals
           open={isSettingsModalOpen}
           onOpenChange={setIsSettingsModalOpen}
-          currentEmail={clientData.email}
         />
         <ProfileEditModal
           open={isProfileModalOpen}
@@ -352,41 +351,41 @@ const ClientProfile = () => {
     </div>
   );
 };
-const FavLawyer = ({ fav }: Lawyer) => {
+interface FavLawyerProps {
+  fav: Lawyer;
+}
+
+const FavLawyer = ({ fav }: FavLawyerProps) => {
   return (
-    <Card
-      key={fav.id}
-      className="overflow-hidden border hover:shadow-lg transition-shadow"
-    >
+    <Card className="overflow-hidden border hover:shadow-lg transition-shadow">
       <div className="flex">
-        <div className="relative w-48 h-full shrink-0">
+        <div className="relative w-48 shrink-0">
           <img
             src={fav.image}
             alt={fav.name}
             className="w-full h-full object-cover"
           />
         </div>
+
         <div className="flex-1 p-4 space-y-2">
-          <div className="flex items-start justify-between">
+          <div className="flex justify-between">
             <div>
               <h3 className="font-bold">{fav.name}</h3>
-              <Badge variant="secondary" className="text-xs mt-1">
-                {fav.specialty}
-              </Badge>
+              <Badge variant="secondary">{fav.specialty}</Badge>
             </div>
-            <button className="cursor-pointer p-1 rounded-full hover:bg-muted transition-colors">
-              <Heart className="w-7 h-7 text-red-500 fill-red-500" />
-            </button>
+            <Heart className="w-6 h-6 text-red-500 fill-red-500" />
           </div>
+
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="w-3 h-3" />
+            <MapPin className="w-4 h-4" />
             {fav.location}
-            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-2" />
+            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 ml-2" />
             {fav.rating}
           </div>
-          <div className="flex items-center gap-1 flex-wrap">
-            {fav.sessionTypes.map((type: string) => (
-              <Badge key={type} variant="outline" className="text-xs">
+
+          <div className="flex gap-2 flex-wrap">
+            {fav.sessionTypes.map((type) => (
+              <Badge key={type} variant="outline">
                 {type === "مكتب" ? (
                   <Building2 className="w-3 h-3 ml-1" />
                 ) : (
@@ -396,11 +395,12 @@ const FavLawyer = ({ fav }: Lawyer) => {
               </Badge>
             ))}
           </div>
-          <div className="flex items-center justify-between pt-2">
-            <span className="text-primary font-bold">{fav.price} ج.م/جلسة</span>
-            <Button className="cursor-pointer" size="sm">
-              عرض الملف
-            </Button>
+
+          <div className="flex justify-between pt-2">
+            <span className="font-bold text-primary">
+              {fav.price} ج.م / جلسة
+            </span>
+            <Button size="sm">عرض الملف</Button>
           </div>
         </div>
       </div>

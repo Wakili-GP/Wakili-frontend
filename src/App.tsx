@@ -1,11 +1,11 @@
-// import IndexPage from "./pages/IndexPage";
+import IndexPage from "./pages/IndexPage";
 // import HomePage from "./pages/HomePage";
-import ClientProfile from "./pages/ClientProfile";
+// import ClientProfile from "./pages/ClientProfile";
 const App = () => (
   <>
-    {/* <IndexPage /> */}
+    <IndexPage />
     {/* <HomePage /> */}
-    <ClientProfile />
+    {/* <ClientProfile /> */}
   </>
 );
 export default App;

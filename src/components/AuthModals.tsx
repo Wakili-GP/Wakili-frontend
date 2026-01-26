@@ -11,12 +11,13 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-import { toast } from "sonner";
+import EmailVerificationModal from "./EmailVerificationModal";
 export type AuthMode =
   | "login"
   | "register"
   | "forgot-password"
   | "reset-password";
+
 interface AuthModalProps {
   open: boolean;
   mode: AuthMode;
@@ -53,6 +54,8 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const [selectedUserType, setSelectedUserType] = useState<string>("");
   const [resetCode, setResetCode] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState("");
   const FAKE_EMAIL = "email@email.com";
   const FAKE_PASSWORD = "1234";
   const handleLogin = async (e: React.FormEvent) => {
@@ -60,14 +63,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     if (email === FAKE_EMAIL && password === FAKE_PASSWORD) {
-      toast.success("تم تسجيل الدخول بنجاح!", {
-        description: "مرحباً بك في وكيلك",
-      });
+      // toast.success("تم تسجيل الدخول بنجاح!", {
+      //   description: "مرحباً بك في وكيلك",
+      // });
       onOpenChange(false);
     } else {
-      toast.error("خطأ في تسجيل الدخول", {
-        description: "تأكد من البريد الإلكتروني وكلمة المرور",
-      });
+      // toast.error("خطأ في تسجيل الدخول", {
+      //   description: "تأكد من البريد الإلكتروني وكلمة المرور",
+      // });
     }
     setIsLoading(false);
   };
@@ -79,6 +82,19 @@ const AuthModals: React.FC<AuthModalProps> = ({
   };
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
+  };
+  const handleEmailVerified = () => {
+    setShowEmailVerification(false);
+    // toast({
+    //   title: "تم التحقق بنجاح!",
+    //   description: "مرحباً بك في وكيلك",
+    // });
+
+    if (selectedUserType === "freelance-lawyer") {
+      // navigate("/verify/lawyer");
+    } else {
+      // navigate("/home");
+    }
   };
   const userTypes = [
     {
@@ -366,6 +382,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
           </div>
         )}
       </DialogContent>
+      <EmailVerificationModal
+        open={showEmailVerification}
+        onOpenChange={setShowEmailVerification}
+        email={registrationEmail}
+        onVerified={handleEmailVerified}
+        userType={selectedUserType}
+      />
     </Dialog>
   );
 };
