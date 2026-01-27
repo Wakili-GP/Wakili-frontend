@@ -8,15 +8,15 @@ interface OnboardingStepperProps {
 
 const OnboardingStepper = ({ currentStep, steps }: OnboardingStepperProps) => {
   return (
-    <div className="w-full py-4">
-      <div className="flex items-center justify-between">
+    <div className="w-full py-4 flex justify-center">
+      <div className="flex items-center">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCompleted = currentStep > stepNumber;
           const isCurrent = currentStep === stepNumber;
 
           return (
-            <div key={index} className="flex items-center flex-1">
+            <div key={index} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
                   className={cn(
@@ -30,6 +30,7 @@ const OnboardingStepper = ({ currentStep, steps }: OnboardingStepperProps) => {
                 >
                   {isCompleted ? <Check className="w-5 h-5" /> : stepNumber}
                 </div>
+
                 <div className="mt-2 text-center hidden md:block">
                   <p
                     className={cn(
@@ -46,10 +47,11 @@ const OnboardingStepper = ({ currentStep, steps }: OnboardingStepperProps) => {
                   </p>
                 </div>
               </div>
+
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    "flex-1 h-1 mx-2 rounded-full transition-all",
+                    "w-20 h-1 mx-3 rounded-full transition-all",
                     isCompleted ? "bg-primary" : "bg-muted",
                   )}
                 />

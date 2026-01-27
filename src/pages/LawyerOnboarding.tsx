@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import { Scale, Clock } from "lucide-react";
+import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -13,6 +14,20 @@ const LawyerOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  // Step 1: Basic Info
+  const [basicInfo, setBasicInfo] = useState({
+    fullName: "",
+    email: "lawyer@example.com", // This would come from registration
+    profileImage: null as string | null,
+    phoneCode: "+20",
+    phoneNumber: "",
+    country: "",
+    city: "",
+    bio: "",
+    yearsOfExperience: "",
+    practiceAreas: [] as string[],
+    sessionTypes: [] as string[],
+  });
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b bg-card">
@@ -30,6 +45,17 @@ const LawyerOnboarding = () => {
       </header>
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <OnboardingStepper currentStep={currentStep} steps={steps} />
+        <Card className="mt-8">
+          <CardContent className="p-6 md:p-8">
+            {currentStep === 1 && (
+              <BasicInfoStep
+                data={basicInfo}
+                onChange={setBasicInfo}
+                onNext={() => setCurrentStep(2)}
+              />
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
