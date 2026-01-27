@@ -1,9 +1,10 @@
-import IndexPage from "./pages/IndexPage";
+// import IndexPage from "./pages/IndexPage";
+import LawyerOnboarding from "./pages/LawyerOnboarding";
 // import HomePage from "./pages/HomePage";
 // import ClientProfile from "./pages/ClientProfile";
 const App = () => (
   <>
-    <IndexPage />
+    <LawyerOnboarding />
     {/* <HomePage /> */}
     {/* <ClientProfile /> */}
   </>
