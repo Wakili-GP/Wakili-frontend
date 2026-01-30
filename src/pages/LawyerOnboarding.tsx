@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
-import { Scale, Clock } from "lucide-react";
+import { Scale, Clock, Euro } from "lucide-react";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
+import EducationStep from "@/components/onboarding/EducationStep";
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -11,7 +12,7 @@ const steps = [
   { title: "المراجعة", description: "تأكيد البيانات" },
 ];
 const LawyerOnboarding = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   // Step 1: Basic Info
@@ -27,6 +28,25 @@ const LawyerOnboarding = () => {
     yearsOfExperience: "",
     practiceAreas: [] as string[],
     sessionTypes: [] as string[],
+  });
+  // Step 2: Education
+  const [education, setEducation] = useState({
+    academicQualifications: [
+      {
+        id: "1",
+        degreeType: "",
+        fieldOfStudy: "",
+        universityName: "",
+        graduationYear: "",
+      },
+    ],
+    professionalCertifications: [] as {
+      id: string;
+      certificateName: string;
+      issuingOrganization: string;
+      yearObtained: string;
+      document: string | null;
+    }[],
   });
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -52,6 +72,14 @@ const LawyerOnboarding = () => {
                 data={basicInfo}
                 onChange={setBasicInfo}
                 onNext={() => setCurrentStep(2)}
+              />
+            )}
+            {currentStep === 2 && (
+              <EducationStep
+                data={education}
+                onChange={setEducation}
+                onNext={() => setCurrentStep(3)}
+                onBack={() => setCurrentStep(1)}
               />
             )}
           </CardContent>

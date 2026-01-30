@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Camera, X, Upload, SettingsIcon } from "lucide-react";
+import { Camera, X, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 interface BasicInfoData {
   fullName: string;
