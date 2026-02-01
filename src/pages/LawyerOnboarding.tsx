@@ -5,6 +5,7 @@ import { Scale, Clock, Euro } from "lucide-react";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
 import EducationStep from "@/components/onboarding/EducationStep";
 import ExperienceStep from "@/components/onboarding/ExperienceStep";
+import VerificationStep from "@/components/onboarding/VerificationStep";
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -13,7 +14,7 @@ const steps = [
   { title: "المراجعة", description: "تأكيد البيانات" },
 ];
 const LawyerOnboarding = () => {
-  const [currentStep, setCurrentStep] = useState(3);
+  const [currentStep, setCurrentStep] = useState(4);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   // Step 1: Basic Info
@@ -63,6 +64,46 @@ const LawyerOnboarding = () => {
       },
     ],
   });
+  // Step 4: Verification
+  const [verification, setVerification] = useState<{
+    nationalIdFront: {
+      file: string | null;
+      fileName: string | null;
+      status: "pending" | "uploaded";
+    };
+    nationalIdBack: {
+      file: string | null;
+      fileName: string | null;
+      status: "pending" | "uploaded";
+    };
+    lawyerLicense: {
+      file: string | null;
+      fileName: string | null;
+      status: "pending" | "uploaded";
+    };
+    educationalCertificates: {
+      file: string | null;
+      fileName: string | null;
+      status: "pending" | "uploaded";
+    }[];
+    professionalCertificates: {
+      file: string | null;
+      fileName: string | null;
+      status: "pending" | "uploaded";
+    }[];
+    licenseNumber: string;
+    issuingAuthority: string;
+    yearOfIssue: string;
+  }>({
+    nationalIdFront: { file: null, fileName: null, status: "pending" },
+    nationalIdBack: { file: null, fileName: null, status: "pending" },
+    lawyerLicense: { file: null, fileName: null, status: "pending" },
+    educationalCertificates: [],
+    professionalCertificates: [],
+    licenseNumber: "",
+    issuingAuthority: "",
+    yearOfIssue: "",
+  });
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b bg-card">
@@ -101,6 +142,14 @@ const LawyerOnboarding = () => {
               <ExperienceStep
                 data={experience}
                 onChange={setExperience}
+                onNext={() => setCurrentStep(4)}
+                onBack={() => setCurrentStep(2)}
+              />
+            )}
+            {currentStep === 4 && (
+              <VerificationStep
+                data={verification}
+                onChange={setVerification}
                 onNext={() => setCurrentStep(4)}
                 onBack={() => setCurrentStep(2)}
               />
