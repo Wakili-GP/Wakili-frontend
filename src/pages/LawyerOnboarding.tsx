@@ -4,6 +4,7 @@ import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import { Scale, Clock, Euro } from "lucide-react";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
 import EducationStep from "@/components/onboarding/EducationStep";
+import ExperienceStep from "@/components/onboarding/ExperienceStep";
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -12,7 +13,7 @@ const steps = [
   { title: "المراجعة", description: "تأكيد البيانات" },
 ];
 const LawyerOnboarding = () => {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   // Step 1: Basic Info
@@ -48,6 +49,20 @@ const LawyerOnboarding = () => {
       document: string | null;
     }[],
   });
+  // Step 3: Experience
+  const [experience, setExperience] = useState({
+    workExperiences: [
+      {
+        id: "1",
+        jobTitle: "",
+        organizationName: "",
+        startYear: "",
+        endYear: "",
+        isCurrentJob: false,
+        description: "",
+      },
+    ],
+  });
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b bg-card">
@@ -80,6 +95,14 @@ const LawyerOnboarding = () => {
                 onChange={setEducation}
                 onNext={() => setCurrentStep(3)}
                 onBack={() => setCurrentStep(1)}
+              />
+            )}
+            {currentStep === 3 && (
+              <ExperienceStep
+                data={experience}
+                onChange={setExperience}
+                onNext={() => setCurrentStep(4)}
+                onBack={() => setCurrentStep(2)}
               />
             )}
           </CardContent>
