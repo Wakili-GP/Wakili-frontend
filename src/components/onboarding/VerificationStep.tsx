@@ -50,6 +50,7 @@ const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 50 }, (_, i) =>
   (currentYear - i).toString(),
 );
+
 const VerificationStep = ({
   data,
   onChange,
@@ -57,6 +58,7 @@ const VerificationStep = ({
   onBack,
 }: VerificationStepProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleFileUpload = (
     field: keyof VerificationData,
     e: React.ChangeEvent<HTMLInputElement>,
@@ -130,6 +132,14 @@ const VerificationStep = ({
     if (!data.issuingAuthority.trim()) newErrors.issuingAuthority = "مطلوب";
     if (!data.yearOfIssue) newErrors.yearOfIssue = "مطلوب";
 
+    // Educational certificates are now mandatory - at least one must be uploaded
+    const hasEducationalCert = data.educationalCertificates.some(
+      (cert) => cert.file !== null,
+    );
+    if (!hasEducationalCert) {
+      newErrors.educationalCertificates = "يجب رفع شهادة علمية واحدة على الأقل";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,6 +149,7 @@ const VerificationStep = ({
       onNext();
     }
   };
+
   const renderUploadBox = (
     label: string,
     field: keyof VerificationData,
@@ -151,7 +162,9 @@ const VerificationStep = ({
             field as "educationalCertificates" | "professionalCertificates"
           ][index] as DocumentUpload)
         : (data[field] as DocumentUpload);
+
     const hasError = errors[field];
+
     return (
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
@@ -169,7 +182,7 @@ const VerificationStep = ({
               variant="ghost"
               size="sm"
               onClick={() => removeFile(field, index)}
-              className="cursor-pointer text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -198,6 +211,7 @@ const VerificationStep = ({
       </div>
     );
   };
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="text-center mb-6">
@@ -208,6 +222,7 @@ const VerificationStep = ({
           ارفع المستندات المطلوبة للتحقق من هويتك وترخيصك المهني
         </p>
       </div>
+
       <Alert className="bg-amber-500/10 border-amber-500/20">
         <AlertTriangle className="h-4 w-4 text-amber-500" />
         <AlertDescription className="text-amber-700 dark:text-amber-300">
@@ -215,6 +230,7 @@ const VerificationStep = ({
           حتى تتم الموافقة على التوثيق.
         </AlertDescription>
       </Alert>
+
       {/* National ID */}
       <Card className="border-border">
         <CardContent className="p-4 space-y-4">
@@ -236,6 +252,7 @@ const VerificationStep = ({
           </div>
         </CardContent>
       </Card>
+
       {/* Lawyer License */}
       <Card className="border-border">
         <CardContent className="p-4 space-y-4">
@@ -306,7 +323,7 @@ const VerificationStep = ({
                 <SelectContent>
                   {years.map((year) => (
                     <SelectItem
-                      className="cursor-pointer justify-end"
+                      className="justify-end cursor-pointer"
                       key={year}
                       value={year}
                     >
@@ -322,14 +339,17 @@ const VerificationStep = ({
           </div>
         </CardContent>
       </Card>
-      {/* Educational Certificates */}
-      <Card className="border-border">
+
+      {/* Educational Certificates - Now Mandatory */}
+      <Card
+        className={`border-border ${errors.educationalCertificates ? "border-destructive" : ""}`}
+      >
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <GraduationCap className="w-5 h-5 text-primary" />
               <h3 className="text-lg font-semibold">
-                الشهادات العلمية (اختياري)
+                الشهادات العلمية <span className="text-destructive">*</span>
               </h3>
             </div>
             <Button
@@ -341,18 +361,35 @@ const VerificationStep = ({
               إضافة شهادة
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">
+            يجب رفع شهادة علمية واحدة على الأقل (شهادة البكالوريوس أو أعلى)
+          </p>
+          {errors.educationalCertificates && (
+            <p className="text-sm text-destructive">
+              {errors.educationalCertificates}
+            </p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.educationalCertificates.map((_, index) =>
-              renderUploadBox(
-                `الشهادة ${index + 1}`,
-                "educationalCertificates",
-                <FileText className="w-4 h-4" />,
-                index,
-              ),
-            )}
+            {data.educationalCertificates.length === 0
+              ? // Show at least one upload slot if none exist
+                renderUploadBox(
+                  "الشهادة 1",
+                  "educationalCertificates",
+                  <FileText className="w-4 h-4" />,
+                  0,
+                )
+              : data.educationalCertificates.map((_, index) =>
+                  renderUploadBox(
+                    `الشهادة ${index + 1}`,
+                    "educationalCertificates",
+                    <FileText className="w-4 h-4" />,
+                    index,
+                  ),
+                )}
           </div>
         </CardContent>
       </Card>
+
       {/* Professional Certificates */}
       <Card className="border-border">
         <CardContent className="p-4 space-y-4">
@@ -384,6 +421,7 @@ const VerificationStep = ({
           </div>
         </CardContent>
       </Card>
+
       <div className="flex justify-between pt-4">
         <Button className="cursor-pointer" variant="outline" onClick={onBack}>
           السابق
@@ -395,4 +433,5 @@ const VerificationStep = ({
     </div>
   );
 };
+
 export default VerificationStep;

@@ -109,7 +109,9 @@ const LawyerOnboarding = () => {
     nationalIdFront: { file: null, fileName: null, status: "pending" },
     nationalIdBack: { file: null, fileName: null, status: "pending" },
     lawyerLicense: { file: null, fileName: null, status: "pending" },
-    educationalCertificates: [],
+    educationalCertificates: [
+      { file: null, fileName: null, status: "pending" },
+    ],
     professionalCertificates: [],
     licenseNumber: "",
     issuingAuthority: "",
