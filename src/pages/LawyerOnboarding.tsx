@@ -21,7 +21,7 @@ const steps = [
 const LawyerOnboarding = () => {
   // const navigate = useNavigate();
   // const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(5);
+  const [currentStep, setCurrentStep] = useState(4);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 

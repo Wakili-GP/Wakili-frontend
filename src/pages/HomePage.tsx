@@ -24,7 +24,6 @@ import {
   ChevronDown,
   User,
   LogOut,
-  Divide,
 } from "lucide-react";
 import Footer from "../components/Footer.tsx";
 import ComingSoon from "../components/ComingSoon.tsx";
