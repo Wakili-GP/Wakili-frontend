@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
+@import "@/styles/sonner.css";
 
 @layer base {
   :root {
