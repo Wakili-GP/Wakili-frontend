@@ -16,7 +16,7 @@ const NotFound = () => {
   return (
     <div
       dir="rtl"
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted via-background to-accent"
+      className="min-h-screen flex items-center justify-center bg-linear-to-br from-muted via-background to-accent"
     >
       <div className="text-center p-8 max-w-md">
         <div className="mb-6 flex justify-center">
