@@ -6,9 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-// import { toast } from "sonner";
-// import { useToast } from "@/hooks/use-toast";
-
+import { toast } from "@/components/ui/sonner";
 // Mock lawyer data
 const lawyerInfo = {
   name: "د. أحمد سليمان",
@@ -23,7 +21,6 @@ const isFirstSession = true;
 export default function LawyerReview() {
   //   const { id } = useParams();
   //   const navigate = useNavigate();
-  //   const { toast } = useToast();
 
   const [lawyerRating, setLawyerRating] = useState(0);
   const [lawyerHover, setLawyerHover] = useState(0);
@@ -37,11 +34,9 @@ export default function LawyerReview() {
 
   const handleSubmit = async () => {
     if (lawyerRating === 0) {
-      //   toast({
-      //     title: "خطأ",
-      //     description: "يرجى تقييم المحامي قبل الإرسال",
-      //     variant: "destructive",
-      //   });
+      toast.error("خطأ", {
+        description: "يرجى تقييم المحامي قبل الإرسال",
+      });
       return;
     }
 
@@ -50,10 +45,9 @@ export default function LawyerReview() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // toast({
-    //   title: "تم إرسال التقييم",
-    //   description: "شكراً لمشاركتك رأيك معنا",
-    // });
+    toast.success("تم إرسال التقييم", {
+      description: "شكراً لمشاركتك رأيك معنا",
+    });
 
     setIsSubmitting(false);
     // navigate(`/lawyer/${id}`);
