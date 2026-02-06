@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Globe,
   Scale,
@@ -7,6 +8,7 @@ import {
   Building2,
   Mail,
   RefreshCw,
+  Loader,
 } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +22,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import { toast } from "@/components/ui/sonner";
+import { authService } from "@/services/auth-services";
 
 export type AuthMode =
   | "login"
@@ -57,6 +60,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
   onOpenChange,
   onSwitchMode,
 }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,44 +69,166 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
-  const FAKE_EMAIL = "email@email.com";
-  const FAKE_PASSWORD = "1234";
+  const [rememberMe, setRememberMe] = useState(false);
+  const [fullName, setFullName] = useState("");
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setResetCode("");
+      setFullName("");
+    }
+  }, [open, mode]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (email === FAKE_EMAIL && password === FAKE_PASSWORD) {
+
+    const response = await authService.login({
+      email,
+      password,
+      rememberMe,
+    });
+
+    if (response.success) {
       toast.success("تم تسجيل الدخول بنجاح!", {
-        description: "مرحباً بك في وكيلك",
+        description: "مرحباً بك في وكيلي",
       });
       onOpenChange(false);
+      navigate("/home");
     } else {
       toast.error("خطأ في تسجيل الدخول", {
-        description: "تأكد من البريد الإلكتروني وكلمة المرور",
+        description: response.error || "تأكد من البريد والرمز",
       });
     }
     setIsLoading(false);
   };
-  const handleForgotPassword = (e: React.FormEvent) => {
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    const response = await authService.forgotPassword({ email });
+
+    if (response.success) {
+      toast.success("تم إرسال رمز التحقق", {
+        description: "تحقق من بريدك الإلكتروني",
+      });
+      onSwitchMode("reset-password");
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل إرسال رمز التحقق",
+      });
+    }
+    setIsLoading(false);
   };
-  const handleRegister = (e: React.FormEvent) => {
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-  };
-  const handleResetPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
-  const handleEmailVerified = () => {
-    setShowEmailVerification(false);
-    toast.success("تم التحقق بنجاح!", {
-      description: "مرحباً بك في وكيلك",
+
+    if (!selectedUserType) {
+      toast.error("خطأ", {
+        description: "اختر نوع المستخدم",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("خطأ", {
+        description: "كلمات المرور غير متطابقة",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    const [firstName, ...lastNameParts] = fullName.trim().split(" ");
+    const lastName = lastNameParts.join(" ");
+
+    const response = await authService.register({
+      email,
+      password,
+      confirmPassword,
+      firstName,
+      lastName,
+      userType: selectedUserType as "client" | "lawyer",
+      acceptTerms: true,
     });
 
-    if (selectedUserType === "freelance-lawyer") {
-      // navigate("/verify/lawyer");
+    if (response.success) {
+      setRegistrationEmail(email);
+      setShowEmailVerification(true);
+      toast.success("تم إنشاء الحساب!", {
+        description: "يرجى تأكيد بريدك الإلكتروني",
+      });
     } else {
-      // navigate("/home");
+      toast.error("خطأ في التسجيل", {
+        description: response.error || "فشل إنشاء الحساب",
+      });
     }
+    setIsLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("خطأ", {
+        description: "كلمات المرور غير متطابقة",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    const response = await authService.resetPassword({
+      email,
+      code: resetCode,
+      newPassword: password,
+      confirmPassword,
+    });
+
+    if (response.success) {
+      toast.success("تم تحديث كلمة المرور!", {
+        description: "يمكنك الآن تسجيل الدخول",
+      });
+      onSwitchMode("login");
+      setEmail("");
+      setPassword("");
+      setResetCode("");
+      setConfirmPassword("");
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل تحديث كلمة المرور",
+      });
+    }
+    setIsLoading(false);
+  };
+
+  const handleEmailVerified = async () => {
+    setShowEmailVerification(false);
+    toast.success("تم التحقق بنجاح!", {
+      description: "مرحباً بك في وكيلي",
+    });
+    onOpenChange(false);
+
+    // Redirect based on user type
+    if (selectedUserType === "freelance-lawyer") {
+      navigate("/verify/lawyer");
+    } else {
+      navigate("/home");
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    // TODO: Implement Google OAuth with actual Google Sign-In SDK
+    // For now, show a coming soon message
+    toast.info("قيد التطوير", {
+      description: "ستتوفر طريقة تسجيل الدخول عبر Google قريباً",
+    });
   };
   const userTypes = [
     {
@@ -144,7 +270,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
         </DialogHeader>
         {mode === "login" && (
           <div>
-            <Button type="button" variant="secondary" className="w-full mb-4">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full mb-4"
+              disabled={isLoading}
+              onClick={handleGoogleAuth}
+            >
               <Globe className="ml-2" /> الدخول باستخدام Google
             </Button>
 
@@ -174,7 +306,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) =>
+                      setRememberMe(checked as boolean)
+                    }
+                  />
                   <Label
                     htmlFor="remember"
                     className="text-sm text-muted-foreground cursor-pointer"
@@ -248,8 +386,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
         )}
         {mode === "register" && (
           <div>
-            <Button type="button" variant="secondary" className="w-full mb-4">
-              <Globe />
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full mb-4"
+              disabled={isLoading}
+              onClick={handleGoogleAuth}
+            >
+              <Globe className="ml-2" />
               التسجيل باستخدام Google
             </Button>
             <Divider />
@@ -291,8 +435,16 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم الكامل</Label>
-                <Input id="name" type="text" placeholder="الاسم" required />
+                <Label htmlFor="fullname">الاسم الكامل</Label>
+                <Input
+                  id="fullname"
+                  type="text"
+                  placeholder="الاسم الكامل"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-email">البريد الإلكتروني</Label>
@@ -300,16 +452,30 @@ const AuthModals: React.FC<AuthModalProps> = ({
                   id="reg-email"
                   type="email"
                   placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-password">كلمة المرور</Label>
-                <Input id="reg-password" type="password" required />
+                <Input
+                  id="reg-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
-                <Input id="confirm-password" type="password" required />
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
               </div>
               <Button
                 type="submit"
@@ -363,9 +529,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                   id="confirm-new-password"
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setResetCode(e.target.value)}
-                  maxLength={6}
-                  className="text-center text-2xl tracking-widset"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </div>
@@ -481,28 +645,44 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     }
 
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    toast.success("تم التحقق بنجاح!", {
-      description: "تم تأكيد بريدك الإلكتروني",
+    const response = await authService.verifyEmail({
+      email,
+      code,
     });
-    setIsLoading(false);
-    onVerified();
+
+    if (response.success) {
+      toast.success("تم التحقق بنجاح!", {
+        description: "تم تأكيد بريدك الإلكتروني",
+      });
+      setIsLoading(false);
+      onVerified();
+    } else {
+      toast.error("خطأ في التحقق", {
+        description: response.error || "الرمز غير صحيح أو منتهي الصلاحية",
+      });
+      setIsLoading(false);
+    }
   };
 
   const handleResend = async () => {
     setIsResending(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    toast.success("تم إرسال الرمز", {
-      description: "تحقق من بريدك الإلكتروني",
-    });
+    const response = await authService.resendVerificationEmail(email);
+
+    if (response.success) {
+      toast.success("تم إرسال الرمز", {
+        description: "تحقق من بريدك الإلكتروني",
+      });
+      setCountdown(60);
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل إرسال الرمز",
+      });
+    }
     setIsResending(false);
-    setCountdown(60);
-    setOtp(["", "", "", "", "", ""]);
-    inputRefs.current[0]?.focus();
   };
 
   return (
@@ -552,7 +732,14 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             className="w-full"
             disabled={isLoading || otp.some((d) => !d)}
           >
-            {isLoading ? "جاري التحقق..." : "تأكيد"}
+            {isLoading ? (
+              <>
+                <Loader className="w-4 h-4 ml-2 animate-spin" />
+                جاري التحقق...
+              </>
+            ) : (
+              "تأكيد"
+            )}
           </Button>
 
           {/* Resend */}

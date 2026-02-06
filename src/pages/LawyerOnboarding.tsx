@@ -1,5 +1,5 @@
-import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scale, Clock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
@@ -9,6 +9,8 @@ import EducationStep from "@/components/onboarding/EducationStep";
 import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
+import { lawyerService } from "@/services/lawyer-services";
+import { useAuth } from "@/context/AuthContext";
 
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
@@ -19,15 +21,17 @@ const steps = [
 ];
 
 const LawyerOnboarding = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // Step 1: Basic Info
   const [basicInfo, setBasicInfo] = useState({
     fullName: "",
-    email: "lawyer@example.com", // This would come from registration
+    email: user?.email || "",
     profileImage: null as string | null,
     phoneCode: "+20",
     phoneNumber: "",
@@ -117,18 +121,122 @@ const LawyerOnboarding = () => {
     yearOfIssue: "",
   });
 
+  // Fetch onboarding progress on mount
+  useEffect(() => {
+    const fetchProgress = async () => {
+      setIsLoadingProgress(true);
+      const response = await lawyerService.getOnboardingProgress();
+      if (response.success && response.data) {
+        // Load saved data from progress
+        const { currentStep: savedStep, data: savedData } = response.data;
+        setCurrentStep(savedStep);
+
+        if (savedData.basicInfo) {
+          setBasicInfo((prev) => ({ ...prev, ...savedData.basicInfo }));
+        }
+        if (savedData.education) {
+          setEducation(savedData.education);
+        }
+        if (savedData.experience) {
+          setExperience(savedData.experience);
+        }
+        if (savedData.verification) {
+          setVerification((prev) => ({ ...prev, ...savedData.verification }));
+        }
+      }
+      setIsLoadingProgress(false);
+    };
+
+    fetchProgress();
+  }, []);
+
+  // Save basic info step to backend
+  const handleBasicInfoNext = async () => {
+    const response = await lawyerService.saveBasicInfo(basicInfo);
+    if (response.success) {
+      toast.success("تم حفظ المعلومات", {
+        description: "سيتم الانتقال للخطوة التالية",
+      });
+      setCurrentStep(2);
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل حفظ البيانات",
+      });
+    }
+  };
+
+  // Save education step to backend
+  const handleEducationNext = async () => {
+    const response = await lawyerService.saveEducation(education);
+    if (response.success) {
+      toast.success("تم حفظ المؤهلات", {
+        description: "سيتم الانتقال للخطوة التالية",
+      });
+      setCurrentStep(3);
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل حفظ البيانات",
+      });
+    }
+  };
+
+  // Save experience step to backend
+  const handleExperienceNext = async () => {
+    const response = await lawyerService.saveExperience(experience);
+    if (response.success) {
+      toast.success("تم حفظ الخبرات", {
+        description: "سيتم الانتقال للخطوة التالية",
+      });
+      setCurrentStep(4);
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل حفظ البيانات",
+      });
+    }
+  };
+
+  // Save verification step to backend
+  const handleVerificationNext = async () => {
+    const response =
+      await lawyerService.uploadVerificationDocuments(verification);
+    if (response.success) {
+      toast.success("تم حفظ المستندات", {
+        description: "سيتم الانتقال للخطوة التالية",
+      });
+      setCurrentStep(5);
+    } else {
+      toast.error("خطأ", {
+        description: response.error || "فشل حفظ المستندات",
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Prepare all data for submission
+    const completeData = {
+      basicInfo,
+      education,
+      experience,
+      verification,
+    };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    const response = await lawyerService.submitOnboarding(completeData);
 
-    toast.success("تم إرسال طلبك بنجاح!", {
-      description: "سيتم مراجعة بياناتك من قبل فريق الإدارة",
-    });
+    if (response.success) {
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      toast.success("تم إرسال طلبك بنجاح!", {
+        description: "سيتم مراجعة بياناتك من قبل فريق الإدارة",
+      });
+    } else {
+      setIsSubmitting(false);
+      toast.error("خطأ", {
+        description: response.error || "فشل إرسال الطلب",
+      });
+    }
   };
 
   const goToStep = (step: number) => {
@@ -162,13 +270,24 @@ const LawyerOnboarding = () => {
               </p>
             </div>
             <button
-              // onClick={() => navigate("/")}
+              onClick={() => navigate("/")}
               className="text-primary hover:underline text-sm"
             >
               العودة للصفحة الرئيسية
             </button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (isLoadingProgress) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Scale className="w-12 h-12 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">جاري تحميل بيانات التسجيل...</p>
+        </div>
       </div>
     );
   }
@@ -202,7 +321,7 @@ const LawyerOnboarding = () => {
               <BasicInfoStep
                 data={basicInfo}
                 onChange={setBasicInfo}
-                onNext={() => setCurrentStep(2)}
+                onNext={handleBasicInfoNext}
               />
             )}
 
@@ -210,7 +329,7 @@ const LawyerOnboarding = () => {
               <EducationStep
                 data={education}
                 onChange={setEducation}
-                onNext={() => setCurrentStep(3)}
+                onNext={handleEducationNext}
                 onBack={() => setCurrentStep(1)}
               />
             )}
@@ -219,7 +338,7 @@ const LawyerOnboarding = () => {
               <ExperienceStep
                 data={experience}
                 onChange={setExperience}
-                onNext={() => setCurrentStep(4)}
+                onNext={handleExperienceNext}
                 onBack={() => setCurrentStep(2)}
               />
             )}
@@ -228,7 +347,7 @@ const LawyerOnboarding = () => {
               <VerificationStep
                 data={verification}
                 onChange={setVerification}
-                onNext={() => setCurrentStep(5)}
+                onNext={handleVerificationNext}
                 onBack={() => setCurrentStep(3)}
               />
             )}

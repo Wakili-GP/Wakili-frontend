@@ -8,22 +8,53 @@ import LawyerReview from "./pages/LawyerReview";
 import HomePage from "./pages/HomePage";
 import ClientProfile from "./pages/ClientProfile";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-const App = () => (
-  <TooltipProvider>
-    <Sonner />
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<IndexPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/lawyer/:id" element={<LawyerProfile />} />
-        <Route path="/lawyer/:id/review" element={<LawyerReview />} />
-        <Route path="/profile" element={<ClientProfile />} />
-        <Route path="/verify/lawyer" element={<LawyerOnboarding />} />
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/context/ProtectedRoute";
 
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  </TooltipProvider>
+const App = () => (
+  <AuthProvider>
+    <TooltipProvider>
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<IndexPage />} />
+          <Route path="/lawyer/:id" element={<LawyerProfile />} />
+          <Route path="/lawyer/:id/review" element={<LawyerReview />} />
+
+          {/* Protected Routes - Authenticated Users */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ClientProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Routes - Lawyers Only */}
+          <Route
+            path="/verify/lawyer"
+            element={
+              <ProtectedRoute requiredUserType="lawyer">
+                <LawyerOnboarding />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </AuthProvider>
 );
 export default App;

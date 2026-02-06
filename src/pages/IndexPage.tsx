@@ -15,6 +15,7 @@ import {
   Briefcase,
   Star,
   Phone,
+  Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import legalHeroImage from "../assets/legal-hero.jpg";
@@ -32,6 +33,12 @@ import Marquee from "react-fast-marquee";
 import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.png";
 import lawyer_3 from "../assets/lawyer-3.png";
+import {
+  indexPageService,
+  type Testimonial,
+  type LawyerCard as BackendLawyerCard,
+  type FeatureStatistic,
+} from "@/services/indexPage-services";
 const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
@@ -555,6 +562,22 @@ const LawyerCard: FC<LawyerCardProps> = ({
 };
 
 const Lawyers: FC = () => {
+  const [lawyers, setLawyers] = useState<BackendLawyerCard[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      setIsLoading(true);
+      const response = await indexPageService.getTopLawyers(6);
+      if (response.success && response.data) {
+        setLawyers(response.data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchLawyers();
+  }, []);
+
   return (
     <section id="lawyers" className="py-16 bg-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center">
@@ -571,61 +594,50 @@ const Lawyers: FC = () => {
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10 pointer-events-none"></div>
 
-        <Marquee gradient={false} speed={50} pauseOnHover autoFill={true}>
-          <LawyerCard
-            lawyerImg={lawyer_1}
-            lawyerName="د. أحمد المحامي"
-            lawyerCases={350}
-            lawyerSpecialization="القانون الجنائي والمدني"
-            lawyerRating={4.9}
-            lawyerExperience="15 سنة خبرة"
-          />
-          <LawyerCard
-            lawyerImg={lawyer_2}
-            lawyerName="د. فاطمة علي"
-            lawyerCases={280}
-            lawyerSpecialization="قانون الأسرة والأحوال الشخصية"
-            lawyerRating={4.8}
-            lawyerExperience="12 سنة خبرة"
-          />
-          <LawyerCard
-            lawyerImg={lawyer_3}
-            lawyerName="د. محمد حسن"
-            lawyerCases={420}
-            lawyerSpecialization="القانون التجاري والشركات"
-            lawyerRating={4.9}
-            lawyerExperience="20 سنة خبرة"
-          />
-          <LawyerCard
-            lawyerImg={lawyer_2}
-            lawyerName="د. سارة أحمد"
-            lawyerCases={195}
-            lawyerSpecialization="قانون العقارات والاستثمار"
-            lawyerRating={4.7}
-            lawyerExperience="8 سنوات خبرة"
-          />
-          <LawyerCard
-            lawyerImg={lawyer_1}
-            lawyerName="د. خالد محمود"
-            lawyerCases={310}
-            lawyerSpecialization="القانون الدولي والتحكيم"
-            lawyerRating={4.8}
-            lawyerExperience="18 سنة خبرة"
-          />
-          <LawyerCard
-            lawyerImg={lawyer_3}
-            lawyerName="د. نور الدين"
-            lawyerCases={240}
-            lawyerSpecialization="قانون العمل والضمان الاجتماعي"
-            lawyerRating={4.6}
-            lawyerExperience="10 سنوات خبرة"
-          />
-        </Marquee>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : lawyers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">لم يتم العثور على محامين</p>
+          </div>
+        ) : (
+          <Marquee gradient={false} speed={50} pauseOnHover autoFill={true}>
+            {lawyers.map((lawyer) => (
+              <LawyerCard
+                key={lawyer.id}
+                lawyerImg={lawyer.profileImage || lawyer_1}
+                lawyerName={`${lawyer.firstName} ${lawyer.lastName}`}
+                lawyerCases={lawyer.reviewCount}
+                lawyerSpecialization={lawyer.specialties.join(", ")}
+                lawyerRating={lawyer.rating}
+                lawyerExperience={`${lawyer.yearsOfExperience || 0} سنة خبرة`}
+              />
+            ))}
+          </Marquee>
+        )}
       </div>
     </section>
   );
 };
 const Testimonials = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      setIsLoading(true);
+      const response = await indexPageService.getTestimonials(6);
+      if (response.success && response.data) {
+        setTestimonials(response.data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchTestimonials();
+  }, []);
+
   return (
     <section id="testimonials" className="py-20 bg-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -644,243 +656,81 @@ const Testimonials = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "خدمة ممتازة ومحامون محترفون. حلوا مشكلتي القانونية بسرعة
-                  وكفاءة عالية. أنصح بشدة بهذه المنصة."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-primary font-semibold">أ</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">أحمد محمد</h4>
-                    <p className="text-sm text-muted-foreground">رجل أعمال</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "المنصة سهلة الاستخدام والذكي الاصطناعي مفيد جداً. وفرت علي
-                  الكثير من الوقت والجهد في البحث عن المعلومات القانونية."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-secondary font-semibold">س</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">سارة أحمد</h4>
-                    <p className="text-sm text-muted-foreground">محاسبة</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "تجربة رائعة مع فريق محترف. الاستشارة كانت مفصلة ومفيدة،
-                  والمحامي كان صبوراً في الشرح والتوضيح."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-success-green font-semibold">م</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">محمد علي</h4>
-                    <p className="text-sm text-muted-foreground">مهندس</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "خدمة جيدة وسعر مناسب. كان هناك تأخير بسيط في الرد ولكن بشكل
-                  عام التجربة إيجابية وأنصح بها."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-warning-amber/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-warning-amber font-semibold">ف</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">فاطمة حسن</h4>
-                    <p className="text-sm text-muted-foreground">طبيبة</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "استثنائي! المحامي كان خبيراً في مجاله وقدم نصائح قيمة جداً.
-                  المنصة آمنة وموثوقة بنسبة 100%."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-primary font-semibold">ك</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">كريم يوسف</h4>
-                    <p className="text-sm text-muted-foreground">صاحب شركة</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-warning-amber">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          true
-                            ? "text-warning-amber fill-current"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  "منصة مبتكرة ومفيدة جداً. الذكي الاصطناعي أجاب على كل
-                  استفساراتي بدقة، وعندما احتجت استشارة شخصية كان الحجز سهل."
-                </p>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center ml-3">
-                    <span className="text-secondary font-semibold">ن</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">
-                      نورا إبراهيم
-                    </h4>
-                    <p className="text-sm text-muted-foreground">مصممة</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <div className="flex text-warning-amber">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < testimonial.rating
+                                ? "text-warning-amber fill-current"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                      "{testimonial.testimonialText}"
+                    </p>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
+                        <span className="text-primary font-semibold">
+                          {testimonial.clientName.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground">
+                          {testimonial.clientName}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {testimonial.serviceCategory || "عميل"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 };
 const Features = () => {
+  const [statistics, setStatistics] = useState<FeatureStatistic[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      setIsLoading(true);
+      const response = await indexPageService.getStatistics();
+      if (response.success && response.data) {
+        setStatistics(response.data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchStatistics();
+  }, []);
+
   return (
     <section id="features" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -959,32 +809,22 @@ const Features = () => {
             <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
               إحصائيات المنصة
             </h3>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">
-                  1000+
-                </div>
-                <div className="text-muted-foreground">محامي معتمد</div>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader className="w-8 h-8 animate-spin text-primary" />
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-secondary mb-2">
-                  5000+
-                </div>
-                <div className="text-muted-foreground">استشارة مكتملة</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-6">
+                {statistics.map((stat) => (
+                  <div key={stat.id} className="text-center">
+                    <div className="text-3xl font-bold text-primary mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-muted-foreground">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-success-green mb-2">
-                  24/7
-                </div>
-                <div className="text-muted-foreground">دعم مستمر</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-warning-amber mb-2">
-                  99%
-                </div>
-                <div className="text-muted-foreground">رضا العملاء</div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
