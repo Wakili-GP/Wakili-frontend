@@ -42,7 +42,7 @@ const HomePage = () => {
         description: "نراك قريباً",
       });
       navigate("/");
-    } catch (error) {
+    } catch {
       toast.error("خطأ في تسجيل الخروج");
     }
   };
@@ -253,7 +253,7 @@ const HomePage = () => {
                     <span className="text-sm font-medium hidden md:inline">
                       {user?.firstName}
                     </span>
-                    <ChevronDown className="h-4 h-4" />
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">

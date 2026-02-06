@@ -30,9 +30,11 @@ import {
 } from "@/components/ui/card";
 import AuthModals, { type AuthMode } from "@/components/AuthModals";
 import Marquee from "react-fast-marquee";
-import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.png";
-import lawyer_3 from "../assets/lawyer-3.png";
+import {
+  MarqueeLawyerCardSkeleton,
+  TestimonialCardSkeleton,
+} from "@/components/ui/skeletons";
 
 import {
   indexPageService,
@@ -592,13 +594,15 @@ const Lawyers: FC = () => {
 
       <div className="container relative">
         {/* Fade gradients */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-muted to-transparent z-10 pointer-events-none"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-muted to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-linear-to-r from-muted to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-linear-to-l from-muted to-transparent z-10 pointer-events-none"></div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <Marquee gradient={false} speed={50} pauseOnHover autoFill={true}>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <MarqueeLawyerCardSkeleton key={i} />
+            ))}
+          </Marquee>
         ) : lawyers.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">لم يتم العثور على محامين</p>
@@ -658,8 +662,10 @@ const Testimonials = () => {
         </motion.div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <TestimonialCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

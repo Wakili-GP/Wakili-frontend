@@ -18,7 +18,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import {
   clientProfileService,
@@ -44,7 +43,6 @@ import {
 
 const ClientProfile = () => {
   const navigate = useNavigate();
-  const { user: authUser } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -120,8 +118,6 @@ const ClientProfile = () => {
   };
 
   const handleCoverSave = async (input: string | File) => {
-    let file: File;
-
     if (typeof input === "string") {
       // If string URL is provided, skip upload (for compatibility)
       if (clientData) {
@@ -131,7 +127,7 @@ const ClientProfile = () => {
       return;
     }
 
-    file = input;
+    const file = input;
     const response = await clientProfileService.uploadCoverImage(file);
     if (response.success && response.data) {
       if (clientData) {

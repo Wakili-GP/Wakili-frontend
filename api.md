@@ -12,8 +12,9 @@ This document outlines all frontend-consumed API endpoints for the Wakili legal 
 1. [Authentication Endpoints](#authentication-endpoints)
 2. [Home Page Endpoints](#home-page-endpoints)
 3. [Lawyer Onboarding Endpoints](#lawyer-onboarding-endpoints)
-4. [Error Handling](#error-handling)
-5. [Authentication](#authentication)
+4. [Client Profile Endpoints](#client-profile-endpoints)
+5. [Error Handling](#error-handling)
+6. [Authentication](#authentication)
 
 ---
 
@@ -780,6 +781,404 @@ This document outlines all frontend-consumed API endpoints for the Wakili legal 
 
 ---
 
+## Client Profile Endpoints
+
+### 1. Get Client Profile
+
+**Endpoint:** `GET /client/profile`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "client-123",
+    "firstName": "أسامة",
+    "lastName": "أحمد",
+    "email": "usama@email.com",
+    "phoneNumber": "+201001234567",
+    "profileImage": "https://api.wakili.com/uploads/profiles/client-123.jpg",
+    "coverImage": "https://api.wakili.com/uploads/covers/client-123.jpg",
+    "bio": "مهتم بالاستشارات القانونية في مجال العمل والتجارة",
+    "location": "القاهرة، مصر",
+    "joinedDate": "2024-01-15T10:00:00Z",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-02-06T10:00:00Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Profile retrieved successfully
+- `401` - Unauthorized (missing or invalid token)
+- `404` - Profile not found
+
+---
+
+### 2. Update Client Profile
+
+**Endpoint:** `PUT /client/profile`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Request Body:**
+
+```json
+{
+  "firstName": "أسامة",
+  "lastName": "أحمد",
+  "phoneNumber": "+201001234567",
+  "bio": "مهتم بالاستشارات القانونية",
+  "location": "القاهرة، مصر"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "client-123",
+    "firstName": "أسامة",
+    "lastName": "أحمد",
+    "email": "usama@email.com",
+    "phoneNumber": "+201001234567",
+    "profileImage": "https://api.wakili.com/uploads/profiles/client-123.jpg",
+    "coverImage": "https://api.wakili.com/uploads/covers/client-123.jpg",
+    "bio": "مهتم بالاستشارات القانونية",
+    "location": "القاهرة، مصر",
+    "joinedDate": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-02-06T10:30:00Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Profile updated successfully
+- `400` - Validation error (invalid phone format, etc.)
+- `401` - Unauthorized
+
+---
+
+### 3. Upload Profile Image
+
+**Endpoint:** `POST /client/profile/image`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:**
+
+- `file`: Image file (JPEG, PNG, WebP)
+- Max size: 5MB
+- Recommended dimensions: 400x400px
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "imageUrl": "https://api.wakili.com/uploads/profiles/client-123-1707219600.jpg",
+    "uploadedAt": "2024-02-06T10:00:00Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Image uploaded successfully
+- `400` - Invalid file type or size exceeds limit
+- `401` - Unauthorized
+- `413` - Payload too large
+
+---
+
+### 4. Upload Cover Image
+
+**Endpoint:** `POST /client/profile/cover`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:**
+
+- `file`: Image file (JPEG, PNG, WebP)
+- Max size: 10MB
+- Recommended dimensions: 1200x400px
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "imageUrl": "https://api.wakili.com/uploads/covers/client-123-1707219600.jpg",
+    "uploadedAt": "2024-02-06T10:00:00Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Cover image uploaded successfully
+- `400` - Invalid file type or size exceeds limit
+- `401` - Unauthorized
+- `413` - Payload too large
+
+---
+
+### 5. Get Favorite Lawyers
+
+**Endpoint:** `GET /client/favorites`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Query Parameters:**
+
+- `page` (optional, default: 1): Page number for pagination
+- `limit` (optional, default: 10): Number of items per page
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "lawyer-1",
+      "firstName": "علي",
+      "lastName": "عبدالله",
+      "profileImage": "https://api.wakili.com/uploads/profiles/lawyer-1.jpg",
+      "specialties": ["قانون العمل", "القانون التجاري"],
+      "rating": 4.9,
+      "reviewCount": 248,
+      "hourlyRate": 250,
+      "isVerified": true,
+      "yearsOfExperience": 15,
+      "bio": "محام متخصص في قانون العمل والقانون التجاري",
+      "city": "القاهرة",
+      "country": "مصر",
+      "addedAt": "2024-01-20T10:00:00Z"
+    },
+    {
+      "id": "lawyer-2",
+      "firstName": "فاطمة",
+      "lastName": "محمد",
+      "profileImage": "https://api.wakili.com/uploads/profiles/lawyer-2.jpg",
+      "specialties": ["قانون الأسرة", "القانون الجنائي"],
+      "rating": 4.8,
+      "reviewCount": 189,
+      "hourlyRate": 300,
+      "isVerified": true,
+      "yearsOfExperience": 12,
+      "bio": "محامية متخصصة في قانون الأسرة والقضايا الجنائية",
+      "city": "الإسكندرية",
+      "country": "مصر",
+      "addedAt": "2024-01-25T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalItems": 2,
+    "itemsPerPage": 10
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Favorites retrieved successfully
+- `401` - Unauthorized
+
+---
+
+### 6. Add Lawyer to Favorites
+
+**Endpoint:** `POST /client/favorites/:lawyerId`
+
+**Auth Required:** Yes (Bearer Token)
+
+**URL Parameters:**
+
+- `lawyerId`: The ID of the lawyer to add to favorites
+
+**Request Body:** Empty or `{}`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Lawyer added to favorites",
+    "lawyerId": "lawyer-1",
+    "addedAt": "2024-02-06T10:00:00Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Lawyer added to favorites
+- `400` - Lawyer already in favorites
+- `401` - Unauthorized
+- `404` - Lawyer not found
+
+---
+
+### 7. Remove Lawyer from Favorites
+
+**Endpoint:** `DELETE /client/favorites/:lawyerId`
+
+**Auth Required:** Yes (Bearer Token)
+
+**URL Parameters:**
+
+- `lawyerId`: The ID of the lawyer to remove from favorites
+
+**Request Body:** None
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Lawyer removed from favorites",
+    "lawyerId": "lawyer-1"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Lawyer removed from favorites
+- `401` - Unauthorized
+- `404` - Lawyer not found in favorites
+
+---
+
+### 8. Get Client Bookings
+
+**Endpoint:** `GET /client/bookings`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Query Parameters:**
+
+- `status` (optional): Filter by booking status (`pending`, `confirmed`, `completed`, `cancelled`)
+- `page` (optional, default: 1): Page number for pagination
+- `limit` (optional, default: 10): Number of items per page
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "booking-1",
+      "lawyerName": "علي عبدالله",
+      "lawyerImage": "https://api.wakili.com/uploads/profiles/lawyer-1.jpg",
+      "serviceType": "استشارة فيديو",
+      "date": "2024-02-15",
+      "time": "10:00 ص",
+      "status": "confirmed",
+      "duration": "45 دقيقة",
+      "price": 250,
+      "notes": "استشارة حول قضية عمل",
+      "bookingCode": "BK-123456",
+      "createdAt": "2024-02-01T10:00:00Z"
+    },
+    {
+      "id": "booking-2",
+      "lawyerName": "فاطمة محمد",
+      "lawyerImage": "https://api.wakili.com/uploads/profiles/lawyer-2.jpg",
+      "serviceType": "استشارة مباشرة",
+      "date": "2024-02-20",
+      "time": "02:00 م",
+      "status": "pending",
+      "duration": "30 دقيقة",
+      "price": 300,
+      "notes": "استشارة أسرية",
+      "bookingCode": "BK-123457",
+      "createdAt": "2024-02-03T10:00:00Z"
+    },
+    {
+      "id": "booking-3",
+      "lawyerName": "أحمد حسن",
+      "lawyerImage": "https://api.wakili.com/uploads/profiles/lawyer-3.jpg",
+      "serviceType": "استشارة هاتفية",
+      "date": "2024-01-10",
+      "time": "11:00 ص",
+      "status": "completed",
+      "duration": "60 دقيقة",
+      "price": 200,
+      "notes": "استشارة تجارية",
+      "bookingCode": "BK-123458",
+      "createdAt": "2024-01-05T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalItems": 3,
+    "itemsPerPage": 10
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Bookings retrieved successfully
+- `401` - Unauthorized
+
+---
+
+### 9. Update Client Password
+
+**Endpoint:** `PUT /client/password`
+
+**Auth Required:** Yes (Bearer Token)
+
+**Request Body:**
+
+```json
+{
+  "oldPassword": "CurrentPassword123!",
+  "newPassword": "NewPassword123!"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "تم تحديث كلمة المرور بنجاح"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Password updated successfully
+- `400` - Validation error (old password incorrect, weak password, etc.)
+- `401` - Unauthorized
+
+---
+
 ## Error Handling
 
 All endpoints return a consistent error response format:
@@ -851,5 +1250,11 @@ Frontend is configured to access the API at the base URL. Ensure backend has pro
 
 ---
 
-**Last Updated:** February 6, 2024  
-**Version:** 1.0.0
+**Last Updated:** February 7, 2026  
+**Version:** 1.2.0
+
+**Changelog:**
+
+- v1.2.0 (Feb 7, 2026): Updated Client Profile Endpoints - merged account settings into password update endpoint (9 endpoints total: profile management, favorites, bookings, password update)
+- v1.1.0 (Feb 7, 2024): Added Client Profile Endpoints section with 10 endpoints (profile management, favorites, bookings, settings)
+- v1.0.0 (Feb 6, 2024): Initial version with Authentication, Home Page, and Lawyer Onboarding endpoints

@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { clientProfileService } from "@/services/clientProfile-services";
 
 interface AccountSettingsModalProps {
   open: boolean;
@@ -57,14 +59,27 @@ const AccountSettingsModals: React.FC<AccountSettingsModalProps> = ({
 
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await clientProfileService.updatePassword({
+        oldPassword,
+        newPassword,
+      });
 
-    setIsLoading(false);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    onOpenChange(false);
+      if (response.success) {
+        toast.success("تم تحديث كلمة المرور بنجاح");
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        onOpenChange(false);
+      } else {
+        setPasswordError("فشل تحديث كلمة المرور. حاول مرة أخرى");
+      }
+    } catch {
+      setPasswordError("حدث خطأ أثناء تحديث كلمة المرور");
+      toast.error("حدث خطأ أثناء تحديث كلمة المرور");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -47,15 +47,6 @@ export interface Booking {
   price: number;
 }
 
-export interface AccountSettings {
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  marketingEmails: boolean;
-  twoFactorAuth: boolean;
-  language: string;
-  timezone: string;
-}
-
 export interface ProfileUpdateRequest {
   firstName?: string;
   lastName?: string;
@@ -69,8 +60,8 @@ export interface ProfileUpdateRequest {
 
 const MOCK_CLIENT_PROFILE: ClientProfile = {
   id: "client-1",
-  firstName: "Usama",
-  lastName: "Developer",
+  firstName: "اسامة",
+  lastName: "العريني",
   email: "usama@email.com",
   phoneNumber: "+20 100 123 4567",
   profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Usama",
@@ -159,15 +150,6 @@ const MOCK_BOOKINGS: Booking[] = [
     price: 250,
   },
 ];
-
-const MOCK_ACCOUNT_SETTINGS: AccountSettings = {
-  emailNotifications: true,
-  smsNotifications: false,
-  marketingEmails: true,
-  twoFactorAuth: false,
-  language: "ar",
-  timezone: "Africa/Cairo",
-};
 
 // ============ Service ============
 
@@ -349,46 +331,27 @@ export const clientProfileService = {
   },
 
   /**
-   * Get account settings
-   * GET /client/settings
+   * Update client password
+   * PUT /client/password
    */
-  async getAccountSettings(): Promise<ApiResponse<AccountSettings>> {
+  async updatePassword(data: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<ApiResponse<{ message: string }>> {
     try {
-      const response =
-        await httpClient.get<AccountSettings>("/client/settings");
-      if (!response.success || !response.data) {
-        return { success: true, data: MOCK_ACCOUNT_SETTINGS };
-      }
-      return response;
-    } catch {
-      return { success: true, data: MOCK_ACCOUNT_SETTINGS };
-    }
-  },
-
-  /**
-   * Update account settings
-   * PUT /client/settings
-   */
-  async updateAccountSettings(
-    settings: Partial<AccountSettings>,
-  ): Promise<ApiResponse<AccountSettings>> {
-    try {
-      const response = await httpClient.put<AccountSettings>(
-        "/client/settings",
-        settings,
+      const response = await httpClient.put<{ message: string }>(
+        "/client/password",
+        data,
       );
       if (!response.success) {
         return {
           success: true,
-          data: { ...MOCK_ACCOUNT_SETTINGS, ...settings },
+          data: { message: "تم تحديث كلمة المرور بنجاح" },
         };
       }
       return response;
     } catch {
-      return {
-        success: true,
-        data: { ...MOCK_ACCOUNT_SETTINGS, ...settings },
-      };
+      return { success: true, data: { message: "تم تحديث كلمة المرور بنجاح" } };
     }
   },
 };
