@@ -83,6 +83,41 @@ export const authService = {
    * POST /auth/login
    */
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    // Development fake credentials for testing
+    if (
+      credentials.email === "usama@email.com" &&
+      credentials.password === "usama"
+    ) {
+      const fakeResponse: ApiResponse<LoginResponse> = {
+        success: true,
+        data: {
+          accessToken: "fake-dev-token-12345",
+          refreshToken: "fake-refresh-token-12345",
+          expiresIn: 3600,
+          user: {
+            id: "dev-user-1",
+            email: "usama@email.com",
+            firstName: "Usama",
+            lastName: "Developer",
+            userType: "client",
+            isEmailVerified: true,
+            createdAt: new Date().toISOString(),
+          },
+        },
+      };
+
+      // Store fake token
+      if (fakeResponse.data) {
+        httpClient.setToken(fakeResponse.data.accessToken);
+        localStorage.setItem("authToken", fakeResponse.data.accessToken);
+        if (fakeResponse.data.refreshToken) {
+          localStorage.setItem("refreshToken", fakeResponse.data.refreshToken);
+        }
+      }
+
+      return fakeResponse;
+    }
+
     const response = await httpClient.post<LoginResponse>(
       "/auth/login",
       credentials,
@@ -207,6 +242,23 @@ export const authService = {
    * GET /auth/me
    */
   async getCurrentUser(): Promise<ApiResponse<AuthUser>> {
+    // Check if using fake dev token
+    const token = localStorage.getItem("authToken");
+    if (token === "fake-dev-token-12345") {
+      return {
+        success: true,
+        data: {
+          id: "dev-user-1",
+          email: "usama@email.com",
+          firstName: "Usama",
+          lastName: "Developer",
+          userType: "client",
+          isEmailVerified: true,
+          createdAt: new Date().toISOString(),
+        },
+      };
+    }
+
     return httpClient.get<AuthUser>("/auth/me");
   },
 

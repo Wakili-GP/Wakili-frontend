@@ -33,6 +33,7 @@ import Marquee from "react-fast-marquee";
 import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.png";
 import lawyer_3 from "../assets/lawyer-3.png";
+
 import {
   indexPageService,
   type Testimonial,
@@ -607,7 +608,7 @@ const Lawyers: FC = () => {
             {lawyers.map((lawyer) => (
               <LawyerCard
                 key={lawyer.id}
-                lawyerImg={lawyer.profileImage || lawyer_1}
+                lawyerImg={lawyer.profileImage || lawyer_2}
                 lawyerName={`${lawyer.firstName} ${lawyer.lastName}`}
                 lawyerCases={lawyer.reviewCount}
                 lawyerSpecialization={lawyer.specialties.join(", ")}
