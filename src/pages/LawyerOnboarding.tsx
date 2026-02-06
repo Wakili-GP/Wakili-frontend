@@ -2,7 +2,7 @@ import { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scale, Clock } from "lucide-react";
-// import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/sonner";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
 import EducationStep from "@/components/onboarding/EducationStep";
@@ -20,8 +20,7 @@ const steps = [
 
 const LawyerOnboarding = () => {
   // const navigate = useNavigate();
-  // const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -127,10 +126,9 @@ const LawyerOnboarding = () => {
     setIsSubmitting(false);
     setIsSubmitted(true);
 
-    // toast({
-    //   title: "تم إرسال طلبك بنجاح!",
-    //   description: "سيتم مراجعة بياناتك من قبل فريق الإدارة",
-    // });
+    toast.success("تم إرسال طلبك بنجاح!", {
+      description: "سيتم مراجعة بياناتك من قبل فريق الإدارة",
+    });
   };
 
   const goToStep = (step: number) => {

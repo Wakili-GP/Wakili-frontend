@@ -169,7 +169,7 @@ const Hero = () => {
 const MobileApp = () => {
   return (
     <section className="relative py-12 overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5" />
+      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-accent/5 to-primary/5" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
@@ -251,7 +251,7 @@ const MobileApp = () => {
           >
             <div className="relative">
               {/* Glassmorphism Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 rounded-[3rem] blur-3xl" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-accent/20 to-primary/20 rounded-[3rem] blur-3xl" />
 
               {/* Phone Mockup */}
               <div className="relative z-10">
