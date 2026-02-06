@@ -445,7 +445,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
                   required
                 />
               </div>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="reg-email">البريد الإلكتروني</Label>
                 <Input
@@ -578,7 +577,6 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   onOpenChange,
   email,
   onVerified,
-  userType,
 }) => {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
@@ -714,7 +712,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             {otp.map((digit, index) => (
               <input
                 key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}

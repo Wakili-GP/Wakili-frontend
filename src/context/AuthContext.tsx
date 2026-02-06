@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { authService, type AuthUser } from "./auth-services";
+import { authService, type AuthUser } from "@/services/auth-services";
 
 interface AuthContextType {
   isAuthenticated: boolean;
