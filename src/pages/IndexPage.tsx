@@ -488,23 +488,23 @@ const LawyerCard: FC<LawyerCardProps> = ({
   const ratingValue = Number(lawyerRating);
 
   return (
-    <Card className="min-w-[320px] pt-4 mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
-      <CardContent>
+    <Card className="min-w-[320px] px-7 py-6 mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
+      <CardContent className="p-0">
         {/* Avatar + Info */}
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <div className="relative">
             <img
               src={lawyerImg}
               alt={lawyerName}
-              className="w-16 h-16 rounded-full object-cover shadow-card"
+              className="w-14 h-14 rounded-full object-cover shadow-card"
             />
             <div className="absolute -bottom-1 -right-1 bg-secondary rounded-full p-1">
               <Award className="w-3 h-3 text-secondary-foreground" />
             </div>
           </div>
 
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-foreground mb-1">
+          <div className="flex-1 leading-tight">
+            <h3 className="text-base font-bold text-foreground">
               {lawyerName}
             </h3>
             <p className="text-sm text-muted-foreground">{lawyerExperience}</p>
@@ -512,27 +512,27 @@ const LawyerCard: FC<LawyerCardProps> = ({
         </div>
 
         {/* Specialization + Stats */}
-        <div className="mb-3">
-          <p className="text-sm font-medium text-primary mb-2">
+        <div className="mb-3 space-y-2">
+          <p className="text-sm font-medium text-primary">
             {lawyerSpecialization}
           </p>
 
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <Briefcase className="w-4 h-4 ml-1" />
+            <div className="flex items-center gap-1">
+              <Briefcase className="w-4 h-4" />
               <span>{lawyerCases} قضية</span>
             </div>
 
-            <div className="flex items-center">
-              <Star className="w-4 h-4 ml-1 text-warning-amber fill-current" />
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 text-warning-amber fill-current" />
               <span className="font-medium">{lawyerRating}</span>
             </div>
           </div>
         </div>
 
         {/* Rating Stars */}
-        <div className="flex justify-between items-center">
-          <div className="flex">
+        <div className="flex items-center justify-between pt-2 border-t border-border/40">
+          <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
@@ -545,7 +545,7 @@ const LawyerCard: FC<LawyerCardProps> = ({
             ))}
           </div>
 
-          <span className="text-xs text-muted-foreground bg-muted px-2 rounded-full">
+          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
             متاح للاستشارة
           </span>
         </div>
