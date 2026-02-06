@@ -84,6 +84,7 @@ const IndexPage = () => {
                 من نحن
               </a>
               <Button
+                className="cursor-pointer"
                 variant="hero"
                 size="lg"
                 onClick={() => {
@@ -487,7 +488,7 @@ const LawyerCard: FC<LawyerCardProps> = ({
   const ratingValue = Number(lawyerRating);
 
   return (
-    <Card className="min-w-[320px] mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
+    <Card className="min-w-[320px] pt-4 mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
       <CardContent>
         {/* Avatar + Info */}
         <div className="flex items-center gap-4 mb-4">
@@ -544,7 +545,7 @@ const LawyerCard: FC<LawyerCardProps> = ({
             ))}
           </div>
 
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+          <span className="text-xs text-muted-foreground bg-muted px-2 rounded-full">
             متاح للاستشارة
           </span>
         </div>
@@ -895,7 +896,7 @@ const Features = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="gap-6">
             <div className="flex items-start space-x-4 mb-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                 <Zap className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -910,7 +911,7 @@ const Features = () => {
             </div>
 
             <div className="flex items-start space-x-4 mb-4">
-              <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center shrink-0">
                 <Shield className="h-5 w-5 text-secondary" />
               </div>
               <div>
@@ -925,7 +926,7 @@ const Features = () => {
             </div>
 
             <div className="flex items-start space-x-4 mb-4">
-              <div className="w-10 h-10 bg-success-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-success-green/10 rounded-lg flex items-center justify-center shrink-0">
                 <Users className="h-5 w-5 text-success-green" />
               </div>
               <div>
@@ -940,7 +941,7 @@ const Features = () => {
             </div>
 
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-warning-amber/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-warning-amber/10 rounded-lg flex items-center justify-center shrink-0">
                 <Scale className="h-5 w-5 text-warning-amber" />
               </div>
               <div>
@@ -1003,14 +1004,18 @@ const CTA = () => {
           الخدمات القانونية
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button variant="cta" size="xl" className="shadow-glow">
+          <Button
+            variant="cta"
+            size="xl"
+            className="cursor-pointer shadow-glow"
+          >
             <Phone className="ml-2" />
             احجز استشارة مجانية
           </Button>
           <Button
             variant="outline"
             size="xl"
-            className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            className="cursor-pointer border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
           >
             <MessageCircle className="ml-2" />
             تجربة الذكي الاصطناعي
