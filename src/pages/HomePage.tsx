@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Badge } from "@/components/ui/badge";
 import LawyerSearch from "../components/LawyerSearch.tsx";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Scale,
   MessageCircle,
@@ -27,10 +28,27 @@ import {
 } from "lucide-react";
 import Footer from "../components/Footer.tsx";
 import ComingSoon from "../components/ComingSoon.tsx";
+import { useAuth } from "@/context/AuthContext.tsx";
+import { toast } from "@/components/ui/sonner";
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState("home");
-  const handleLogout = (e: React.FormEvent) => {
-    e.preventDefault();
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("تم تسجيل الخروج بنجاح", {
+        description: "نراك قريباً",
+      });
+      navigate("/");
+    } catch (error) {
+      toast.error("خطأ في تسجيل الخروج");
+    }
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
   };
   const notifications = [
     {
@@ -222,16 +240,30 @@ const HomePage = () => {
                     className="cursor-pointer flex items-center space-x-2 space-x space-x-reverse"
                   >
                     <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-primary" />
+                      {user?.profileImage ? (
+                        <img
+                          src={user.profileImage}
+                          alt={user.firstName}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-5 h-5 text-primary" />
+                      )}
                     </div>
-                    <ChevronDown className="h-4 w-4" />
+                    <span className="text-sm font-medium hidden md:inline">
+                      {user?.firstName}
+                    </span>
+                    <ChevronDown className="h-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="cursor-pointer flex items-center space-x-2 space-x-reverse">
+                  <DropdownMenuItem
+                    onClick={handleProfileClick}
+                    className="cursor-pointer flex items-center space-x-2 space-x-reverse"
+                  >
                     <User className="w-4 h-4" />
                     <span>حسابك</span>
-                  </DropdownMenuItem>{" "}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="cursor-pointer flex items-center space-x-2 space-x-reverse text-red-600"

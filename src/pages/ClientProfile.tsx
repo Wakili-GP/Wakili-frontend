@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AccountSettingsModals from "@/components/AccountSettingsModal";
 import CoverImageEditModal from "@/components/CoverImageEditModal";
@@ -14,11 +15,17 @@ import {
   Edit,
   Heart,
   Star,
-  Phone,
-  Building2,
   Settings,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/sonner";
+import {
+  clientProfileService,
+  type ClientProfile as ClientProfileType,
+  type FavoriteLawyer,
+  type Booking,
+} from "@/services/clientProfile-services";
 
 import {
   Table,
@@ -34,159 +41,180 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-const mockBookings = [
-  {
-    id: 1,
-    lawyer: "د. أحمد سليمان",
-    type: "استشارة قانونية",
-    date: "2024-10-15",
-    time: "10:00 ص",
-    status: "مؤكد",
-    specialty: "القانون التجاري",
-  },
-  {
-    id: 2,
-    lawyer: "أ. سارة محمود",
-    type: "استشارة جنائية",
-    date: "2024-10-10",
-    time: "2:00 م",
-    status: "مكتمل",
-    specialty: "القانون الجنائي",
-  },
-  {
-    id: 3,
-    lawyer: "أ. محمد علي",
-    type: "مراجعة عقد",
-    date: "2024-10-20",
-    time: "11:00 ص",
-    status: "قيد الانتظار",
-    specialty: "القانون التجاري",
-  },
-];
-interface Lawyer {
-  id: number;
-  name: string;
-  specialty: string;
-  location: string;
-  rating: number;
-  reviewCount: number;
-  price: number;
-  sessionTypes: string[];
-  image: string;
-}
-const mockFavoriteLawyers: Lawyer[] = [
-  {
-    id: 1,
-    name: "د. أحمد سليمان",
-    specialty: "قانون تجاري",
-    location: "القاهرة",
-    rating: 4.9,
-    reviewCount: 127,
-    price: 500,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop",
-  },
-  {
-    id: 2,
-    name: "أ. سارة محمود",
-    specialty: "قانون الأسرة",
-    location: "الإسكندرية",
-    rating: 4.8,
-    reviewCount: 89,
-    price: 350,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop",
-  },
-  {
-    id: 4,
-    name: "د. فاطمة حسن",
-    specialty: "قانون العمل",
-    location: "القاهرة",
-    rating: 4.9,
-    reviewCount: 203,
-    price: 450,
-    sessionTypes: ["هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
-  },
-];
-interface ClientData {
-  name: string;
-  location: string;
-  bio: string;
-  coverImage: string;
-  profileImage: string;
-  memberSince: string;
-  email: string;
-}
+
 const ClientProfile = () => {
+  const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [clientData, setClientData] = useState<ClientData>({
-    name: "محمد أحمد",
-    location: "القاهرة، مصر",
-    bio: "مهتم بالاستشارات القانونية للشركات الناشئة",
-    coverImage:
-      "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=300&fit=crop",
-    profileImage:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-    memberSince: "2023",
-    email: "mohamed@example.com",
-  });
-  const handleProfileSave = (data: {
+
+  const [clientData, setClientData] = useState<ClientProfileType | null>(null);
+  const [favoriteLawyers, setFavoriteLawyers] = useState<FavoriteLawyer[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  const fetchProfileData = async () => {
+    setIsLoading(true);
+    const response = await clientProfileService.getProfile();
+    if (response.success && response.data) {
+      setClientData(response.data);
+    }
+    setIsLoading(false);
+  };
+
+  // Fetch favorite lawyers
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setFavoritesLoading(true);
+      const response = await clientProfileService.getFavoriteLawyers();
+      if (response.success && response.data) {
+        setFavoriteLawyers(response.data);
+      }
+      setFavoritesLoading(false);
+    };
+    fetchFavorites();
+  }, []);
+
+  // Fetch bookings
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setBookingsLoading(true);
+      const response = await clientProfileService.getBookings();
+      if (response.success && response.data) {
+        setBookings(response.data);
+      }
+      setBookingsLoading(false);
+    };
+    fetchBookings();
+  }, []);
+
+  const handleProfileSave = async (data: {
     name: string;
     location: string;
     bio: string;
     profileImage: string;
   }) => {
-    setClientData((prev) => ({ ...prev, ...data }));
+    const [firstName, ...lastNameParts] = data.name.split(" ");
+    const lastName = lastNameParts.join(" ");
+
+    const response = await clientProfileService.updateProfile({
+      firstName,
+      lastName,
+      bio: data.bio,
+    });
+
+    if (response.success && response.data) {
+      setClientData(response.data);
+      toast.success("تم تحديث الملف الشخصي بنجاح");
+    } else {
+      toast.error("فشل تحديث الملف الشخصي");
+    }
+  };
+
+  const handleCoverSave = async (input: string | File) => {
+    let file: File;
+
+    if (typeof input === "string") {
+      // If string URL is provided, skip upload (for compatibility)
+      if (clientData) {
+        setClientData({ ...clientData, coverImage: input });
+      }
+      toast.success("تم تحديث صورة الغلاف بنجاح");
+      return;
+    }
+
+    file = input;
+    const response = await clientProfileService.uploadCoverImage(file);
+    if (response.success && response.data) {
+      if (clientData) {
+        setClientData({ ...clientData, coverImage: response.data.imageUrl });
+      }
+      toast.success("تم تحديث صورة الغلاف بنجاح");
+    } else {
+      toast.error("فشل تحديث صورة الغلاف");
+    }
+  };
+
+  const handleNewConsultation = () => {
+    navigate("/home", { state: { activeSection: "محامي" } });
+  };
+
+  const handleRemoveFavorite = async (lawyerId: string) => {
+    const response = await clientProfileService.removeFavoriteLawyer(lawyerId);
+    if (response.success) {
+      setFavoriteLawyers((prev) => prev.filter((l) => l.id !== lawyerId));
+      toast.success("تم إزالة المحامي من المفضلة");
+    } else {
+      toast.error("فشلت إزالة المحامي");
+    }
   };
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case "confirmed":
       case "مؤكد":
         return (
           <Badge className="bg-success-light text-success-dark">
             <CheckCircle className="w-3 h-3 ml-1" />
-            {status}
+            مؤكد
           </Badge>
         );
+      case "completed":
       case "مكتمل":
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">مكتمل</Badge>;
+      case "pending":
       case "قيد الانتظار":
         return (
           <Badge variant="outline">
             <Clock className="w-3 h-3 ml-1" />
-            {status}
+            قيد الانتظار
           </Badge>
         );
+      case "cancelled":
       case "ملغي":
         return (
           <Badge variant="destructive">
             <X className="w-3 h-3 ml-1" />
-            {status}
+            ملغي
           </Badge>
         );
       default:
         return <Badge>{status}</Badge>;
     }
   };
-  const handleCoverSave = (imageUrl: string) => {
-    setClientData((prev) => ({ ...prev, coverImage: imageUrl }));
-  };
+
+  if (isLoading || !clientData) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">جاري تحميل الملف الشخصي...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="relative">
         <div className="h-64 overflow-hidden relative group">
           <img
-            src={clientData.coverImage}
+            src={
+              clientData.coverImage ||
+              "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=300&fit=crop"
+            }
             alt="Cover"
             className="w-full h-full object-cover"
           />
           <Button
-            className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             variant="secondary"
             size="sm"
             onClick={() => setIsCoverModalOpen(true)}
@@ -199,8 +227,11 @@ const ClientProfile = () => {
             <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
               <div className="relative">
                 <img
-                  src={clientData.profileImage}
-                  alt={clientData.name}
+                  src={
+                    clientData.profileImage ||
+                    "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+                  }
+                  alt={`${clientData.firstName} ${clientData.lastName}`}
                   className="w-36 h-36 rounded-full border-4 border-background shadow-lg object-cover"
                 />
               </div>
@@ -208,17 +239,21 @@ const ClientProfile = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <div className="mb-2">
-                      <h1 className="text-2xl font-bold">{clientData.name}</h1>
+                      <h1 className="text-2xl font-bold">{`${clientData.firstName} ${clientData.lastName}`}</h1>
                     </div>
                     <p className="text-muted-foreground mb-2">
-                      {clientData.bio}
+                      {clientData.bio || "لا يوجد نبذة تعريفية"}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{clientData.location}</span>
+                      {clientData.city && clientData.country && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{`${clientData.city}، ${clientData.country}`}</span>
+                        </div>
+                      )}
+                      <div>
+                        عضو منذ {new Date(clientData.joinedDate).getFullYear()}
                       </div>
-                      <div>عضو منذ {clientData.memberSince}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -260,46 +295,87 @@ const ClientProfile = () => {
                 <Calendar className="w-6 h-6" />
                 <span>حجوزات الاستشارات</span>
               </h2>
-              <div dir="rtl" className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>المحامي</TableHead>
-                      <TableHead>نوع الاستشارة</TableHead>
-                      <TableHead>التخصص</TableHead>
-                      <TableHead>التاريخ</TableHead>
-                      <TableHead>الوقت</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead>الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockBookings.map((booking) => (
-                      <TableRow key={booking.id}>
-                        <TableCell className="font-medium">
-                          {booking.lawyer}
-                        </TableCell>
-                        <TableCell>{booking.type}</TableCell>
-                        <TableCell>{booking.specialty}</TableCell>
-                        <TableCell>{booking.date}</TableCell>
-                        <TableCell>{booking.time}</TableCell>
-                        <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                        <TableCell>
-                          <Button
-                            className="cursor-pointer"
-                            variant="outline"
-                            size="sm"
-                          >
-                            التفاصيل
-                          </Button>
-                        </TableCell>
+              {bookingsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="h-16 bg-muted animate-pulse rounded"
+                    ></div>
+                  ))}
+                </div>
+              ) : bookings.length > 0 ? (
+                <div dir="rtl" className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>المحامي</TableHead>
+                        <TableHead>نوع الاستشارة</TableHead>
+                        <TableHead>التاريخ</TableHead>
+                        <TableHead>الوقت</TableHead>
+                        <TableHead>السعر</TableHead>
+                        <TableHead>الحالة</TableHead>
+                        <TableHead>الإجراءات</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {bookings.map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {booking.lawyerImage && (
+                                <img
+                                  src={booking.lawyerImage}
+                                  alt={booking.lawyerName}
+                                  className="w-8 h-8 rounded-full"
+                                />
+                              )}
+                              {booking.lawyerName}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {booking.consultationType === "video" && "فيديو"}
+                            {booking.consultationType === "phone" && "هاتف"}
+                            {booking.consultationType === "in-person" && "مكتب"}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(booking.date).toLocaleDateString("ar-EG")}
+                          </TableCell>
+                          <TableCell>{booking.time}</TableCell>
+                          <TableCell>{booking.price} ج.م</TableCell>
+                          <TableCell>
+                            {getStatusBadge(booking.status)}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              className="cursor-pointer"
+                              variant="outline"
+                              size="sm"
+                            >
+                              التفاصيل
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">لا توجد حجوزات</h3>
+                  <p className="text-muted-foreground mb-4">
+                    ابدأ بحجز استشارة قانونية مع أحد محامينا المتخصصين
+                  </p>
+                </div>
+              )}
               <div className="mt-6">
-                <Button className="cursor-pointer">احجز استشارة جديدة</Button>
+                <Button
+                  onClick={handleNewConsultation}
+                  className="cursor-pointer"
+                >
+                  احجز استشارة جديدة
+                </Button>
               </div>
             </Card>
           </TabsContent>
@@ -309,10 +385,23 @@ const ClientProfile = () => {
                 <Heart className="w-6 h-6 text-red-500" />
                 <span>المحامون المفضلون</span>
               </h2>
-              {mockFavoriteLawyers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {mockFavoriteLawyers.map((fav) => (
-                    <FavLawyer fav={fav} />
+              {favoritesLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-48 bg-muted animate-pulse rounded-lg"
+                    ></div>
+                  ))}
+                </div>
+              ) : favoriteLawyers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {favoriteLawyers.map((fav) => (
+                    <FavLawyer
+                      key={fav.id}
+                      fav={fav}
+                      onRemove={handleRemoveFavorite}
+                    />
                   ))}
                 </div>
               ) : (
@@ -324,7 +413,12 @@ const ClientProfile = () => {
                   <p className="text-muted-foreground mb-4">
                     ابحث عن محامين وأضفهم إلى قائمة المفضلة للوصول إليهم بسهولة
                   </p>
-                  <Button className="cursor-pointer">ابحث عن محامي</Button>
+                  <Button
+                    onClick={handleNewConsultation}
+                    className="cursor-pointer"
+                  >
+                    ابحث عن محامي
+                  </Button>
                 </div>
               )}
             </Card>
@@ -337,13 +431,21 @@ const ClientProfile = () => {
         <ProfileEditModal
           open={isProfileModalOpen}
           onOpenChange={setIsProfileModalOpen}
-          currentData={clientData}
+          currentData={{
+            name: `${clientData.firstName} ${clientData.lastName}`,
+            location:
+              clientData.city && clientData.country
+                ? `${clientData.city}، ${clientData.country}`
+                : "",
+            bio: clientData.bio || "",
+            profileImage: clientData.profileImage || "",
+          }}
           onSave={handleProfileSave}
         />
         <CoverImageEditModal
           open={isCoverModalOpen}
           onOpenChange={setIsCoverModalOpen}
-          currentCover={clientData.coverImage}
+          currentCover={clientData.coverImage || ""}
           onSave={handleCoverSave}
         />
       </div>
@@ -352,17 +454,21 @@ const ClientProfile = () => {
   );
 };
 interface FavLawyerProps {
-  fav: Lawyer;
+  fav: FavoriteLawyer;
+  onRemove: (lawyerId: string) => void;
 }
 
-const FavLawyer = ({ fav }: FavLawyerProps) => {
+const FavLawyer = ({ fav, onRemove }: FavLawyerProps) => {
   return (
     <Card className="overflow-hidden border hover:shadow-lg transition-shadow">
       <div className="flex">
         <div className="relative w-48 shrink-0">
           <img
-            src={fav.image}
-            alt={fav.name}
+            src={
+              fav.profileImage ||
+              "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+            }
+            alt={`${fav.firstName} ${fav.lastName}`}
             className="w-full h-full object-cover"
           />
         </div>
@@ -370,37 +476,42 @@ const FavLawyer = ({ fav }: FavLawyerProps) => {
         <div className="flex-1 p-4 space-y-2">
           <div className="flex justify-between">
             <div>
-              <h3 className="font-bold">{fav.name}</h3>
-              <Badge variant="secondary">{fav.specialty}</Badge>
+              <h3 className="font-bold">{`${fav.firstName} ${fav.lastName}`}</h3>
+              <Badge variant="secondary">{fav.specialties[0]}</Badge>
             </div>
-            <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+            <button onClick={() => onRemove(fav.id)} className="cursor-pointer">
+              <Heart className="w-6 h-6 text-red-500 fill-red-500 hover:opacity-70 transition-opacity" />
+            </button>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            {fav.location}
-            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 ml-2" />
-            {fav.rating}
+            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+            <span className="font-medium">{fav.rating}</span>
+            <span>({fav.reviewCount} تقييم)</span>
           </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {fav.sessionTypes.map((type) => (
-              <Badge key={type} variant="outline">
-                {type === "مكتب" ? (
-                  <Building2 className="w-3 h-3 ml-1" />
-                ) : (
-                  <Phone className="w-3 h-3 ml-1" />
-                )}
-                {type}
+          <div className="flex items-center gap-2 text-sm">
+            {fav.isVerified && (
+              <Badge
+                variant="outline"
+                className="bg-success-light text-success-dark"
+              >
+                <CheckCircle className="w-3 h-3 ml-1" />
+                موثق
               </Badge>
-            ))}
+            )}
+            <span className="text-muted-foreground">
+              {fav.yearsOfExperience} سنة خبرة
+            </span>
           </div>
 
-          <div className="flex justify-between pt-2">
+          <div className="flex justify-between items-center pt-2">
             <span className="font-bold text-primary">
-              {fav.price} ج.م / جلسة
+              {fav.hourlyRate} ج.م / جلسة
             </span>
-            <Button size="sm">عرض الملف</Button>
+            <Button size="sm" className="cursor-pointer">
+              عرض الملف
+            </Button>
           </div>
         </div>
       </div>
