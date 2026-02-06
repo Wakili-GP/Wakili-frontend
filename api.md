@@ -13,8 +13,9 @@ This document outlines all frontend-consumed API endpoints for the Wakili legal 
 2. [Home Page Endpoints](#home-page-endpoints)
 3. [Lawyer Onboarding Endpoints](#lawyer-onboarding-endpoints)
 4. [Client Profile Endpoints](#client-profile-endpoints)
-5. [Error Handling](#error-handling)
-6. [Authentication](#authentication)
+5. [Lawyer Search Endpoints](#lawyer-search-endpoints)
+6. [Error Handling](#error-handling)
+7. [Authentication](#authentication)
 
 ---
 
@@ -1179,6 +1180,255 @@ This document outlines all frontend-consumed API endpoints for the Wakili legal 
 
 ---
 
+## Lawyer Search Endpoints
+
+### 1. Search Lawyers
+
+**Endpoint:** `GET /lawyer/search`
+
+**Auth Required:** No (Public)
+
+**Query Parameters:**
+
+- `query` (optional): Search by lawyer name or specialties
+- `practiceArea` (optional): Filter by practice area
+- `location` (optional): Filter by city/location
+- `minPrice` (optional): Minimum hourly rate
+- `maxPrice` (optional): Maximum hourly rate
+- `minRating` (optional): Minimum rating (1-5)
+- `sessionTypes` (optional): Comma-separated session types (مكتب, هاتف)
+- `sortBy` (optional): Sort by (rating, price-low, price-high, reviews)
+- `page` (optional, default: 1): Page number for pagination
+- `limit` (optional, default: 6): Number of results per page
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "data": [
+      {
+        "id": "lawyer-1",
+        "firstName": "أحمد",
+        "lastName": "سليمان",
+        "specialty": "قانون تجاري",
+        "specialties": ["قانون تجاري", "القانون المالي"],
+        "profileImage": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed1",
+        "location": "القاهرة",
+        "city": "القاهرة",
+        "country": "مصر",
+        "rating": 4.9,
+        "reviewCount": 127,
+        "hourlyRate": 500,
+        "yearsOfExperience": 15,
+        "sessionTypes": ["مكتب", "هاتف"],
+        "isVerified": true,
+        "bio": "متخصص في القانون التجاري والعقود التجارية"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 5,
+      "totalItems": 28,
+      "itemsPerPage": 6
+    }
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Search completed successfully
+- `400` - Invalid query parameters
+
+---
+
+### 2. Get Practice Areas
+
+**Endpoint:** `GET /lawyer/practice-areas`
+
+**Auth Required:** No (Public)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "area-1",
+      "name": "قانون تجاري",
+      "description": "العقود والقانون التجاري والمالي",
+      "icon": "briefcase"
+    },
+    {
+      "id": "area-2",
+      "name": "قانون الأسرة",
+      "description": "الزواج والطلاق والحضانة والميراث",
+      "icon": "heart"
+    },
+    {
+      "id": "area-3",
+      "name": "قانون جنائي",
+      "description": "الدفاع الجنائي والقضايا الجنائية",
+      "icon": "scale"
+    }
+  ]
+}
+```
+
+**Status Codes:**
+
+- `200` - Practice areas retrieved successfully
+
+---
+
+### 3. Get Locations
+
+**Endpoint:** `GET /lawyer/locations`
+
+**Auth Required:** No (Public)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "loc-1",
+      "name": "القاهرة",
+      "city": "القاهرة",
+      "country": "مصر"
+    },
+    {
+      "id": "loc-2",
+      "name": "الإسكندرية",
+      "city": "الإسكندرية",
+      "country": "مصر"
+    },
+    {
+      "id": "loc-3",
+      "name": "الجيزة",
+      "city": "الجيزة",
+      "country": "مصر"
+    }
+  ]
+}
+```
+
+**Status Codes:**
+
+- `200` - Locations retrieved successfully
+
+---
+
+### 4. Get Lawyer Details
+
+**Endpoint:** `GET /lawyer/:id`
+
+**Auth Required:** No (Public)
+
+**URL Parameters:**
+
+- `id`: Lawyer ID
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "lawyer-1",
+    "firstName": "أحمد",
+    "lastName": "سليمان",
+    "specialty": "قانون تجاري",
+    "specialties": ["قانون تجاري", "القانون المالي"],
+    "profileImage": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed1",
+    "location": "القاهرة",
+    "city": "القاهرة",
+    "country": "مصر",
+    "rating": 4.9,
+    "reviewCount": 127,
+    "hourlyRate": 500,
+    "yearsOfExperience": 15,
+    "sessionTypes": ["مكتب", "هاتف"],
+    "isVerified": true,
+    "bio": "متخصص في القانون التجاري والعقود التجارية"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Lawyer details retrieved successfully
+- `404` - Lawyer not found
+
+---
+
+### 5. Add Lawyer to Favorites
+
+**Endpoint:** `POST /lawyer/:lawyerId/favorite`
+
+**Auth Required:** Yes (Bearer Token)
+
+**URL Parameters:**
+
+- `lawyerId`: Lawyer ID to add to favorites
+
+**Request Body:** Empty or `{}`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "تم إضافة المحامي إلى المفضلة"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Lawyer added to favorites
+- `401` - Unauthorized
+- `404` - Lawyer not found
+
+---
+
+### 6. Remove Lawyer from Favorites
+
+**Endpoint:** `DELETE /lawyer/:lawyerId/favorite`
+
+**Auth Required:** Yes (Bearer Token)
+
+**URL Parameters:**
+
+- `lawyerId`: Lawyer ID to remove from favorites
+
+**Request Body:** None
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "تم إزالة المحامي من المفضلة"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200` - Lawyer removed from favorites
+- `401` - Unauthorized
+- `404` - Lawyer not found
+
+---
+
 ## Error Handling
 
 All endpoints return a consistent error response format:
@@ -1251,10 +1501,11 @@ Frontend is configured to access the API at the base URL. Ensure backend has pro
 ---
 
 **Last Updated:** February 7, 2026  
-**Version:** 1.2.0
+**Version:** 1.3.0
 
 **Changelog:**
 
+- v1.3.0 (Feb 7, 2026): Added Lawyer Search Endpoints section with 6 endpoints (search, practice areas, locations, lawyer details, add/remove favorites)
 - v1.2.0 (Feb 7, 2026): Updated Client Profile Endpoints - merged account settings into password update endpoint (9 endpoints total: profile management, favorites, bookings, password update)
 - v1.1.0 (Feb 7, 2024): Added Client Profile Endpoints section with 10 endpoints (profile management, favorites, bookings, settings)
 - v1.0.0 (Feb 6, 2024): Initial version with Authentication, Home Page, and Lawyer Onboarding endpoints

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -40,180 +40,14 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { useNavigate } from "react-router-dom";
-
-interface Lawyer {
-  id: number;
-  name: string;
-  specialty: string;
-  location: string;
-  rating: number;
-  reviewCount: number;
-  price: number;
-  sessionTypes: string[];
-  image: string;
-  yearsExperience: number;
-  isFavorite?: boolean;
-}
-
-const mockLawyers: Lawyer[] = [
-  {
-    id: 1,
-    name: "د. أحمد سليمان",
-    specialty: "قانون تجاري",
-    location: "القاهرة",
-    rating: 4.9,
-    reviewCount: 127,
-    price: 500,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop",
-    yearsExperience: 15,
-  },
-  {
-    id: 2,
-    name: "أ. سارة محمود",
-    specialty: "قانون الأسرة",
-    location: "الإسكندرية",
-    rating: 4.8,
-    reviewCount: 89,
-    price: 350,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop",
-    yearsExperience: 10,
-  },
-  {
-    id: 3,
-    name: "أ. محمد علي",
-    specialty: "قانون جنائي",
-    location: "الجيزة",
-    rating: 4.7,
-    reviewCount: 156,
-    price: 600,
-    sessionTypes: ["مكتب"],
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
-    yearsExperience: 20,
-  },
-  {
-    id: 4,
-    name: "د. فاطمة حسن",
-    specialty: "قانون العمل",
-    location: "القاهرة",
-    rating: 4.9,
-    reviewCount: 203,
-    price: 450,
-    sessionTypes: ["هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
-    yearsExperience: 12,
-  },
-  {
-    id: 5,
-    name: "أ. عمر خالد",
-    specialty: "قانون مدني",
-    location: "المنصورة",
-    rating: 4.6,
-    reviewCount: 78,
-    price: 300,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
-    yearsExperience: 8,
-  },
-  {
-    id: 6,
-    name: "د. نورا عبدالله",
-    specialty: "قانون تجاري",
-    location: "القاهرة",
-    rating: 4.8,
-    reviewCount: 145,
-    price: 550,
-    sessionTypes: ["مكتب"],
-    image:
-      "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=200&h=200&fit=crop",
-    yearsExperience: 14,
-  },
-  {
-    id: 7,
-    name: "أ. كريم مصطفى",
-    specialty: "قانون الهجرة",
-    location: "الإسكندرية",
-    rating: 4.5,
-    reviewCount: 67,
-    price: 400,
-    sessionTypes: ["هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop",
-    yearsExperience: 6,
-  },
-  {
-    id: 8,
-    name: "د. هند السيد",
-    specialty: "قانون الأسرة",
-    location: "طنطا",
-    rating: 4.7,
-    reviewCount: 112,
-    price: 380,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=200&h=200&fit=crop",
-    yearsExperience: 11,
-  },
-  {
-    id: 9,
-    name: "أ. ياسر إبراهيم",
-    specialty: "قانون جنائي",
-    location: "القاهرة",
-    rating: 4.6,
-    reviewCount: 95,
-    price: 480,
-    sessionTypes: ["مكتب"],
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop",
-    yearsExperience: 9,
-  },
-  {
-    id: 10,
-    name: "د. ليلى أحمد",
-    specialty: "قانون العمل",
-    location: "الجيزة",
-    rating: 4.8,
-    reviewCount: 178,
-    price: 520,
-    sessionTypes: ["مكتب", "هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop",
-    yearsExperience: 13,
-  },
-  {
-    id: 11,
-    name: "أ. حسام محمد",
-    specialty: "قانون مدني",
-    location: "أسيوط",
-    rating: 4.4,
-    reviewCount: 45,
-    price: 280,
-    sessionTypes: ["هاتف"],
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop",
-    yearsExperience: 5,
-  },
-  {
-    id: 12,
-    name: "د. رانيا سمير",
-    specialty: "قانون تجاري",
-    location: "الأقصر",
-    rating: 4.7,
-    reviewCount: 88,
-    price: 420,
-    sessionTypes: ["مكتب"],
-    image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop",
-    yearsExperience: 10,
-  },
-];
+import { toast } from "@/components/ui/sonner";
+import {
+  lawyerSearchService,
+  type Lawyer,
+  type PracticeArea,
+  type LocationResponse,
+} from "@/services/lawyerSearch-services";
+import { LawyerCardSkeleton } from "@/components/ui/skeletons";
 
 const practiceAreas = [
   "قانون تجاري",
@@ -239,7 +73,6 @@ const locations = [
 const ITEMS_PER_PAGE = 6;
 
 export default function LawyerSearch() {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArea, setSelectedArea] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
@@ -249,81 +82,113 @@ export default function LawyerSearch() {
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState<number[]>(() => {
+  const [favorites, setFavorites] = useState<string[]>(() => {
     const saved = localStorage.getItem("favoriteLawyers");
     return saved ? JSON.parse(saved) : [];
   });
 
-  const toggleFavorite = (lawyerId: number) => {
-    setFavorites((prev) => {
-      const newFavorites = prev.includes(lawyerId)
-        ? prev.filter((id) => id !== lawyerId)
-        : [...prev, lawyerId];
-      localStorage.setItem("favoriteLawyers", JSON.stringify(newFavorites));
-      return newFavorites;
-    });
+  // Data fetching states
+  const [practiceAreasData, setPracticeAreasData] = useState<PracticeArea[]>(
+    [],
+  );
+  const [locationsData, setLocationsData] = useState<LocationResponse[]>([]);
+  const [searchResults, setSearchResults] = useState<Lawyer[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch practice areas and locations on mount
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [areasRes, locationsRes] = await Promise.all([
+          lawyerSearchService.getPracticeAreas(),
+          lawyerSearchService.getLocations(),
+        ]);
+
+        if (areasRes.success && areasRes.data) {
+          setPracticeAreasData(areasRes.data);
+        }
+        if (locationsRes.success && locationsRes.data) {
+          setLocationsData(locationsRes.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial data:", error);
+        toast.error("فشل تحميل البيانات");
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // Search lawyers when filters change
+  useEffect(() => {
+    const searchLawyers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await lawyerSearchService.searchLawyers({
+          query: searchQuery,
+          practiceArea: selectedArea !== "all" ? selectedArea : undefined,
+          location: selectedLocation !== "all" ? selectedLocation : undefined,
+          minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
+          maxPrice: priceRange[1] < 1000 ? priceRange[1] : undefined,
+          minRating: minRating > 0 ? minRating : undefined,
+          sessionTypes: sessionTypes.length > 0 ? sessionTypes : undefined,
+          sortBy,
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        });
+
+        if (response.success && response.data) {
+          setSearchResults(response.data.data);
+          setTotalItems(response.data.pagination.totalItems);
+        }
+      } catch (error) {
+        console.error("Search failed:", error);
+        toast.error("فشل البحث عن محامين");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    searchLawyers();
+  }, [
+    searchQuery,
+    selectedArea,
+    selectedLocation,
+    priceRange,
+    minRating,
+    sessionTypes,
+    sortBy,
+    currentPage,
+  ]);
+
+  const toggleFavorite = async (lawyerId: string) => {
+    const isFavorite = favorites.includes(lawyerId);
+
+    try {
+      if (isFavorite) {
+        const res = await lawyerSearchService.removeFromFavorites(lawyerId);
+        if (res.success) {
+          setFavorites((prev) => prev.filter((id) => id !== lawyerId));
+          toast.success("تم إزالة المحامي من المفضلة");
+        }
+      } else {
+        const res = await lawyerSearchService.addToFavorites(lawyerId);
+        if (res.success) {
+          setFavorites((prev) => [...prev, lawyerId]);
+          toast.success("تم إضافة المحامي إلى المفضلة");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      toast.error("فشل تحديث المفضلة");
+    }
   };
 
   const toggleSessionType = (type: string) => {
     setSessionTypes((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
-  };
-
-  const filteredLawyers = mockLawyers
-    .filter((lawyer) => {
-      if (
-        searchQuery &&
-        !lawyer.name.includes(searchQuery) &&
-        !lawyer.specialty.includes(searchQuery)
-      )
-        return false;
-      if (
-        selectedArea &&
-        selectedArea !== "all" &&
-        lawyer.specialty !== selectedArea
-      )
-        return false;
-      if (
-        selectedLocation &&
-        selectedLocation !== "all" &&
-        lawyer.location !== selectedLocation
-      )
-        return false;
-      if (lawyer.price < priceRange[0] || lawyer.price > priceRange[1])
-        return false;
-      if (lawyer.rating < minRating) return false;
-      if (
-        sessionTypes.length > 0 &&
-        !sessionTypes.some((t) => lawyer.sessionTypes.includes(t))
-      )
-        return false;
-      return true;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
-        case "price-low":
-          return a.price - b.price;
-        case "price-high":
-          return b.price - a.price;
-        case "reviews":
-          return b.reviewCount - a.reviewCount;
-        default:
-          return 0;
-      }
-    });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredLawyers.length / ITEMS_PER_PAGE);
-  const paginatedLawyers = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredLawyers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredLawyers, currentPage]);
-
-  // Reset to page 1 when filters change
-  const handleFilterChange = () => {
     setCurrentPage(1);
   };
 
@@ -344,6 +209,8 @@ export default function LawyerSearch() {
     minRating > 0,
     sessionTypes.length > 0,
   ].filter(Boolean).length;
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
@@ -445,7 +312,10 @@ export default function LawyerSearch() {
                     <CollapsibleContent className="pt-2">
                       <Select
                         value={selectedArea}
-                        onValueChange={setSelectedArea}
+                        onValueChange={(value) => {
+                          setSelectedArea(value);
+                          setCurrentPage(1);
+                        }}
                       >
                         <SelectTrigger dir="rtl" className="cursor-pointer">
                           <SelectValue placeholder="اختر التخصص" />
@@ -454,15 +324,25 @@ export default function LawyerSearch() {
                           <SelectItem className="cursor-pointer" value="all">
                             جميع التخصصات
                           </SelectItem>
-                          {practiceAreas.map((area) => (
-                            <SelectItem
-                              className="cursor-pointer"
-                              key={area}
-                              value={area}
-                            >
-                              {area}
-                            </SelectItem>
-                          ))}
+                          {practiceAreasData.length > 0
+                            ? practiceAreasData.map((area) => (
+                                <SelectItem
+                                  className="cursor-pointer"
+                                  key={area.id}
+                                  value={area.name}
+                                >
+                                  {area.name}
+                                </SelectItem>
+                              ))
+                            : practiceAreas.map((area) => (
+                                <SelectItem
+                                  className="cursor-pointer"
+                                  key={area}
+                                  value={area}
+                                >
+                                  {area}
+                                </SelectItem>
+                              ))}
                         </SelectContent>
                       </Select>
                     </CollapsibleContent>
@@ -480,7 +360,10 @@ export default function LawyerSearch() {
                     <CollapsibleContent className="pt-2">
                       <Select
                         value={selectedLocation}
-                        onValueChange={setSelectedLocation}
+                        onValueChange={(value) => {
+                          setSelectedLocation(value);
+                          setCurrentPage(1);
+                        }}
                       >
                         <SelectTrigger dir="rtl" className="cursor-pointer">
                           <SelectValue placeholder="اختر المدينة" />
@@ -489,15 +372,25 @@ export default function LawyerSearch() {
                           <SelectItem className="cursor-pointer" value="all">
                             جميع المدن
                           </SelectItem>
-                          {locations.map((loc) => (
-                            <SelectItem
-                              className="cursor-pointer"
-                              key={loc}
-                              value={loc}
-                            >
-                              {loc}
-                            </SelectItem>
-                          ))}
+                          {locationsData.length > 0
+                            ? locationsData.map((loc) => (
+                                <SelectItem
+                                  className="cursor-pointer"
+                                  key={loc.id}
+                                  value={loc.city}
+                                >
+                                  {loc.name}
+                                </SelectItem>
+                              ))
+                            : locations.map((loc) => (
+                                <SelectItem
+                                  className="cursor-pointer"
+                                  key={loc}
+                                  value={loc}
+                                >
+                                  {loc}
+                                </SelectItem>
+                              ))}
                         </SelectContent>
                       </Select>
                     </CollapsibleContent>
@@ -515,7 +408,10 @@ export default function LawyerSearch() {
                     <CollapsibleContent className="pt-4 space-y-4">
                       <Slider
                         value={priceRange}
-                        onValueChange={setPriceRange}
+                        onValueChange={(value) => {
+                          setPriceRange(value);
+                          setCurrentPage(1);
+                        }}
                         max={1000}
                         min={0}
                         step={50}
@@ -546,9 +442,10 @@ export default function LawyerSearch() {
                               ? "bg-primary/10"
                               : "hover:bg-muted"
                           }`}
-                          onClick={() =>
-                            setMinRating(minRating === rating ? 0 : rating)
-                          }
+                          onClick={() => {
+                            setMinRating(minRating === rating ? 0 : rating);
+                            setCurrentPage(1);
+                          }}
                         >
                           <div className="flex items-center">
                             {Array.from({ length: 5 }).map((_, i) => (
@@ -606,12 +503,16 @@ export default function LawyerSearch() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <p className="text-muted-foreground">
               عرض{" "}
-              <span className="font-bold text-foreground">
-                {filteredLawyers.length}
-              </span>{" "}
+              <span className="font-bold text-foreground">{totalItems}</span>{" "}
               محامي
             </p>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select
+              value={sortBy}
+              onValueChange={(value) => {
+                setSortBy(value);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger dir="rtl" className="w-48 cursor-pointer">
                 <SelectValue placeholder="ترتيب حسب" />
               </SelectTrigger>
@@ -632,180 +533,199 @@ export default function LawyerSearch() {
             </Select>
           </div>
 
-          {/* Lawyer Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AnimatePresence mode="wait">
-              {paginatedLawyers.map((lawyer, index) => (
-                <motion.div
-                  key={lawyer.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-primary/30">
-                    <CardContent className="p-0">
-                      <div className="flex">
-                        {/* Lawyer Image */}
-                        <div className="relative w-32 h-40 shrink-0">
-                          <img
-                            src={lawyer.image}
-                            alt={lawyer.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(lawyer.id);
-                            }}
-                            className="cursor-pointer absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                          >
-                            <Heart
-                              className={`w-5 h-5 transition-colors ${
-                                favorites.includes(lawyer.id)
-                                  ? "text-red-500 fill-red-500"
-                                  : "text-muted-foreground"
-                              }`}
-                            />
-                          </button>
-                        </div>
-
-                        {/* Lawyer Info */}
-                        <div className="flex-1 p-4 space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
-                                {lawyer.name}
-                              </h3>
-                              <Badge variant="secondary" className="mt-1">
-                                {lawyer.specialty}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {lawyer.location}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                              <span className="font-semibold text-foreground">
-                                {lawyer.rating}
-                              </span>
-                              <span>({lawyer.reviewCount})</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {lawyer.sessionTypes.map((type) => (
-                              <Badge
-                                key={type}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {type === "مكتب" ? (
-                                  <Building2 className="w-3 h-3 ml-1" />
-                                ) : (
-                                  <Phone className="w-3 h-3 ml-1" />
-                                )}
-                                {type}
-                              </Badge>
-                            ))}
-                            <span className="text-sm text-muted-foreground">
-                              • {lawyer.yearsExperience} سنة خبرة
-                            </span>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-2 border-t">
-                            <div className="text-lg font-bold text-primary">
-                              {lawyer.price} ج.م
-                              <span className="text-sm font-normal text-muted-foreground">
-                                /جلسة
-                              </span>
-                            </div>
-                            <Button size="sm" className="cursor-pointer">
-                              عرض الملف
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <LawyerCardSkeleton key={i} />
               ))}
-            </AnimatePresence>
-          </div>
-
-          {/* Pagination */}
-          {filteredLawyers.length > 0 && totalPages > 1 && (
-            <div className="flex justify-center mt-8">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() =>
-                        setCurrentPage(Math.max(1, currentPage - 1))
-                      }
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-
-                  {getPageNumbers().map((page, index) => (
-                    <PaginationItem key={index}>
-                      {page === "ellipsis" ? (
-                        <PaginationEllipsis />
-                      ) : (
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      )}
-                    </PaginationItem>
-                  ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage(Math.min(totalPages, currentPage + 1))
-                      }
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
             </div>
           )}
 
-          {/* Page Info */}
-          {filteredLawyers.length > 0 && totalPages > 1 && (
-            <p className="text-center text-sm text-muted-foreground">
-              صفحة {currentPage} من {totalPages}
-            </p>
-          )}
+          {/* Lawyer Cards Grid */}
+          {!isLoading && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AnimatePresence mode="wait">
+                  {searchResults.map((lawyer, index) => (
+                    <motion.div
+                      key={lawyer.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-primary/30">
+                        <CardContent className="p-0">
+                          <div className="flex">
+                            {/* Lawyer Image */}
+                            <div className="relative w-32 h-40 shrink-0">
+                              <img
+                                src={
+                                  lawyer.profileImage ||
+                                  "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+                                }
+                                alt={`${lawyer.firstName} ${lawyer.lastName}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(lawyer.id);
+                                }}
+                                className="cursor-pointer absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
+                              >
+                                <Heart
+                                  className={`w-5 h-5 transition-colors ${
+                                    favorites.includes(lawyer.id)
+                                      ? "text-red-500 fill-red-500"
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                              </button>
+                            </div>
 
-          {filteredLawyers.length === 0 && (
-            <Card className="p-12 text-center">
-              <Scale className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-bold mb-2">لا توجد نتائج</h3>
-              <p className="text-muted-foreground mb-4">
-                جرب تعديل معايير البحث للعثور على محامين مناسبين
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                مسح الفلاتر
-              </Button>
-            </Card>
+                            {/* Lawyer Info */}
+                            <div className="flex-1 p-4 space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
+                                    {lawyer.firstName} {lawyer.lastName}
+                                  </h3>
+                                  <Badge variant="secondary" className="mt-1">
+                                    {lawyer.specialty}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {lawyer.city}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                  <span className="font-semibold text-foreground">
+                                    {lawyer.rating}
+                                  </span>
+                                  <span>({lawyer.reviewCount})</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {lawyer.sessionTypes.map((type) => (
+                                  <Badge
+                                    key={type}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {type === "مكتب" ? (
+                                      <Building2 className="w-3 h-3 ml-1" />
+                                    ) : (
+                                      <Phone className="w-3 h-3 ml-1" />
+                                    )}
+                                    {type}
+                                  </Badge>
+                                ))}
+                                <span className="text-sm text-muted-foreground">
+                                  • {lawyer.yearsOfExperience} سنة خبرة
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-2 border-t">
+                                <div className="text-lg font-bold text-primary">
+                                  {lawyer.hourlyRate} ج.م
+                                  <span className="text-sm font-normal text-muted-foreground">
+                                    /جلسة
+                                  </span>
+                                </div>
+                                <Button size="sm" className="cursor-pointer">
+                                  عرض الملف
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {/* Pagination */}
+              {!isLoading && searchResults.length > 0 && totalPages > 1 && (
+                <div className="flex justify-center mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            setCurrentPage(Math.max(1, currentPage - 1))
+                          }
+                          className={
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+
+                      {getPageNumbers().map((page, index) => (
+                        <PaginationItem key={index}>
+                          {page === "ellipsis" ? (
+                            <PaginationEllipsis />
+                          ) : (
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage(
+                              Math.min(totalPages, currentPage + 1),
+                            )
+                          }
+                          className={
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+
+              {/* Page Info */}
+              {!isLoading && searchResults.length > 0 && totalPages > 1 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  صفحة {currentPage} من {totalPages}
+                </p>
+              )}
+
+              {/* No Results */}
+              {!isLoading && searchResults.length === 0 && (
+                <Card className="p-12 text-center">
+                  <Scale className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-bold mb-2">لا توجد نتائج</h3>
+                  <p className="text-muted-foreground mb-4">
+                    جرب تعديل معايير البحث للعثور على محامين مناسبين
+                  </p>
+                  <Button variant="outline" onClick={clearFilters}>
+                    مسح الفلاتر
+                  </Button>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </div>
