@@ -365,7 +365,7 @@ export default function LawyerSearch() {
     <div className="space-y-8">
       {/* Search Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
           ابحث عن محاميك المثالي
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -387,7 +387,7 @@ export default function LawyerSearch() {
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            className="relative"
+            className="relative cursor-pointer"
           >
             <Filter className="w-5 h-5 ml-2" />
             الفلاتر
@@ -408,7 +408,7 @@ export default function LawyerSearch() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
-              className="lg:w-80 flex-shrink-0"
+              className="lg:w-80  shrink-0"
             >
               <Card className="sticky top-4">
                 <CardContent className="p-6 space-y-6">
@@ -418,7 +418,12 @@ export default function LawyerSearch() {
                       تصفية النتائج
                     </h3>
                     {activeFiltersCount > 0 && (
-                      <Button variant="ghost" size="sm" onClick={clearFilters}>
+                      <Button
+                        className="cursor-pointer"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                      >
                         <X className="w-4 h-4 ml-1" />
                         مسح الكل
                       </Button>
@@ -427,7 +432,10 @@ export default function LawyerSearch() {
 
                   {/* Practice Area Filter */}
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+                    <CollapsibleTrigger
+                      dir="rtl"
+                      className="cursor-pointer flex items-center justify-between w-full py-2 font-semibold"
+                    >
                       <span className="flex items-center gap-2">
                         <Scale className="w-4 h-4" />
                         التخصص القانوني
@@ -439,13 +447,19 @@ export default function LawyerSearch() {
                         value={selectedArea}
                         onValueChange={setSelectedArea}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger dir="rtl" className="cursor-pointer">
                           <SelectValue placeholder="اختر التخصص" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">جميع التخصصات</SelectItem>
+                          <SelectItem className="cursor-pointer" value="all">
+                            جميع التخصصات
+                          </SelectItem>
                           {practiceAreas.map((area) => (
-                            <SelectItem key={area} value={area}>
+                            <SelectItem
+                              className="cursor-pointer"
+                              key={area}
+                              value={area}
+                            >
                               {area}
                             </SelectItem>
                           ))}
@@ -456,7 +470,7 @@ export default function LawyerSearch() {
 
                   {/* Location Filter */}
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold cursor-pointer">
                       <span className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
                         الموقع
@@ -468,13 +482,19 @@ export default function LawyerSearch() {
                         value={selectedLocation}
                         onValueChange={setSelectedLocation}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger dir="rtl" className="cursor-pointer">
                           <SelectValue placeholder="اختر المدينة" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">جميع المدن</SelectItem>
+                          <SelectItem className="cursor-pointer" value="all">
+                            جميع المدن
+                          </SelectItem>
                           {locations.map((loc) => (
-                            <SelectItem key={loc} value={loc}>
+                            <SelectItem
+                              className="cursor-pointer"
+                              key={loc}
+                              value={loc}
+                            >
                               {loc}
                             </SelectItem>
                           ))}
@@ -485,7 +505,7 @@ export default function LawyerSearch() {
 
                   {/* Price Range Filter */}
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold cursor-pointer">
                       <span className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4" />
                         سعر الجلسة
@@ -510,7 +530,7 @@ export default function LawyerSearch() {
 
                   {/* Rating Filter */}
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold cursor-pointer">
                       <span className="flex items-center gap-2">
                         <Star className="w-4 h-4" />
                         التقييم
@@ -546,7 +566,7 @@ export default function LawyerSearch() {
 
                   {/* Session Type Filter */}
                   <Collapsible defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full py-2 font-semibold cursor-pointer">
                       <span className="flex items-center gap-2">
                         <Phone className="w-4 h-4" />
                         نوع الجلسة
@@ -556,6 +576,7 @@ export default function LawyerSearch() {
                     <CollapsibleContent className="pt-2 space-y-2">
                       <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer">
                         <Checkbox
+                          className="cursor-pointer"
                           checked={sessionTypes.includes("مكتب")}
                           onCheckedChange={() => toggleSessionType("مكتب")}
                         />
@@ -564,6 +585,7 @@ export default function LawyerSearch() {
                       </label>
                       <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer">
                         <Checkbox
+                          className="cursor-pointer"
                           checked={sessionTypes.includes("هاتف")}
                           onCheckedChange={() => toggleSessionType("هاتف")}
                         />
@@ -590,16 +612,20 @@ export default function LawyerSearch() {
               محامي
             </p>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger dir="rtl" className="w-48 cursor-pointer">
                 <SelectValue placeholder="ترتيب حسب" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rating">الأعلى تقييماً</SelectItem>
-                <SelectItem value="reviews">الأكثر تقييمات</SelectItem>
-                <SelectItem value="price-low">
+                <SelectItem className="cursor-pointer" value="rating">
+                  الأعلى تقييماً
+                </SelectItem>
+                <SelectItem className="cursor-pointer" value="reviews">
+                  الأكثر تقييمات
+                </SelectItem>
+                <SelectItem className="cursor-pointer" value="price-low">
                   السعر: من الأقل للأعلى
                 </SelectItem>
-                <SelectItem value="price-high">
+                <SelectItem className="cursor-pointer" value="price-high">
                   السعر: من الأعلى للأقل
                 </SelectItem>
               </SelectContent>
@@ -621,7 +647,7 @@ export default function LawyerSearch() {
                     <CardContent className="p-0">
                       <div className="flex">
                         {/* Lawyer Image */}
-                        <div className="relative w-32 h-40 flex-shrink-0">
+                        <div className="relative w-32 h-40 shrink-0">
                           <img
                             src={lawyer.image}
                             alt={lawyer.name}
@@ -632,7 +658,7 @@ export default function LawyerSearch() {
                               e.stopPropagation();
                               toggleFavorite(lawyer.id);
                             }}
-                            className="absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
+                            className="cursor-pointer absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
                           >
                             <Heart
                               className={`w-5 h-5 transition-colors ${
@@ -698,10 +724,7 @@ export default function LawyerSearch() {
                                 /جلسة
                               </span>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => navigate(`/lawyer/${lawyer.id}`)}
-                            >
+                            <Button size="sm" className="cursor-pointer">
                               عرض الملف
                             </Button>
                           </div>
