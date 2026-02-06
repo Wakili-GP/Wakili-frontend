@@ -12,6 +12,8 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import EmailVerificationModal from "./EmailVerificationModal";
+import { toast } from "@/components/ui/sonner";
+
 export type AuthMode =
   | "login"
   | "register"
@@ -63,14 +65,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     if (email === FAKE_EMAIL && password === FAKE_PASSWORD) {
-      // toast.success("تم تسجيل الدخول بنجاح!", {
-      //   description: "مرحباً بك في وكيلك",
-      // });
+      toast.success("تم تسجيل الدخول بنجاح!", {
+        description: "مرحباً بك في وكيلك",
+      });
       onOpenChange(false);
     } else {
-      // toast.error("خطأ في تسجيل الدخول", {
-      //   description: "تأكد من البريد الإلكتروني وكلمة المرور",
-      // });
+      toast.error("خطأ في تسجيل الدخول", {
+        description: "تأكد من البريد الإلكتروني وكلمة المرور",
+      });
     }
     setIsLoading(false);
   };
@@ -85,10 +87,9 @@ const AuthModals: React.FC<AuthModalProps> = ({
   };
   const handleEmailVerified = () => {
     setShowEmailVerification(false);
-    // toast({
-    //   title: "تم التحقق بنجاح!",
-    //   description: "مرحباً بك في وكيلك",
-    // });
+    toast("تم التحقق بنجاح!", {
+      description: "مرحباً بك في وكيلك",
+    });
 
     if (selectedUserType === "freelance-lawyer") {
       // navigate("/verify/lawyer");
