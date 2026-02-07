@@ -38,7 +38,7 @@ export interface LoginResponse extends AuthTokens {
 export interface RegisterRequest {
   email: string;
   password: string;
-  confirmPassword: string;
+  // confirmPassword: string;
   firstName: string;
   lastName: string;
   userType: "client" | "lawyer";
@@ -58,7 +58,6 @@ export interface ResetPasswordRequest {
   email: string;
   code: string;
   newPassword: string;
-  confirmPassword: string;
 }
 
 export interface VerifyEmailRequest {
@@ -80,46 +79,11 @@ export interface RefreshTokenRequest {
 export const authService = {
   /**
    * Login with email and password
-   * POST /auth/login
+   * POST /Auth/login
    */
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    // Development fake credentials for testing
-    if (
-      credentials.email === "usama@email.com" &&
-      credentials.password === "usama"
-    ) {
-      const fakeResponse: ApiResponse<LoginResponse> = {
-        success: true,
-        data: {
-          accessToken: "fake-dev-token-12345",
-          refreshToken: "fake-refresh-token-12345",
-          expiresIn: 3600,
-          user: {
-            id: "dev-user-1",
-            email: "usama@email.com",
-            firstName: "Usama",
-            lastName: "Developer",
-            userType: "client",
-            isEmailVerified: true,
-            createdAt: new Date().toISOString(),
-          },
-        },
-      };
-
-      // Store fake token
-      if (fakeResponse.data) {
-        httpClient.setToken(fakeResponse.data.accessToken);
-        localStorage.setItem("authToken", fakeResponse.data.accessToken);
-        if (fakeResponse.data.refreshToken) {
-          localStorage.setItem("refreshToken", fakeResponse.data.refreshToken);
-        }
-      }
-
-      return fakeResponse;
-    }
-
     const response = await httpClient.post<LoginResponse>(
-      "/auth/login",
+      "/Auth/login",
       credentials,
     );
 
@@ -136,13 +100,13 @@ export const authService = {
 
   /**
    * Register new user
-   * POST /auth/register
+   * POST /Auth/register
    */
   async register(
     data: RegisterRequest,
   ): Promise<ApiResponse<RegisterResponse>> {
     const response = await httpClient.post<RegisterResponse>(
-      "/auth/register",
+      "/Auth/register",
       data,
     );
 
@@ -159,10 +123,10 @@ export const authService = {
 
   /**
    * Logout user
-   * POST /auth/logout
+   * POST /Auth/logout
    */
   async logout(): Promise<ApiResponse<{ message: string }>> {
-    const response = await httpClient.post<{ message: string }>("/auth/logout");
+    const response = await httpClient.post<{ message: string }>("/Auth/logout");
 
     // Clear local storage
     localStorage.removeItem("authToken");
@@ -174,57 +138,57 @@ export const authService = {
 
   /**
    * Send password reset code to email
-   * POST /auth/forgot-password
+   * POST /Auth/forget-password
    */
   async forgotPassword(
     data: ForgotPasswordRequest,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>("/auth/forgot-password", data);
+    return httpClient.post<{ message: string }>("/Auth/forget-password", data);
   },
 
   /**
    * Reset password with verification code
-   * POST /auth/reset-password
+   * POST /Auth/reset-password
    */
   async resetPassword(
     data: ResetPasswordRequest,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>("/auth/reset-password", data);
+    return httpClient.post<{ message: string }>("/Auth/reset-password", data);
   },
 
   /**
    * Verify email with code
-   * POST /auth/verify-email
+   * POST /Auth/verify-email
    */
   async verifyEmail(
     data: VerifyEmailRequest,
   ): Promise<ApiResponse<{ message: string; user: AuthUser }>> {
     return httpClient.post<{ message: string; user: AuthUser }>(
-      "/auth/verify-email",
+      "/Auth/verify-email",
       data,
     );
   },
 
   /**
    * Resend verification email
-   * POST /auth/resend-verification
+   * POST /Auth/resend-verification
    */
   async resendVerificationEmail(
     email: string,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>("/auth/resend-verification", {
+    return httpClient.post<{ message: string }>("/Auth/resend-verification", {
       email,
     });
   },
 
   /**
    * Google OAuth login/register
-   * POST /auth/google
+   * POST /Auth/google
    */
   async googleAuth(
     data: GoogleAuthRequest,
   ): Promise<ApiResponse<LoginResponse>> {
-    const response = await httpClient.post<LoginResponse>("/auth/google", data);
+    const response = await httpClient.post<LoginResponse>("/Auth/google", data);
 
     if (response.success && response.data?.accessToken) {
       httpClient.setToken(response.data.accessToken);
@@ -239,35 +203,18 @@ export const authService = {
 
   /**
    * Get current authenticated user
-   * GET /auth/me
+   * GET /Auth/me
    */
   async getCurrentUser(): Promise<ApiResponse<AuthUser>> {
-    // Check if using fake dev token
-    const token = localStorage.getItem("authToken");
-    if (token === "fake-dev-token-12345") {
-      return {
-        success: true,
-        data: {
-          id: "dev-user-1",
-          email: "usama@email.com",
-          firstName: "Usama",
-          lastName: "Developer",
-          userType: "client",
-          isEmailVerified: true,
-          createdAt: new Date().toISOString(),
-        },
-      };
-    }
-
-    return httpClient.get<AuthUser>("/auth/me");
+    return httpClient.get<AuthUser>("/Auth/me");
   },
 
   /**
    * Refresh access token
-   * POST /auth/refresh
+   * POST /Auth/refresh
    */
   async refreshToken(refreshToken: string): Promise<ApiResponse<AuthTokens>> {
-    const response = await httpClient.post<AuthTokens>("/auth/refresh", {
+    const response = await httpClient.post<AuthTokens>("/Auth/refresh", {
       refreshToken,
     });
 
@@ -281,12 +228,12 @@ export const authService = {
 
   /**
    * Check if email exists
-   * POST /auth/check-email
+   * POST /Auth/check-email
    */
   async checkEmailExists(
     email: string,
   ): Promise<ApiResponse<{ exists: boolean }>> {
-    return httpClient.post<{ exists: boolean }>("/auth/check-email", { email });
+    return httpClient.post<{ exists: boolean }>("/Auth/check-email", { email });
   },
 
   /**

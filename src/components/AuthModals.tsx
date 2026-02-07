@@ -90,7 +90,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
     const response = await authService.login({
       email,
       password,
-      rememberMe,
     });
 
     if (response.success) {
@@ -148,13 +147,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
     const [firstName, ...lastNameParts] = fullName.trim().split(" ");
     const lastName = lastNameParts.join(" ");
 
+    const userType = selectedUserType === "lawyer" ? "lawyer" : "client";
+
     const response = await authService.register({
       email,
       password,
-      confirmPassword,
       firstName,
       lastName,
-      userType: selectedUserType as "client" | "lawyer",
+      userType,
       acceptTerms: true,
     });
 
@@ -188,7 +188,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
       email,
       code: resetCode,
       newPassword: password,
-      confirmPassword,
     });
 
     if (response.success) {
@@ -216,8 +215,8 @@ const AuthModals: React.FC<AuthModalProps> = ({
     onOpenChange(false);
 
     // Redirect based on user type
-    if (selectedUserType === "freelance-lawyer") {
-      navigate("/verify/lawyer");
+    if (selectedUserType === "lawyer") {
+      navigate("/lawyer-onboarding");
     } else {
       navigate("/home");
     }
@@ -238,7 +237,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
       comingSoon: false,
     },
     {
-      id: "freelance-lawyer",
+      id: "lawyer",
       label: "محامي حر",
       icon: Briefcase,
       comingSoon: false,
@@ -273,7 +272,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
             <Button
               type="button"
               variant="secondary"
-              className="w-full mb-4"
+              className="w-full mb-4 cursor-pointer"
               disabled={isLoading}
               onClick={handleGoogleAuth}
             >
