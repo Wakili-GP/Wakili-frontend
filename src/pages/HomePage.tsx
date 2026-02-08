@@ -240,9 +240,9 @@ const HomePage = () => {
                     className="cursor-pointer flex items-center space-x-2 space-x space-x-reverse"
                   >
                     <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      {user?.profileImage ? (
+                      {user?.imageUrl ? (
                         <img
-                          src={user.profileImage}
+                          src={user.imageUrl}
                           alt={user.firstName}
                           className="w-full h-full rounded-full object-cover"
                         />

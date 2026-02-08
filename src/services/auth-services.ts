@@ -14,7 +14,7 @@ export interface AuthUser {
   lastName: string;
   phoneNumber?: string;
   userType: "client" | "lawyer";
-  profileImage?: string;
+  imageUrl?: string | null;
   isEmailVerified?: boolean;
   createdAt?: string;
 }
@@ -38,11 +38,10 @@ export interface LoginResponse extends AuthTokens {
 export interface RegisterRequest {
   email: string;
   password: string;
-  // confirmPassword: string;
   firstName: string;
   lastName: string;
   userType: "client" | "lawyer";
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   acceptTerms: boolean;
 }
 

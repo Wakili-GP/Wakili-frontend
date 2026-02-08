@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authService, type AuthUser } from "@/services/auth-services";
+import { httpClient } from "@/services/api/httpClient";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -59,6 +60,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
+    // Clear tokens from localStorage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId");
+
+    // Clear token from httpClient
+    httpClient.setToken(null);
+
+    // Clear state
     setUser(null);
     setIsAuthenticated(false);
   };

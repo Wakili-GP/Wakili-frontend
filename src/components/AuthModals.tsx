@@ -240,8 +240,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
   };
 
   const handleGoogleAuth = async () => {
-    // TODO: Implement Google OAuth with actual Google Sign-In SDK
-    // For now, show a coming soon message
     toast.info("قيد التطوير", {
       description: "ستتوفر طريقة تسجيل الدخول عبر Google قريباً",
     });
