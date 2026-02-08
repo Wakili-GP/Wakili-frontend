@@ -8,6 +8,7 @@ import { httpClient, type ApiResponse } from "./api/httpClient";
 // ============ Types ============
 
 export interface LawyerBasicInfo {
+  id: string;
   fullName: string;
   email: string;
   profileImage: string | null;
@@ -17,7 +18,7 @@ export interface LawyerBasicInfo {
   city: string;
   bio: string;
   yearsOfExperience: string;
-  practiceAreas: string[];
+  practiceAreas: number[]; // Stores specialization IDs
   sessionTypes: string[];
 }
 
@@ -89,38 +90,190 @@ export interface OnboardingProgress {
   lastUpdated: string;
 }
 
+// ============ Helper Functions ============
+
+/**
+ * Helper to make multipart requests
+ */
+const makeMultipartRequest = async <T>(
+  endpoint: string,
+  formDataBuilder: (fd: FormData) => void,
+): Promise<ApiResponse<T>> => {
+  const formData = new FormData();
+  formDataBuilder(formData);
+
+  const token = localStorage.getItem("authToken");
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const baseURL =
+    import.meta.env.MODE === "development"
+      ? "/api"
+      : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+
+  try {
+    const response = await fetch(`${baseURL}${endpoint}`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
+
+    if (!response.ok) {
+      const errorMessage =
+        typeof data === "string"
+          ? data
+          : data?.error || data?.message || "Request failed";
+      return {
+        success: false,
+        error: errorMessage,
+        statusCode: response.status,
+        data,
+      };
+    }
+
+    return {
+      success: true,
+      data: typeof data === "string" ? (data as T) : data,
+      statusCode: response.status,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Network error",
+      statusCode: 0,
+    };
+  }
+};
+
+/**
+ * Helper to convert base64 to File
+ */
+const base64ToFile = (
+  base64: string,
+  filename: string,
+  mime: string = "application/pdf",
+): File => {
+  const arr = base64.split(",");
+  const actualMime = arr[0].match(/:(.*?);/)?.[1] || mime;
+  const bstr = atob(arr[1]);
+  const n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    u8arr[i] = bstr.charCodeAt(i);
+  }
+  return new File([u8arr], filename, { type: actualMime });
+};
+
 // ============ Service ============
 
 export const lawyerService = {
   /**
    * Save basic info step (Step 1)
-   * POST /lawyer/onboarding/basic-info
+   * POST /api/lawyer/onboarding/basic-info (multipart/form-data)
    */
-  async saveBasicInfo(
-    data: LawyerBasicInfo,
-  ): Promise<ApiResponse<{ message: string; progress: OnboardingProgress }>> {
-    return httpClient.post<{ message: string; progress: OnboardingProgress }>(
+  async saveBasicInfo(data: LawyerBasicInfo): Promise<ApiResponse<string>> {
+    const userId = localStorage.getItem("userId") || "";
+    return makeMultipartRequest<string>(
       "/lawyer/onboarding/basic-info",
-      data,
+      (formData) => {
+        formData.append("UserId", userId);
+
+        // Convert base64 profile image to File if present
+        if (data.profileImage && data.profileImage.startsWith("data:")) {
+          const file = base64ToFile(
+            data.profileImage,
+            "profile.jpg",
+            "image/jpeg",
+          );
+          formData.append("ProfileImage", file);
+        }
+
+        // Combine phone code and number (e.g., +20123456789)
+        const fullPhoneNumber = `${data.phoneCode}${data.phoneNumber}`;
+        formData.append("PhoneNumber", fullPhoneNumber);
+        formData.append("Country", data.country);
+        formData.append("City", data.city);
+        formData.append("Bio", data.bio);
+        formData.append("YearsOfExperience", data.yearsOfExperience);
+        data.practiceAreas.forEach((areaId) => {
+          formData.append("PracticeAreas", areaId.toString());
+        });
+        data.sessionTypes.forEach((type) => {
+          formData.append("SessionTypes", type);
+        });
+      },
     );
   },
 
   /**
    * Save education step (Step 2)
-   * POST /lawyer/onboarding/education
+   * POST /api/lawyer/onboarding/education (multipart/form-data)
    */
-  async saveEducation(
-    data: EducationData,
-  ): Promise<ApiResponse<{ message: string; progress: OnboardingProgress }>> {
-    return httpClient.post<{ message: string; progress: OnboardingProgress }>(
+  async saveEducation(data: EducationData): Promise<ApiResponse<string>> {
+    const userId = localStorage.getItem("userId") || "";
+    return makeMultipartRequest<string>(
       "/lawyer/onboarding/education",
-      data,
+      (formData) => {
+        formData.append("UserId", userId);
+
+        // Append academic qualifications
+        data.academicQualifications.forEach((qual, index) => {
+          formData.append(
+            `AcademicQualifications[${index}].degreeType`,
+            qual.degreeType,
+          );
+          formData.append(
+            `AcademicQualifications[${index}].fieldOfStudy`,
+            qual.fieldOfStudy,
+          );
+          formData.append(
+            `AcademicQualifications[${index}].universityName`,
+            qual.universityName,
+          );
+          formData.append(
+            `AcademicQualifications[${index}].graduationYear`,
+            qual.graduationYear,
+          );
+        });
+
+        // Append professional certifications with file conversion
+        data.professionalCertifications.forEach((cert, index) => {
+          formData.append(
+            `ProfessionalCertifications[${index}].certificateName`,
+            cert.certificateName,
+          );
+          formData.append(
+            `ProfessionalCertifications[${index}].issuingOrganization`,
+            cert.issuingOrganization,
+          );
+          formData.append(
+            `ProfessionalCertifications[${index}].yearObtained`,
+            cert.yearObtained,
+          );
+
+          // Convert base64 to File if present
+          if (cert.document && cert.document.startsWith("data:")) {
+            const file = base64ToFile(cert.document, `cert-${index}.pdf`);
+            formData.append(
+              `ProfessionalCertifications[${index}].document`,
+              file,
+            );
+          }
+        });
+      },
     );
   },
 
   /**
    * Save experience step (Step 3)
-   * POST /lawyer/onboarding/experience
+   * POST /api/lawyer/onboarding/experience (application/json)
    */
   async saveExperience(
     data: ExperienceData,
@@ -133,20 +286,81 @@ export const lawyerService = {
 
   /**
    * Upload verification documents (Step 4)
-   * POST /lawyer/onboarding/verification
+   * POST /api/lawyer/onboarding/verification (multipart/form-data)
    */
   async uploadVerificationDocuments(
-    data: VerificationData,
-  ): Promise<ApiResponse<{ message: string; progress: OnboardingProgress }>> {
-    return httpClient.post<{ message: string; progress: OnboardingProgress }>(
+    data: VerificationData & {
+      licenseNumber: string;
+      issuingAuthority: string;
+      yearOfIssue: string;
+    },
+  ): Promise<ApiResponse<string>> {
+    const userId = localStorage.getItem("userId") || "";
+    return makeMultipartRequest<string>(
       "/lawyer/onboarding/verification",
-      data,
+      (formData) => {
+        formData.append("UserId", userId);
+
+        // National ID files
+        if (
+          data.nationalIdFront.file &&
+          data.nationalIdFront.file.startsWith("data:")
+        ) {
+          formData.append(
+            "NationalIdFront",
+            base64ToFile(data.nationalIdFront.file, "id-front.pdf"),
+          );
+        }
+        if (
+          data.nationalIdBack.file &&
+          data.nationalIdBack.file.startsWith("data:")
+        ) {
+          formData.append(
+            "NationalIdBack",
+            base64ToFile(data.nationalIdBack.file, "id-back.pdf"),
+          );
+        }
+
+        // Lawyer license
+        if (
+          data.lawyerLicense.file &&
+          data.lawyerLicense.file.startsWith("data:")
+        ) {
+          formData.append(
+            "License.LicenseFile",
+            base64ToFile(data.lawyerLicense.file, "license.pdf"),
+          );
+        }
+        formData.append("License.LicenseNumber", data.licenseNumber);
+        formData.append("License.IssuingAuthority", data.issuingAuthority);
+        formData.append("License.LicenseYear", data.yearOfIssue);
+
+        // Educational certificates
+        data.educationalCertificates.forEach((cert, index) => {
+          if (cert.file && cert.file.startsWith("data:")) {
+            formData.append(
+              `EducationalCertificates[${index}]`,
+              base64ToFile(cert.file, `edu-cert-${index}.pdf`),
+            );
+          }
+        });
+
+        // Professional certificates
+        data.professionalCertificates.forEach((cert, index) => {
+          if (cert.file && cert.file.startsWith("data:")) {
+            formData.append(
+              `ProfessionalCertificates[${index}]`,
+              base64ToFile(cert.file, `prof-cert-${index}.pdf`),
+            );
+          }
+        });
+      },
     );
   },
 
   /**
    * Get current onboarding progress
-   * GET /lawyer/onboarding/progress
+   * GET /api/lawyer/onboarding/progress
    */
   async getOnboardingProgress(): Promise<ApiResponse<OnboardingProgress>> {
     return httpClient.get<OnboardingProgress>("/lawyer/onboarding/progress");
@@ -154,15 +368,18 @@ export const lawyerService = {
 
   /**
    * Submit complete onboarding
-   * POST /lawyer/onboarding/submit
+   * Note: Submission happens automatically after each step
+   * This function is kept for backward compatibility
    */
-  async submitOnboarding(
-    data: LawyerOnboardingData,
-  ): Promise<ApiResponse<{ message: string; lawyerId: string }>> {
-    return httpClient.post<{ message: string; lawyerId: string }>(
-      "/lawyer/onboarding/submit",
-      data,
-    );
+  async submitOnboarding(): Promise<
+    ApiResponse<{ message: string; lawyerId: string }>
+  > {
+    // In the new API, submission happens gradually as each step is saved
+    return {
+      success: true,
+      data: { message: "Onboarding completed", lawyerId: "" },
+      statusCode: 200,
+    };
   },
 
   /**

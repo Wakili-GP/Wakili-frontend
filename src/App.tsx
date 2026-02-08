@@ -44,11 +44,14 @@ const App = () => (
           <Route
             path="/verify/lawyer"
             element={
-              <ProtectedRoute requiredUserType="lawyer">
-                <LawyerOnboarding />
-              </ProtectedRoute>
+              // <ProtectedRoute requiredUserType="lawyer">
+              <LawyerOnboarding />
+              // </ProtectedRoute>
             }
           />
+
+          {/* Access Denied */}
+          <Route path="/forbidden" element={<NotFound />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

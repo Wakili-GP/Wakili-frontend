@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,9 +17,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Camera, X, Upload } from "lucide-react";
+import { Camera, X, Upload, Loader } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  categoriesService,
+  type Specialization,
+} from "@/services/categories-services";
+import { toast } from "sonner";
 interface BasicInfoData {
+  id: string;
   fullName: string;
   email: string;
   profileImage: string | null;
@@ -29,7 +35,7 @@ interface BasicInfoData {
   city: string;
   bio: string;
   yearsOfExperience: string;
-  practiceAreas: string[];
+  practiceAreas: number[]; // Stores specialization IDs
   sessionTypes: string[];
 }
 
@@ -39,18 +45,7 @@ interface BasicInfoStepProps {
   onNext: () => void;
   registrationData?: { name: string; email: string };
 }
-const practiceAreaOptions = [
-  "القانون الجنائي",
-  "قانون الأسرة",
-  "القانون التجاري",
-  "القانون المدني",
-  "قانون العمل",
-  "القانون الدولي",
-  "قانون الشركات",
-  "القانون العقاري",
-  "قانون الملكية الفكرية",
-  "القانون الإداري",
-];
+// Practice areas will be fetched from API
 const sessionTypeOptions = [
   { id: "office", label: "استشارة مكتبية" },
   { id: "phone", label: "استشارة هاتفية" },
@@ -94,6 +89,27 @@ const BasicInfoStep = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+  const [isLoadingSpecializations, setIsLoadingSpecializations] =
+    useState(true);
+
+  // Fetch specializations on mount
+  useEffect(() => {
+    const fetchSpecializations = async () => {
+      setIsLoadingSpecializations(true);
+      const response = await categoriesService.getActiveSpecializations();
+      if (response.success && response.data) {
+        setSpecializations(response.data);
+      } else {
+        toast.error("خطأ", {
+          description: response.error || "فشل تحميل التخصصات",
+        });
+      }
+      setIsLoadingSpecializations(false);
+    };
+
+    fetchSpecializations();
+  }, []);
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!data.fullName.trim()) newErrors.fullName = "الاسم مطلوب";
@@ -140,10 +156,10 @@ const BasicInfoStep = ({
       : [...data.sessionTypes, type];
     onChange({ ...data, sessionTypes: newTypes });
   };
-  const togglePracticeArea = (area: string) => {
-    const newAreas = data.practiceAreas.includes(area)
-      ? data.practiceAreas.filter((t) => t !== area)
-      : [...data.practiceAreas, area];
+  const togglePracticeArea = (areaId: number) => {
+    const newAreas = data.practiceAreas.includes(areaId)
+      ? data.practiceAreas.filter((t) => t !== areaId)
+      : [...data.practiceAreas, areaId];
     onChange({ ...data, practiceAreas: newAreas });
   };
   return (
@@ -358,23 +374,33 @@ const BasicInfoStep = ({
       {/* Practice Areas */}
       <div className="space-y-3">
         <Label>مجالات الممارسة * (اختر واحد أو أكثر)</Label>
-        <div className="flex flex-wrap gap-2">
-          {practiceAreaOptions.map((area) => (
-            <Badge
-              key={area}
-              variant={
-                data.practiceAreas.includes(area) ? "default" : "outline"
-              }
-              className="cursor-pointer py-2 px-3"
-              onClick={() => togglePracticeArea(area)}
-            >
-              {area}
-              {data.practiceAreas.includes(area) && (
-                <X className="w-3 h-3 mr-1" />
-              )}
-            </Badge>
-          ))}
-        </div>
+        {isLoadingSpecializations ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader className="w-6 h-6 animate-spin text-primary ml-2" />
+            <span className="text-muted-foreground">
+              جاري تحميل التخصصات...
+            </span>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {specializations.map((spec) => (
+              <Badge
+                key={spec.id}
+                variant={
+                  data.practiceAreas.includes(spec.id) ? "default" : "outline"
+                }
+                className="cursor-pointer py-2 px-3"
+                onClick={() => togglePracticeArea(spec.id)}
+                title={spec.description}
+              >
+                {spec.name}
+                {data.practiceAreas.includes(spec.id) && (
+                  <X className="w-3 h-3 mr-1" />
+                )}
+              </Badge>
+            ))}
+          </div>
+        )}
         {errors.practiceAreas && (
           <p className="text-sm text-destructive">{errors.practiceAreas}</p>
         )}
@@ -405,7 +431,7 @@ const BasicInfoStep = ({
         )}
       </div>
       <div className="flex justify-end pt-4">
-        <Button onClick={handleNext} size="lg">
+        <Button className="cursor-pointer" onClick={handleNext} size="lg">
           التالي
         </Button>
       </div>

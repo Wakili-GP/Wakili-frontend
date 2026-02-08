@@ -23,6 +23,7 @@ import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import { toast } from "@/components/ui/sonner";
 import { authService } from "@/services/auth-services";
+import { useAuth } from "@/context/AuthContext";
 
 export type AuthMode =
   | "login"
@@ -61,6 +62,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
   onSwitchMode,
 }) => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -74,14 +76,14 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   // Reset form when dialog opens
   useEffect(() => {
-    if (!open) {
+    if (!open && !showEmailVerification) {
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setResetCode("");
       setFullName("");
     }
-  }, [open, mode]);
+  }, [open, mode, showEmailVerification]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +163,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
     if (response.success) {
       setRegistrationEmail(email);
       setShowEmailVerification(true);
+      onOpenChange(false);
       toast.success("تم إنشاء الحساب!", {
         description: "يرجى تأكيد بريدك الإلكتروني",
       });
@@ -208,6 +211,18 @@ const AuthModals: React.FC<AuthModalProps> = ({
   };
 
   const handleEmailVerified = async () => {
+    const emailToUse = registrationEmail || email;
+    try {
+      await login(emailToUse, password);
+    } catch (error) {
+      toast.error("خطأ في تسجيل الدخول", {
+        description:
+          error instanceof Error ? error.message : "تعذر تسجيل الدخول",
+      });
+      console.error("Login error:", error);
+      return;
+    }
+
     setShowEmailVerification(false);
     toast.success("تم التحقق بنجاح!", {
       description: "مرحباً بك في وكيلي",
@@ -215,8 +230,10 @@ const AuthModals: React.FC<AuthModalProps> = ({
     onOpenChange(false);
 
     // Redirect based on user type
+    console.log("Selected user type:", selectedUserType);
     if (selectedUserType === "lawyer") {
-      navigate("/lawyer-onboarding");
+      console.log("Redirecting to lawyer onboarding...");
+      navigate("/verify/lawyer");
     } else {
       navigate("/home");
     }
@@ -728,7 +745,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           {/* Verify Button */}
           <Button
             onClick={handleVerify}
-            className="w-full"
+            className="w-full cursor-pointer"
             disabled={isLoading || otp.some((d) => !d)}
           >
             {isLoading ? (

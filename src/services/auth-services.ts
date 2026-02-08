@@ -122,21 +122,6 @@ export const authService = {
   },
 
   /**
-   * Logout user
-   * POST /Auth/logout
-   */
-  async logout(): Promise<ApiResponse<{ message: string }>> {
-    const response = await httpClient.post<{ message: string }>("/Auth/logout");
-
-    // Clear local storage
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("refreshToken");
-    httpClient.setToken(null);
-
-    return response;
-  },
-
-  /**
    * Send password reset code to email
    * POST /Auth/forget-password
    */

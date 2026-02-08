@@ -30,6 +30,7 @@ const LawyerOnboarding = () => {
 
   // Step 1: Basic Info
   const [basicInfo, setBasicInfo] = useState({
+    id: "",
     fullName: "",
     email: user?.email || "",
     profileImage: null as string | null,
@@ -39,9 +40,16 @@ const LawyerOnboarding = () => {
     city: "",
     bio: "",
     yearsOfExperience: "",
-    practiceAreas: [] as string[],
+    practiceAreas: [] as number[], // Stores specialization IDs
     sessionTypes: [] as string[],
   });
+
+  // Update email in basicInfo when user email changes
+  useEffect(() => {
+    if (user?.email) {
+      setBasicInfo((prev) => ({ ...prev, email: user.email }));
+    }
+  }, [user?.email]);
 
   // Step 2: Education
   const [education, setEducation] = useState({
@@ -125,6 +133,12 @@ const LawyerOnboarding = () => {
   useEffect(() => {
     const fetchProgress = async () => {
       setIsLoadingProgress(true);
+
+      // Store userId for API requests
+      if (user?.id) {
+        localStorage.setItem("userId", user.id);
+      }
+
       const response = await lawyerService.getOnboardingProgress();
       if (response.success && response.data) {
         // Load saved data from progress
@@ -148,7 +162,7 @@ const LawyerOnboarding = () => {
     };
 
     fetchProgress();
-  }, []);
+  }, [user?.id]);
 
   // Save basic info step to backend
   const handleBasicInfoNext = async () => {
@@ -214,15 +228,9 @@ const LawyerOnboarding = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Prepare all data for submission
-    const completeData = {
-      basicInfo,
-      education,
-      experience,
-      verification,
-    };
-
-    const response = await lawyerService.submitOnboarding(completeData);
+    // Note: In the new API, submission happens gradually as each step is saved
+    // This just confirms completion
+    const response = await lawyerService.submitOnboarding();
 
     if (response.success) {
       setIsSubmitting(false);

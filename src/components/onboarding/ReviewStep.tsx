@@ -13,6 +13,8 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { categoriesService } from "@/services/categories-services";
 
 interface ReviewStepProps {
   basicInfo: {
@@ -25,7 +27,7 @@ interface ReviewStepProps {
     city: string;
     bio: string;
     yearsOfExperience: string;
-    practiceAreas: string[];
+    practiceAreas: number[]; // Stores specialization IDs
     sessionTypes: string[];
   };
   education: {
@@ -82,6 +84,28 @@ const ReviewStep = ({
   onSubmit,
   isSubmitting,
 }: ReviewStepProps) => {
+  const [practiceAreaNames, setPracticeAreaNames] = useState<string[]>([]);
+
+  // Convert practiceArea IDs to names
+  useEffect(() => {
+    const fetchNames = async () => {
+      const response = await categoriesService.getActiveSpecializations();
+      if (response.success && response.data) {
+        const names = basicInfo.practiceAreas
+          .map((id) => {
+            const spec = response.data.find((s) => s.id === id);
+            return spec?.name || "";
+          })
+          .filter(Boolean);
+        setPracticeAreaNames(names);
+      }
+    };
+
+    if (basicInfo.practiceAreas.length > 0) {
+      fetchNames();
+    }
+  }, [basicInfo.practiceAreas]);
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="text-center mb-6">
@@ -160,9 +184,9 @@ const ReviewStep = ({
           <div>
             <p className="text-sm font-medium mb-2">مجالات الممارسة</p>
             <div className="flex flex-wrap gap-1">
-              {basicInfo.practiceAreas.map((area) => (
-                <Badge key={area} variant="outline" className="text-xs">
-                  {area}
+              {practiceAreaNames.map((name, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {name}
                 </Badge>
               ))}
             </div>

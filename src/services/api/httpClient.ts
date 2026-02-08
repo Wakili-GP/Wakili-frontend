@@ -91,12 +91,33 @@ class HttpClient {
         body: config?.body ? JSON.stringify(config.body) : undefined,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
 
       if (!response.ok) {
+        const errorMessage =
+          typeof data === "string" ? data : this.formatErrorMessage(data);
         return {
           success: false,
-          error: data.error || data.message || "Request failed",
+          error: errorMessage,
+          statusCode: response.status,
+          data,
+        };
+      }
+
+      const backendSuccess =
+        typeof data === "object" && data !== null && "success" in data
+          ? Boolean((data as { success?: unknown }).success)
+          : true;
+
+      if (!backendSuccess) {
+        const errorMessage =
+          typeof data === "string" ? data : this.formatErrorMessage(data);
+        return {
+          success: false,
+          error: errorMessage,
           statusCode: response.status,
           data,
         };
@@ -104,7 +125,7 @@ class HttpClient {
 
       return {
         success: true,
-        data: data.data || data,
+        data: typeof data === "string" ? (data as T) : data.data || data,
         statusCode: response.status,
       };
     } catch (error) {
@@ -116,6 +137,41 @@ class HttpClient {
         statusCode: 0,
       };
     }
+  }
+
+  private formatErrorMessage(data: unknown): string {
+    if (typeof data === "string") {
+      return data;
+    }
+
+    if (!data || typeof data !== "object") {
+      return "Request failed";
+    }
+
+    const errorObject = data as {
+      error?: string;
+      message?: string;
+      title?: string;
+      errors?: Record<string, string[]>;
+    };
+
+    if (errorObject.error) {
+      return errorObject.error;
+    }
+
+    if (errorObject.message) {
+      return errorObject.message;
+    }
+
+    if (errorObject.errors && Object.keys(errorObject.errors).length > 0) {
+      const firstKey = Object.keys(errorObject.errors)[0];
+      const firstValue = errorObject.errors[firstKey]?.[0];
+      if (firstValue) {
+        return firstValue;
+      }
+    }
+
+    return errorObject.title || "Request failed";
   }
 
   /**
