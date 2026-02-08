@@ -3,7 +3,7 @@
  * Handles lawyer profile, onboarding, and verification
  */
 
-import { httpClient, axiosInstance, type ApiResponse } from "./api/httpClient";
+import { httpClient, type ApiResponse } from "./api/httpClient";
 
 // ============ Types ============
 
@@ -93,7 +93,7 @@ export interface OnboardingProgress {
 // ============ Helper Functions ============
 
 /**
- * Helper to make multipart requests using axios
+ * Helper to make multipart requests
  */
 const makeMultipartRequest = async <T>(
   endpoint: string,
@@ -102,30 +102,51 @@ const makeMultipartRequest = async <T>(
   const formData = new FormData();
   formDataBuilder(formData);
 
+  const token = localStorage.getItem("authToken");
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const baseURL =
+    import.meta.env.MODE === "development"
+      ? "/api"
+      : import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+
   try {
-    const response = await axiosInstance.post<unknown>(endpoint, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await fetch(`${baseURL}${endpoint}`, {
+      method: "POST",
+      headers,
+      body: formData,
     });
 
-    const responseData = response.data as Record<string, unknown>;
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
+
+    if (!response.ok) {
+      const errorMessage =
+        typeof data === "string"
+          ? data
+          : data?.error || data?.message || "Request failed";
+      return {
+        success: false,
+        error: errorMessage,
+        statusCode: response.status,
+        data,
+      };
+    }
+
     return {
       success: true,
-      data: (responseData.data || responseData) as T,
+      data: typeof data === "string" ? (data as T) : data,
       statusCode: response.status,
     };
   } catch (error) {
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-        statusCode: 0,
-      };
-    }
     return {
       success: false,
-      error: "Failed to upload",
+      error: error instanceof Error ? error.message : "Network error",
       statusCode: 0,
     };
   }

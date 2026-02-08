@@ -9,8 +9,9 @@ import EducationStep from "@/components/onboarding/EducationStep";
 import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
-import { lawyerService } from "@/services/lawyer-services";
+import { lawyerService } from "@/services/onboarding-services";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const steps = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
@@ -277,12 +278,9 @@ const LawyerOnboarding = () => {
                 عادة ما تستغرق عملية المراجعة 24-48 ساعة عمل
               </p>
             </div>
-            <button
-              onClick={() => navigate("/")}
-              className="text-primary hover:underline text-sm"
-            >
+            <Button onClick={() => navigate("/")} className="cursor-pointer">
               العودة للصفحة الرئيسية
-            </button>
+            </Button>
           </CardContent>
         </Card>
       </div>
