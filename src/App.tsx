@@ -44,9 +44,9 @@ const App = () => (
           <Route
             path="/verify/lawyer"
             element={
-              // <ProtectedRoute requiredUserType="lawyer">
-              <LawyerOnboarding />
-              // </ProtectedRoute>
+              <ProtectedRoute requiredUserType="lawyer">
+                <LawyerOnboarding />
+              </ProtectedRoute>
             }
           />
 

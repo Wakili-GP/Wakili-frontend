@@ -1,12 +1,6 @@
-/**
- * Authentication Service
- * Handles login, registration, password reset, and OAuth
- */
-
 import { httpClient, type ApiResponse } from "./api/httpClient";
 
-// ============ Types ============
-
+// Types
 export interface AuthUser {
   id: string;
   email: string;
@@ -14,7 +8,7 @@ export interface AuthUser {
   lastName: string;
   phoneNumber?: string;
   userType: "client" | "lawyer";
-  imageUrl?: string | null;
+  profileImage?: string | null;
   isEmailVerified?: boolean;
   createdAt?: string;
 }
@@ -73,7 +67,7 @@ export interface RefreshTokenRequest {
   refreshToken: string;
 }
 
-// ============ Service ============
+// Service
 
 export const authService = {
   /**

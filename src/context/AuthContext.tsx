@@ -1,8 +1,3 @@
-/**
- * Authentication Context
- * Manages global authentication state and user information
- */
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authService, type AuthUser } from "@/services/auth-services";
 import { httpClient } from "@/services/api/httpClient";

@@ -129,6 +129,8 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+=\-{}[\]|\\:;"'<>,./]).{12,}$/;
 
     if (!selectedUserType) {
       toast.error("خطأ", {
@@ -136,7 +138,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
       });
       return;
     }
-
+    if (!passwordRegex.test(password)) {
+      toast.error("كلمة مرور ضعيفة", {
+        description:
+          "كلمة المرور يجب أن تكون 12 حرفًا على الأقل وتحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص",
+      });
+      return;
+    }
     if (password !== confirmPassword) {
       toast.error("خطأ", {
         description: "كلمات المرور غير متطابقة",

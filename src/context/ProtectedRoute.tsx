@@ -1,8 +1,3 @@
-/**
- * Protected Route Component
- * Ensures only authenticated users can access certain routes
- */
-
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";

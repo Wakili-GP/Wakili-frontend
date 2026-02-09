@@ -205,7 +205,7 @@ const HomePage = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="end">
+                <PopoverContent className="w-80 p-0" align="center">
                   <div className="p-4 border-b">
                     <h3 className="font-semibold">الإشعارات</h3>
                   </div>
@@ -240,9 +240,9 @@ const HomePage = () => {
                     className="cursor-pointer flex items-center space-x-2 space-x space-x-reverse"
                   >
                     <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      {user?.imageUrl ? (
+                      {user?.profileImage ? (
                         <img
-                          src={user.imageUrl}
+                          src={user.profileImage}
                           alt={user.firstName}
                           className="w-full h-full rounded-full object-cover"
                         />
@@ -258,6 +258,7 @@ const HomePage = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem
+                    dir="rtl"
                     onClick={handleProfileClick}
                     className="cursor-pointer flex items-center space-x-2 space-x-reverse"
                   >
@@ -265,6 +266,7 @@ const HomePage = () => {
                     <span>حسابك</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    dir="rtl"
                     onClick={handleLogout}
                     className="cursor-pointer flex items-center space-x-2 space-x-reverse text-red-600"
                   >

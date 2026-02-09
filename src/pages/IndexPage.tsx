@@ -42,6 +42,8 @@ import {
   type LawyerCard as BackendLawyerCard,
   type FeatureStatistic,
 } from "@/services/indexPage-services";
+
+import Chatbot from "@/components/Chatbot";
 const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
@@ -122,6 +124,7 @@ const IndexPage = () => {
         onOpenChange={setAuthOpen}
         onSwitchMode={setAuthMode}
       />
+      <Chatbot />
     </div>
   );
 };

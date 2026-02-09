@@ -1,11 +1,11 @@
-/**
- * HTTP Client using Axios
- * Handles API requests with automatic error handling and token management
- */
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosError,
+  type AxiosResponse,
+} from "axios";
 
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosError, type AxiosResponse } from "axios";
-
-// ============ Types ============
+// Types
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -19,7 +19,7 @@ interface RequestConfig extends AxiosRequestConfig {
   params?: Record<string, string | number | boolean>;
 }
 
-// ============ Helper Functions ============
+// Helper Functions
 
 const formatErrorMessage = (data: unknown): string => {
   if (typeof data === "string") {
@@ -56,7 +56,7 @@ const formatErrorMessage = (data: unknown): string => {
   return errorObject.title || "Request failed";
 };
 
-// ============ Axios Instance Setup ============
+// Axios Instance Setup
 
 const baseURL =
   import.meta.env.MODE === "development"
@@ -70,7 +70,7 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
-// ============ Interceptors ============
+// Interceptors
 
 /**
  * Request Interceptor - Add Authorization token
@@ -117,8 +117,7 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// ============ HTTP Client Class ============
-
+// HTTP Client Class
 class HttpClient {
   private axiosInstance: AxiosInstance;
 
@@ -248,7 +247,10 @@ class HttpClient {
     config?: RequestConfig,
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axiosInstance.delete<unknown>(endpoint, config);
+      const response = await this.axiosInstance.delete<unknown>(
+        endpoint,
+        config,
+      );
       const responseData = response.data as Record<string, unknown>;
       return {
         success: true,
@@ -265,9 +267,7 @@ class HttpClient {
    */
   private handleError<T>(error: unknown): ApiResponse<T> {
     if (axios.isAxiosError(error)) {
-      const message = formatErrorMessage(
-        error.response?.data || error.message,
-      );
+      const message = formatErrorMessage(error.response?.data || error.message);
       return {
         success: false,
         error: message,
@@ -292,7 +292,7 @@ class HttpClient {
   }
 }
 
-// ============ Export Singleton Instance ============
+// Export Singletong Instance
 
 export const httpClient = new HttpClient(axiosInstance);
 
