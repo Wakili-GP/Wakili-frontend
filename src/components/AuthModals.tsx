@@ -89,23 +89,22 @@ const AuthModals: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
 
-    const response = await authService.login({
-      email,
-      password,
-    });
+    try {
+      await login(email, password);
 
-    if (response.success) {
       toast.success("تم تسجيل الدخول بنجاح!", {
         description: "مرحباً بك في وكيلي",
       });
       onOpenChange(false);
       navigate("/home");
-    } else {
+    } catch (error) {
       toast.error("خطأ في تسجيل الدخول", {
-        description: response.error || "تأكد من البريد والرمز",
+        description:
+          error instanceof Error ? error.message : "تأكد من البريد والرمز",
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
