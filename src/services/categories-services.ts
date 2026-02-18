@@ -1,11 +1,4 @@
-/**
- * Categories/Specializations Service
- * Handles fetching legal practice areas and specializations
- */
-
 import { httpClient, type ApiResponse } from "./api/httpClient";
-
-// ============ Types ============
 
 export interface Specialization {
   id: number;

@@ -13,7 +13,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredUserType,
 }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -21,16 +20,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       </div>
     );
   }
-
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-
   if (requiredUserType && user?.userType !== requiredUserType) {
     return <Navigate to="/forbidden" replace />;
   }
-
   return <>{children}</>;
 };
-
-export default ProtectedRoute;

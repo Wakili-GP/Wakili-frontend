@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Badge } from "@/components/ui/badge";
 import LawyerSearch from "../components/LawyerSearch.tsx";
+import ContractReview from "../components/contract-review/ContractReview.tsx";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -153,28 +154,7 @@ const HomePage = () => {
         return <LawyerSearch />;
 
       case "حلل عقدا":
-        return (
-          <div className="space-y-12">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                هل تريد تحليل عقدك؟
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-                حلّل عقودك القانونية باستخدام الذكاء الاصطناعي لاكتشاف المخاطر،
-                فهم البنود المعقّدة، والحصول على ملخص واضح ودقيق خلال ثوانٍ.
-              </p>
-            </div>
-
-            <ComingSoon
-              title="تحليل العقود بالذكاء الاصطناعي"
-              description="نعمل حالياً على تطوير أداة متقدمة لتحليل العقود بدقة عالية"
-              featureTitle="تحليل العقود تلقائياً"
-              featureDescription="مراجعة وتحليل العقود واكتشاف الثغرات القانونية باستخدام الذكاء الاصطناعي"
-              badgeText="قيد التطوير"
-              progress={60}
-            />
-          </div>
-        );
+        return <ContractReview />;
 
       case "اسئلة شائعة":
         return (

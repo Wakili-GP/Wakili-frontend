@@ -35,7 +35,7 @@ interface BasicInfoData {
   city: string;
   bio: string;
   yearsOfExperience: string;
-  practiceAreas: number[]; // Stores specialization IDs
+  practiceAreas: number[];
   sessionTypes: string[];
 }
 
