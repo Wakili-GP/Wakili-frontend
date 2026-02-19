@@ -9,17 +9,22 @@ interface HeroSectionProps {
 
 export default function HeroSection({ onStartNow }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden rounded-3xl">
+    <section
+      className="relative overflow-hidden -mx-4 -mt-8"
+      style={{
+        marginLeft: "calc(-50vw + 50%)",
+        marginRight: "calc(-50vw + 50%)",
+        width: "100vw",
+      }}
+    >
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
           src={heroImage}
           alt="مراجعة العقود القانونية"
-          className="w-full h-full object-cover scale-105"
+          className="w-full h-full object-cover"
         />
-
-        {/* Stronger depth overlay */}
-        <div className="absolute inset-0 bg-linear-to-l from-primary/95 via-primary/85 to-primary/75" />
+        <div className="absolute inset-0 bg-gradient-to-l from-primary/90 via-primary/80 to-primary/70" />
       </div>
 
       {/* Subtle Glow Effect */}
