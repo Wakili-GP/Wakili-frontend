@@ -23,33 +23,21 @@ import {
   categoriesService,
   type Specialization,
 } from "@/services/categories-services";
+import { type LawyerBasicInfo } from "@/services/onboarding-services";
 import { toast } from "sonner";
-interface BasicInfoData {
-  id: string;
-  fullName: string;
-  email: string;
-  profileImage: string | null;
-  phoneCode: string;
-  phoneNumber: string;
-  country: string;
-  city: string;
-  bio: string;
-  yearsOfExperience: string;
-  practiceAreas: number[];
-  sessionTypes: string[];
-}
 
 interface BasicInfoStepProps {
-  data: BasicInfoData;
-  onChange: (data: BasicInfoData) => void;
+  data: LawyerBasicInfo;
+  onChange: (data: LawyerBasicInfo) => void;
   onNext: () => void;
   registrationData?: { name: string; email: string };
 }
-// Practice areas will be fetched from API
+
 const sessionTypeOptions = [
   { id: "office", label: "استشارة مكتبية" },
   { id: "phone", label: "استشارة هاتفية" },
 ];
+
 const countries = [
   "مصر",
   "السعودية",
@@ -60,6 +48,7 @@ const countries = [
   "عمان",
   "الأردن",
 ];
+
 const citiesByCountry: Record<string, string[]> = {
   مصر: ["القاهرة", "الإسكندرية", "الجيزة", "المنصورة", "طنطا", "أسيوط"],
   السعودية: ["الرياض", "جدة", "مكة", "المدينة", "الدمام"],
@@ -70,6 +59,7 @@ const citiesByCountry: Record<string, string[]> = {
   عمان: ["مسقط", "صلالة", "صحار"],
   الأردن: ["عمان", "إربد", "الزرقاء"],
 };
+
 const phoneCodes = [
   { code: "+20", country: "مصر" },
   { code: "+966", country: "السعودية" },
@@ -80,6 +70,7 @@ const phoneCodes = [
   { code: "+968", country: "عمان" },
   { code: "+962", country: "الأردن" },
 ];
+
 const BasicInfoStep = ({
   data,
   onChange,
@@ -110,6 +101,7 @@ const BasicInfoStep = ({
 
     fetchSpecializations();
   }, []);
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!data.fullName.trim()) newErrors.fullName = "الاسم مطلوب";

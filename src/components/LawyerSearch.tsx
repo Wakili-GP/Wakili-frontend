@@ -11,6 +11,7 @@ import {
   Heart,
   ChevronDown,
   X,
+  Users,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,7 @@ const locations = [
   "الأقصر",
 ];
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 8;
 
 export default function LawyerSearch() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -231,39 +232,98 @@ export default function LawyerSearch() {
   return (
     <div className="space-y-8">
       {/* Search Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-          ابحث عن محاميك المثالي
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          اعثر على محامين متخصصين وموثوقين حسب احتياجاتك القانونية
-        </p>
-      </div>
+      <div
+        className="relative -mx-4 -mt-8 overflow-hidden"
+        style={{
+          marginLeft: "calc(-50vw + 50%)",
+          marginRight: "calc(-50vw + 50%)",
+          width: "100vw",
+        }}
+      >
+        <div className="relative min-h-[50vh] md:min-h-[65vh] flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `radial-gradient(circle at 25% 25%, hsl(var(--primary-glow)) 0%, transparent 50%), radial-gradient(circle at 75% 75%, hsl(var(--secondary)) 0%, transparent 50%)`,
+              }}
+            />
+          </div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djZoLTJ2LTZoMnptMC0xMHY2aC0ydi02aDJ6bTAtMTB2NmgtMlY4aDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
 
-      {/* Main Search Bar */}
-      <div className="relative max-w-3xl mx-auto">
-        <div className="flex items-center gap-2 bg-background border-2 border-primary/20 rounded-2xl p-2 focus-within:border-primary/50 transition-all shadow-lg">
-          <Search className="w-6 h-6 text-muted-foreground mr-3" />
-          <Input
-            type="text"
-            placeholder="ابحث بالاسم أو التخصص..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 border-0 text-lg focus-visible:ring-0 bg-transparent"
-          />
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="relative cursor-pointer"
-          >
-            <Filter className="w-5 h-5 ml-2" />
-            الفلاتر
-            {activeFiltersCount > 0 && (
-              <Badge className="absolute -top-2 -left-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                {activeFiltersCount}
-              </Badge>
-            )}
-          </Button>
+          {/* Content */}
+          <div className="relative z-10 text-center px-4 py-16 md:py-24 max-w-4xl mx-auto space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-4"
+            >
+              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
+                ابحث عن محاميك المثالي
+              </h1>
+              <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
+                اعثر على محامين متخصصين وموثوقين حسب احتياجاتك القانونية
+              </p>
+            </motion.div>
+
+            {/* Search Bar inside Hero */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative max-w-3xl mx-auto"
+            >
+              <div className="flex items-center gap-2 bg-background/95 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-2 shadow-2xl focus-within:border-white/40 transition-all">
+                <Search className="w-6 h-6 text-muted-foreground mr-3" />
+                <Input
+                  type="text"
+                  placeholder="ابحث بالاسم أو التخصص..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 border-0 text-lg focus-visible:ring-0 bg-transparent"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="relative"
+                >
+                  <Filter className="w-5 h-5 ml-2" />
+                  الفلاتر
+                  {activeFiltersCount > 0 && (
+                    <Badge className="absolute -top-2 -left-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Quick Stats */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center justify-center gap-8 text-white/70 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>500+ محامي</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 fill-current" />
+                <span>تقييم 4.8+</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Scale className="w-4 h-4" />
+                <span>جميع التخصصات</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Bottom Fade */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-background to-transparent" />
         </div>
       </div>
 

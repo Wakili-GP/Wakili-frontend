@@ -5,8 +5,6 @@
 
 import { httpClient, type ApiResponse } from "./api/httpClient";
 
-// ============ Types ============
-
 export interface LawyerBasicInfo {
   id: string;
   fullName: string;
