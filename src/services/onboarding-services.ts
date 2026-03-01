@@ -1,12 +1,6 @@
-/**
- * Lawyer Service
- * Handles lawyer profile, onboarding, and verification
- */
-
 import { httpClient, type ApiResponse } from "./api/httpClient";
 
 export interface LawyerBasicInfo {
-  id: string;
   fullName: string;
   email: string;
   profileImage: string | null;
@@ -16,8 +10,8 @@ export interface LawyerBasicInfo {
   city: string;
   bio: string;
   yearsOfExperience: string;
-  practiceAreas: number[]; // Stores specialization IDs
-  sessionTypes: string[];
+  practiceAreas: number[]; // IDs
+  sessionTypes: string[]; // Array of Strings
 }
 
 export interface Education {
@@ -90,9 +84,6 @@ export interface OnboardingProgress {
 
 // ============ Helper Functions ============
 
-/**
- * Helper to make multipart requests
- */
 const makeMultipartRequest = async <T>(
   endpoint: string,
   formDataBuilder: (fd: FormData) => void,
@@ -153,6 +144,7 @@ const makeMultipartRequest = async <T>(
 /**
  * Helper to convert base64 to File
  */
+
 const base64ToFile = (
   base64: string,
   filename: string,

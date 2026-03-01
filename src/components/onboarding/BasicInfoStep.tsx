@@ -201,6 +201,7 @@ const BasicInfoStep = ({
           <Label htmlFor="fullName">الاسم الكامل *</Label>
           <Input
             id="fullName"
+            disabled
             value={data.fullName}
             onChange={(e) => onChange({ ...data, fullName: e.target.value })}
             placeholder="أدخل اسمك الكامل"
@@ -216,6 +217,7 @@ const BasicInfoStep = ({
           <Input
             id="email"
             type="email"
+            placeholder="أدخل البريد الإلكتروني"
             value={data.email || registrationData?.email || ""}
             disabled
             className="bg-muted"

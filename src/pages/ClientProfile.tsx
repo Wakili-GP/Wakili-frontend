@@ -16,6 +16,7 @@ import {
   Heart,
   Star,
   Settings,
+  Home,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
@@ -199,6 +200,14 @@ const ClientProfile = () => {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => navigate("/home")}
+        className="cursor-pointer fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
+      >
+        <Home className="w-6 h-6" />
+      </Button>
       <div className="relative">
         <div className="h-64 overflow-hidden relative group">
           <img

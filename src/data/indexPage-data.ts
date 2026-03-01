@@ -1,13 +1,6 @@
-/**
- * Index Page Service
- * Handles data fetching for home page components
- * (testimonials, top lawyers, features, statistics)
- */
-
-import { httpClient, type ApiResponse } from "./api/httpClient";
-
-// ============ Types ============
-
+import lawyer_1 from "../assets/lawyer-1.jpg";
+import lawyer_2 from "../assets/lawyer-2.jpg";
+import lawyer_3 from "../assets/lawyer-3.jpg";
 export interface Testimonial {
   id: string;
   clientName: string;
@@ -19,10 +12,9 @@ export interface Testimonial {
   date?: string;
 }
 
-export interface LawyerCard {
+export interface Lawyer {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   profileImage?: string;
   specialties: string[];
   rating: number;
@@ -41,15 +33,7 @@ export interface FeatureStatistic {
   icon?: string;
 }
 
-export interface HomePageData {
-  testimonials: Testimonial[];
-  topLawyers: LawyerCard[];
-  statistics: FeatureStatistic[];
-}
-
-// ============ Mock Data (Fallback) ============
-
-const MOCK_TESTIMONIALS: Testimonial[] = [
+export const MOCK_TESTIMONIALS: Testimonial[] = [
   {
     id: "1",
     clientName: "أحمد محمد",
@@ -106,12 +90,11 @@ const MOCK_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-const MOCK_TOP_LAWYERS: LawyerCard[] = [
+export const MOCK_TOP_LAWYERS: Lawyer[] = [
   {
     id: "1",
-    firstName: "علي",
-    lastName: "عبدالله",
-    profileImage: "/api/placeholder/lawyer-1",
+    fullName: "علي عبدالله",
+    profileImage: lawyer_1,
     specialties: ["قانون العمل", "القانون التجاري"],
     rating: 4.9,
     reviewCount: 248,
@@ -122,9 +105,8 @@ const MOCK_TOP_LAWYERS: LawyerCard[] = [
   },
   {
     id: "2",
-    firstName: "سارة",
-    lastName: "محمود",
-    profileImage: "/api/placeholder/lawyer-2",
+    fullName: "سارة محمود",
+    profileImage: lawyer_3,
     specialties: ["قانون الأسرة", "قانون الأحوال الشخصية"],
     rating: 4.8,
     reviewCount: 312,
@@ -135,9 +117,8 @@ const MOCK_TOP_LAWYERS: LawyerCard[] = [
   },
   {
     id: "3",
-    firstName: "أحمد",
-    lastName: "فرج",
-    profileImage: "/api/placeholder/lawyer-3",
+    fullName: "أحمد فرج",
+    profileImage: lawyer_2,
     specialties: ["القانون التجاري", "العقود"],
     rating: 4.7,
     reviewCount: 189,
@@ -148,7 +129,7 @@ const MOCK_TOP_LAWYERS: LawyerCard[] = [
   },
 ];
 
-const MOCK_STATISTICS: FeatureStatistic[] = [
+export const MOCK_STATISTICS: FeatureStatistic[] = [
   {
     id: "1",
     label: "محامي معتمدين",
@@ -174,108 +155,3 @@ const MOCK_STATISTICS: FeatureStatistic[] = [
     description: "ساعات استشارة قانونية",
   },
 ];
-
-// ============ Service ============
-
-export const indexPageService = {
-  /**
-   * Get homepage data (testimonials, top lawyers, statistics)
-   * GET /home/data
-   */
-  async getHomePageData(): Promise<ApiResponse<HomePageData>> {
-    const response = await httpClient.get<HomePageData>("/home/data");
-
-    // Fallback to mock data if request fails or returns empty
-    if (!response.success || !response.data) {
-      return {
-        success: true,
-        data: {
-          testimonials: MOCK_TESTIMONIALS,
-          topLawyers: MOCK_TOP_LAWYERS,
-          statistics: MOCK_STATISTICS,
-        },
-      };
-    }
-
-    // Ensure all fields have data, use mock as fallback for missing parts
-    return {
-      success: true,
-      data: {
-        testimonials:
-          response.data.testimonials && response.data.testimonials.length > 0
-            ? response.data.testimonials
-            : MOCK_TESTIMONIALS,
-        topLawyers:
-          response.data.topLawyers && response.data.topLawyers.length > 0
-            ? response.data.topLawyers
-            : MOCK_TOP_LAWYERS,
-        statistics:
-          response.data.statistics && response.data.statistics.length > 0
-            ? response.data.statistics
-            : MOCK_STATISTICS,
-      },
-    };
-  },
-
-  /**
-   * Get testimonials only
-   * GET /testimonials?limit=6
-   */
-  async getTestimonials(
-    limit: number = 6,
-  ): Promise<ApiResponse<Testimonial[]>> {
-    const response = await httpClient.get<Testimonial[]>("/testimonials", {
-      params: { limit },
-    });
-
-    // Fallback to mock data
-    if (!response.success || !response.data) {
-      return {
-        success: true,
-        data: MOCK_TESTIMONIALS.slice(0, limit),
-      };
-    }
-
-    return response;
-  },
-
-  /**
-   * Get top lawyers
-   * GET /lawyers/top?limit=3
-   */
-  async getTopLawyers(limit: number = 3): Promise<ApiResponse<LawyerCard[]>> {
-    const response = await httpClient.get<LawyerCard[]>("/lawyers/top", {
-      params: { limit },
-    });
-
-    // Fallback to mock data
-    if (!response.success || !response.data) {
-      return {
-        success: true,
-        data: MOCK_TOP_LAWYERS.slice(0, limit),
-      };
-    }
-
-    return response;
-  },
-
-  /**
-   * Get feature statistics
-   * GET /statistics
-   */
-  async getStatistics(): Promise<ApiResponse<FeatureStatistic[]>> {
-    const response = await httpClient.get<FeatureStatistic[]>("/statistics");
-
-    // Fallback to mock data
-    if (!response.success || !response.data) {
-      return {
-        success: true,
-        data: MOCK_STATISTICS,
-      };
-    }
-
-    return response;
-  },
-};
-
-export default indexPageService;

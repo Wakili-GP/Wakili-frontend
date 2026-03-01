@@ -63,7 +63,7 @@ export default function PlatformStats() {
                   <stat.icon className="w-7 h-7" />
                 </div>
 
-                <p className="text-xl md:text-2xl font-extrabold tracking-tight mb-2">
+                <p className="text-xl md:text-1xl font-bold tracking-tight mb-2">
                   {stat.value}
                 </p>
 

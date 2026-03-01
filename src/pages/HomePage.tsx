@@ -15,6 +15,7 @@ import LawyerSearch from "../components/LawyerSearch.tsx";
 import ContractReview from "../components/contract-review/ContractReview.tsx";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 import {
@@ -38,6 +39,7 @@ import ComingSoon from "../components/ComingSoon.tsx";
 import { useAuth } from "@/context/AuthContext.tsx";
 import { toast } from "@/components/ui/sonner";
 import EnhancedChatbot from "@/components/EnhancedChatbot.tsx";
+import legalHeroImage from "@/assets/ai-law.webp";
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState("home");
   const navigate = useNavigate();
@@ -80,7 +82,7 @@ const HomePage = () => {
   ];
   const renderHomeContent = () => (
     <div className="space-y-20">
-      <HeroSection />
+      <HeroSection setActiveSection={setActiveSection} />
       <InteractiveChatbotSection setActiveSection={setActiveSection} />
     </div>
   );
@@ -331,7 +333,7 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         {activeSection === "home" ? renderHomeContent() : renderSection()}
       </div>
       <Footer />
@@ -339,17 +341,52 @@ const HomePage = () => {
   );
 };
 
-const HeroSection = () => {
+const HeroSection = ({
+  setActiveSection,
+}: {
+  setActiveSection: (section: string) => void;
+}) => {
   return (
-    <div className="text-center py-20">
-      <h1 className="text-5xl md:text-7xl font-bold bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent leading-tight">
-        مرحبا بك في وكيلي
-      </h1>
-      <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-        منصتك القانونية الشاملة للحصول على الاستشارات والخدمات القانونية
-        المتميزة
-      </p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
+      className="relative overflow-hidden rounded-2xl"
+      style={{
+        marginLeft: "calc(-50vw + 50%)",
+        marginRight: "calc(-50vw + 50%)",
+        width: "100vw",
+      }}
+    >
+      {/* Same gradient as LandingPage hero */}
+      <div className="absolute inset-0 bg-gradient-hero opacity-90" />
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-15"
+        style={{ backgroundImage: `url(${legalHeroImage})` }}
+      />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6"
+          >
+            <div className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
+            <span className="text-primary-foreground/90 text-sm font-medium">
+              مرحباً بعودتك
+            </span>
+          </motion.div>
+          <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-5 leading-tight">
+            مرحبا بك في <span className="text-secondary">وكيلك</span>
+          </h1>
+          <p className="text-xl text-primary-foreground/85 max-w-3xl mx-auto leading-relaxed mb-8">
+            منصتك القانونية الشاملة — استشارات فورية، محامون موثوقون، وعقود
+            محمية
+          </p>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 const Logo = () => {

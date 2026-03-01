@@ -1,4 +1,9 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosError,
+  type AxiosResponse,
+} from "axios";
 
 // Types
 
@@ -79,6 +84,35 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  },
+);
+
+/**
+ * Response Interceptor - Handle API success flag and errors
+ */
+axiosInstance.interceptors.response.use(
+  (response: AxiosResponse) => {
+    // Check if response has success flag and it's false
+    const responseData = response.data as Record<string, unknown>;
+    if (
+      typeof responseData === "object" &&
+      responseData !== null &&
+      "success" in responseData
+    ) {
+      if (responseData.success === false) {
+        // Treat as error even though HTTP 200
+        const error = new Error(
+          formatErrorMessage(response.data),
+        ) as AxiosError;
+        error.response = response;
+        return Promise.reject(error);
+      }
+    }
+
+    return response;
+  },
+  (error: AxiosError) => {
     return Promise.reject(error);
   },
 );

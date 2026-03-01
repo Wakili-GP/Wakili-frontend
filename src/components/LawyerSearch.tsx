@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Search,
   Filter,
@@ -73,6 +73,55 @@ const locations = [
 
 const ITEMS_PER_PAGE = 8;
 
+// Scroll to Top Button Component
+const ScrollToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 400);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={handleClick}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+          aria-label="Scroll to top"
+        >
+          <motion.svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7-7m0 0L5 14m7-7v12"
+            />
+          </motion.svg>
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export default function LawyerSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedArea, setSelectedArea] = useState<string>("all");
@@ -83,6 +132,7 @@ export default function LawyerSearch() {
   const [sortBy, setSortBy] = useState("rating");
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [favorites, setFavorites] = useState<string[]>(() => {
     const saved = localStorage.getItem("favoriteLawyers");
     return saved ? JSON.parse(saved) : [];
@@ -120,6 +170,18 @@ export default function LawyerSearch() {
 
     fetchInitialData();
   }, []);
+
+  // Scroll to results when page changes
+  useEffect(() => {
+    if (currentPage > 1 && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  }, [currentPage]);
 
   // Search lawyers when filters change
   useEffect(() => {
@@ -240,7 +302,7 @@ export default function LawyerSearch() {
           width: "100vw",
         }}
       >
-        <div className="relative min-h-[50vh] md:min-h-[65vh] flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/70">
+        <div className="relative min-h-[50vh] md:min-h-[65vh] flex items-center justify-center bg-linear-to-br from-primary via-primary/90 to-primary/70">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div
@@ -558,7 +620,11 @@ export default function LawyerSearch() {
         </AnimatePresence>
 
         {/* Results Section */}
-        <div className="flex-1 space-y-6">
+        <div
+          ref={resultsRef}
+          className="flex-1 space-y-6"
+          style={{ scrollBehavior: "smooth" }}
+        >
           {/* Results Header */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <p className="text-muted-foreground">
@@ -615,69 +681,96 @@ export default function LawyerSearch() {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-2 hover:border-primary/30">
+                      <Card
+                        className="
+  group relative overflow-hidden
+  border border-border/40
+  bg-linear-to-br from-background via-background to-muted/30
+  backdrop-blur-xl
+  shadow-md hover:shadow-2xl
+  transition-all duration-500
+  hover:-translate-y-1
+  hover:border-primary/40
+"
+                      >
                         <CardContent className="p-0">
-                          <div className="flex">
+                          <div className="flex h-full">
                             {/* Lawyer Image */}
-                            <div className="relative w-32 h-40 shrink-0">
+                            <div className="relative w-32 h-40 shrink-0 overflow-hidden">
                               <img
                                 src={
                                   lawyer.profileImage ||
                                   "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
                                 }
                                 alt={`${lawyer.firstName} ${lawyer.lastName}`}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               />
+
+                              {/* Image gradient overlay */}
+                              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-70" />
+
+                              {/* Favorite Button */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleFavorite(lawyer.id);
                                 }}
-                                className="cursor-pointer absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
+                                className="cursor-pointer absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md bg-background/60 border border-border/40 shadow-md transition-all duration-300 hover:scale-110 hover:bg-background active:scale-95"
                               >
                                 <Heart
-                                  className={`w-5 h-5 transition-colors ${
-                                    favorites.includes(lawyer.id)
-                                      ? "text-red-500 fill-red-500"
-                                      : "text-muted-foreground"
-                                  }`}
+                                  className={`
+      w-5 h-5 transition-all duration-300
+      ${
+        favorites.includes(lawyer.id)
+          ? "text-red-500 fill-red-500 scale-110 drop-shadow-sm"
+          : "text-muted-foreground group-hover:text-primary"
+      }
+    `}
                                 />
                               </button>
                             </div>
 
                             {/* Lawyer Info */}
-                            <div className="flex-1 p-4 space-y-3">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
-                                    {lawyer.firstName} {lawyer.lastName}
-                                  </h3>
-                                  <Badge variant="secondary" className="mt-1">
-                                    {lawyer.specialty}
-                                  </Badge>
-                                </div>
+                            <div className="flex-1 p-5 flex flex-col">
+                              {/* Name + Specialty */}
+                              <div>
+                                <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
+                                  {lawyer.firstName} {lawyer.lastName}
+                                </h3>
+
+                                <Badge
+                                  variant="secondary"
+                                  className="mt-2 text-xs px-3 py-1 rounded-full"
+                                >
+                                  {lawyer.specialty}
+                                </Badge>
                               </div>
 
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              {/* Location + Rating */}
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-3">
                                 <div className="flex items-center gap-1">
-                                  <MapPin className="w-4 h-4" />
+                                  <MapPin className="w-4 h-4 text-primary/70" />
                                   {lawyer.city}
                                 </div>
+
                                 <div className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                  <Star className="w-4 h-4 text-warning-amber fill-warning-amber" />
                                   <span className="font-semibold text-foreground">
                                     {lawyer.rating}
                                   </span>
-                                  <span>({lawyer.reviewCount})</span>
+                                  <span className="text-xs">
+                                    ({lawyer.reviewCount})
+                                  </span>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 flex-wrap">
+                              {/* Session Types + Experience */}
+                              <div className="flex items-center gap-2 flex-wrap mt-3">
                                 {lawyer.sessionTypes.map((type) => (
                                   <Badge
                                     key={type}
                                     variant="outline"
-                                    className="text-xs"
+                                    className="text-xs px-2 py-1 rounded-full"
                                   >
                                     {type === "مكتب" ? (
                                       <Building2 className="w-3 h-3 ml-1" />
@@ -687,19 +780,32 @@ export default function LawyerSearch() {
                                     {type}
                                   </Badge>
                                 ))}
-                                <span className="text-sm text-muted-foreground">
-                                  • {lawyer.yearsOfExperience} سنة خبرة
+
+                                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                                  {lawyer.yearsOfExperience} سنة خبرة
                                 </span>
                               </div>
 
-                              <div className="flex items-center justify-between pt-2 border-t">
-                                <div className="text-lg font-bold text-primary">
-                                  {lawyer.hourlyRate} ج.م
-                                  <span className="text-sm font-normal text-muted-foreground">
-                                    /جلسة
+                              {/* Bottom Section */}
+                              <div className="pt-4 mt-4 border-t border-border/40 flex items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="text-xl font-bold text-primary">
+                                    {lawyer.hourlyRate} ج.م
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    لكل جلسة
                                   </span>
                                 </div>
-                                <Button size="sm" className="cursor-pointer">
+
+                                <Button
+                                  size="sm"
+                                  className="
+            cursor-pointer
+            rounded-full px-5
+            transition-all duration-300
+            group-hover:shadow-md
+          "
+                                >
                                   عرض الملف
                                 </Button>
                               </div>
@@ -789,6 +895,7 @@ export default function LawyerSearch() {
           )}
         </div>
       </div>
+      <ScrollToTopButton />
     </div>
   );
 }

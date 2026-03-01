@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { FileText, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
-import heroImage from "@/assets/contract-review-hero.jpg";
+import heroImage from "@/assets/ai-contract-review.webp";
 
 interface HeroSectionProps {
   onStartNow: () => void;
@@ -24,13 +24,13 @@ export default function HeroSection({ onStartNow }: HeroSectionProps) {
           alt="مراجعة العقود القانونية"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-l from-primary/90 via-primary/80 to-primary/70" />
+        <div className="absolute inset-0 bg-linear-to-l from-primary/90 via-primary/80 to-primary/70" />
       </div>
 
       {/* Subtle Glow Effect */}
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-white/10 blur-3xl rounded-full" />
 
-      <div className="relative z-10 px-8 md:px-16 py-24 md:py-32 text-right">
+      <div className="relative container z-10 px-8 md:px-28 py-16 md:py-20 text-right">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

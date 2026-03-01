@@ -24,16 +24,15 @@ const steps = [
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // Step 1: Basic Info
   const [basicInfo, setBasicInfo] = useState({
-    id: "",
     fullName: "",
-    email: user?.email || "",
+    email: "",
     profileImage: null as string | null,
     phoneCode: "+20",
     phoneNumber: "",
@@ -46,11 +45,11 @@ const LawyerOnboarding = () => {
   });
 
   // Update email in basicInfo when user email changes
-  useEffect(() => {
-    if (user?.email) {
-      setBasicInfo((prev) => ({ ...prev, email: user.email }));
-    }
-  }, [user?.email]);
+  // useEffect(() => {
+  //   if (user?.email) {
+  //     setBasicInfo((prev) => ({ ...prev, email: user.email }));
+  //   }
+  // }, [user?.email]);
 
   // Step 2: Education
   const [education, setEducation] = useState({

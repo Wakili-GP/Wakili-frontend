@@ -39,8 +39,6 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-
-          {/* Protected Routes - Lawyers Only */}
           <Route
             path="/verify/lawyer"
             element={

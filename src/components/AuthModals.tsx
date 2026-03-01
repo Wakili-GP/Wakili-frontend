@@ -23,7 +23,19 @@ import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import { toast } from "@/components/ui/sonner";
 import { authService } from "@/services/auth-services";
-import { useAuth } from "@/context/AuthContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  loginSchema,
+  type LoginInput,
+  forgotPasswordSchema,
+  type ForgotPasswordInput,
+  resetPasswordSchema,
+  type ResetPasswordInput,
+  registerSchema,
+  type RegisterInput,
+} from "@/schemas/auth";
+import { useMutation } from "@tanstack/react-query";
 
 export type AuthMode =
   | "login"
@@ -62,195 +74,159 @@ const AuthModals: React.FC<AuthModalProps> = ({
   onSwitchMode,
 }) => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedUserType, setSelectedUserType] = useState<string>("");
-  const [resetCode, setResetCode] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
-  const [registrationEmail, setRegistrationEmail] = useState("");
+  const [emailVerificationModal, showEmailVerificationModal] = useState(false);
+  const [registrationEmailToConfirm, setRegistrationEmailToConfirm] =
+    useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [fullName, setFullName] = useState("");
 
-  // Reset form when dialog opens
-  useEffect(() => {
-    if (!open && !showEmailVerification) {
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setResetCode("");
-      setFullName("");
-    }
-  }, [open, mode, showEmailVerification]);
+  const loginForm = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await login(email, password);
-
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: LoginInput) => {
+      const response = await authService.login({ email, password });
+      if (!response.success) throw new Error(response.error);
+      return response.data;
+    },
+    onSuccess: (data) => {
       toast.success("تم تسجيل الدخول بنجاح!", {
         description: "مرحباً بك في وكيلي",
       });
       onOpenChange(false);
+      console.log("Login Data:", data?.user?.userType);
       navigate("/home");
-    } catch (error) {
+    },
+    onError: (error) => {
       toast.error("خطأ في تسجيل الدخول", {
         description:
           error instanceof Error ? error.message : "تأكد من البريد والرمز",
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const response = await authService.forgotPassword({ email });
-
-    if (response.success) {
+  const forgotPasswordForm = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+  const forgotPasswordMutation = useMutation({
+    mutationFn: ({ email }: ForgotPasswordInput) =>
+      authService.forgotPassword({ email }),
+    onSuccess: () => {
       toast.success("تم إرسال رمز التحقق", {
         description: "تحقق من بريدك الإلكتروني",
       });
       onSwitchMode("reset-password");
-    } else {
+    },
+    onError: (error) => {
       toast.error("خطأ", {
-        description: response.error || "فشل إرسال رمز التحقق",
-      });
-    }
-    setIsLoading(false);
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+=\-{}[\]|\\:;"'<>,./]).{12,}$/;
-
-    if (!selectedUserType) {
-      toast.error("خطأ", {
-        description: "اختر نوع المستخدم",
-      });
-      return;
-    }
-    if (!passwordRegex.test(password)) {
-      toast.error("كلمة مرور ضعيفة", {
         description:
-          "كلمة المرور يجب أن تكون 12 حرفًا على الأقل وتحتوي على حرف كبير، حرف صغير، رقم، ورمز خاص",
+          error instanceof Error ? error.message : "فشل إرسال رمز التحقق",
       });
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("خطأ", {
-        description: "كلمات المرور غير متطابقة",
+    },
+  });
+
+  const resetPasswordForm = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      code: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (values: ResetPasswordInput) => {
+      return authService.resetPassword({
+        email: forgotPasswordForm.getValues("email"),
+        code: values.code,
+        newPassword: values.password,
       });
-      return;
-    }
-
-    setIsLoading(true);
-
-    const [firstName, ...lastNameParts] = fullName.trim().split(" ");
-    const lastName = lastNameParts.join(" ");
-
-    const userType = selectedUserType === "lawyer" ? "lawyer" : "client";
-
-    const response = await authService.register({
-      email,
-      password,
-      firstName,
-      lastName,
-      userType,
-      acceptTerms: true,
-    });
-
-    if (response.success) {
-      setRegistrationEmail(email);
-      setShowEmailVerification(true);
-      onOpenChange(false);
-      toast.success("تم إنشاء الحساب!", {
-        description: "يرجى تأكيد بريدك الإلكتروني",
-      });
-    } else {
-      toast.error("خطأ في التسجيل", {
-        description: response.error || "فشل إنشاء الحساب",
-      });
-    }
-    setIsLoading(false);
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("خطأ", {
-        description: "كلمات المرور غير متطابقة",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    const response = await authService.resetPassword({
-      email,
-      code: resetCode,
-      newPassword: password,
-    });
-
-    if (response.success) {
+    },
+    onSuccess: () => {
       toast.success("تم تحديث كلمة المرور!", {
         description: "يمكنك الآن تسجيل الدخول",
       });
       onSwitchMode("login");
-      setEmail("");
-      setPassword("");
-      setResetCode("");
-      setConfirmPassword("");
-    } else {
-      toast.error("خطأ", {
-        description: response.error || "فشل تحديث كلمة المرور",
-      });
-    }
-    setIsLoading(false);
-  };
-
-  const handleEmailVerified = async () => {
-    const emailToUse = registrationEmail || email;
-    try {
-      await login(emailToUse, password);
-    } catch (error) {
-      toast.error("خطأ في تسجيل الدخول", {
+      resetPasswordForm.reset();
+    },
+    onError: (error) => {
+      toast.error("خطأ في تحديث كلمة المرور", {
         description:
-          error instanceof Error ? error.message : "تعذر تسجيل الدخول",
+          error instanceof Error ? error.message : "فشل تحديث كلمة المرور",
       });
-      console.error("Login error:", error);
-      return;
-    }
+    },
+  });
 
-    setShowEmailVerification(false);
-    toast.success("تم التحقق بنجاح!", {
-      description: "مرحباً بك في وكيلي",
-    });
-    onOpenChange(false);
+  const registerForm = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    // Redirect based on user type
-    console.log("Selected user type:", selectedUserType);
-    if (selectedUserType === "lawyer") {
-      console.log("Redirecting to lawyer onboarding...");
-      navigate("/verify/lawyer");
-    } else {
-      navigate("/home");
+  const registerMutation = useMutation({
+    mutationFn: async (values: RegisterInput) => {
+      const userType = values.userType === "lawyer" ? "lawyer" : "client";
+      return authService.register({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        userType,
+        acceptTerms: true,
+      });
+    },
+    onSuccess: () => {
+      setRegistrationEmailToConfirm(registerForm.getValues("email"));
+      showEmailVerificationModal(true);
+      onOpenChange(false);
+      toast.success("تم إنشاء الحساب!", {
+        description: "يرجى تأكيد بريدك الإلكتروني",
+      });
+      registerForm.reset();
+    },
+    onError: (error) => {
+      toast.error("خطأ في التسجيل", {
+        description:
+          error instanceof Error ? error.message : "فشل إنشاء الحساب",
+      });
+    },
+  });
+
+  // Reset forms when both auth and verification dialogs are closed
+  useEffect(() => {
+    if (!open && !emailVerificationModal) {
+      loginForm.reset();
+      forgotPasswordForm.reset();
+      resetPasswordForm.reset();
+      registerForm.reset();
     }
-  };
+  }, [
+    open,
+    emailVerificationModal,
+    loginForm,
+    forgotPasswordForm,
+    resetPasswordForm,
+    registerForm,
+  ]);
 
   const handleGoogleAuth = async () => {
     toast.info("قيد التطوير", {
       description: "ستتوفر طريقة تسجيل الدخول عبر Google قريباً",
     });
   };
+
   const userTypes = [
     {
       id: "client",
@@ -295,7 +271,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
               type="button"
               variant="secondary"
               className="w-full mb-4 cursor-pointer"
-              disabled={isLoading}
               onClick={handleGoogleAuth}
             >
               <Globe className="ml-2" /> الدخول باستخدام Google
@@ -303,27 +278,38 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
             <Divider />
 
-            <form className="space-y-4" onSubmit={handleLogin}>
+            <form
+              className="space-y-4"
+              onSubmit={loginForm.handleSubmit((data) =>
+                loginMutation.mutate(data),
+              )}
+            >
               <div className="space-y-2">
                 <Label htmlFor="email">البريد الإلكتروني</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="email@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...loginForm.register("email")}
                 />
+                {loginForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">
+                    {loginForm.formState.errors.email.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">كلمة المرور</Label>
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...loginForm.register("password")}
                 />
+                {loginForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">
+                    {loginForm.formState.errors.password.message}
+                  </p>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -352,9 +338,11 @@ const AuthModals: React.FC<AuthModalProps> = ({
               <Button
                 type="submit"
                 className="w-full cursor-pointer"
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
               >
-                {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+                {loginMutation.isPending
+                  ? "جاري تسجيل الدخول..."
+                  : "تسجيل الدخول"}
               </Button>
             </form>
 
@@ -373,24 +361,29 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
         {mode === "forgot-password" && (
           <div>
-            <form onSubmit={handleForgotPassword} className="space-y-4">
+            <form
+              onSubmit={forgotPasswordForm.handleSubmit((data) =>
+                forgotPasswordMutation.mutate(data),
+              )}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="forgot-email">البريد الإلكتروني</Label>
                 <Input
                   id="forgot-email"
                   type="email"
                   placeholder="example@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...forgotPasswordForm.register("email")}
                 />
               </div>
               <Button
                 type="submit"
                 className="w-full cursor-pointer"
-                disabled={isLoading}
+                disabled={forgotPasswordMutation.isPending}
               >
-                {isLoading ? "جاري الإرسال..." : "إرسال رمز التحقق"}
+                {forgotPasswordMutation.isPending
+                  ? "جاري الإرسال..."
+                  : "إرسال رمز التحقق"}
               </Button>
             </form>
             <p className="text-center text-sm text-muted-foreground mt-4">
@@ -411,30 +404,47 @@ const AuthModals: React.FC<AuthModalProps> = ({
               type="button"
               variant="secondary"
               className="w-full mb-4"
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               onClick={handleGoogleAuth}
             >
               <Globe className="ml-2" />
               التسجيل باستخدام Google
             </Button>
             <Divider />
-            <form className="space-y-4" onSubmit={handleRegister}>
+            <form
+              className="space-y-4"
+              onSubmit={registerForm.handleSubmit((data) =>
+                registerMutation.mutate(data),
+              )}
+            >
+              {/* User Type */}
               <div className="space-y-4">
                 <Label className="text-base font-medium">نوع المستخدم</Label>
                 <div className="grid grid-cols-3 gap-3">
                   {userTypes.map((type) => {
                     const IconComponent = type.icon;
                     const isDisabled = type.comingSoon;
+                    const isSelected =
+                      registerForm.watch("userType") === type.id;
                     return (
                       <div
                         key={type.id}
-                        onClick={() =>
-                          !isDisabled && setSelectedUserType(type.id)
-                        }
+                        onClick={() => {
+                          if (isDisabled) return;
+                          if (type.id === "lawyer") {
+                            navigate("/apply/lawyer");
+                            return;
+                          }
+                          registerForm.setValue(
+                            "userType",
+                            type.id as "client" | "lawyer",
+                            { shouldValidate: true },
+                          );
+                        }}
                         className={`relative rounded-lg border-2 p-4 text-center transition-all ${
                           isDisabled
                             ? "cursor-not-allowed opacity-60 border-border"
-                            : `cursor-pointer hover:shadow-md ${selectedUserType === type.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary-50"}`
+                            : `cursor-pointer hover:shadow-md ${isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary-50"}`
                         }`}
                       >
                         {type.comingSoon && (
@@ -443,10 +453,10 @@ const AuthModals: React.FC<AuthModalProps> = ({
                           </span>
                         )}
                         <IconComponent
-                          className={`mx-auto mb-2 h-6 w-6 ${isDisabled ? "text-muted-foreground/50" : selectedUserType === type.id ? "text-primary" : "text-muted-foreground"}`}
+                          className={`mx-auto mb-2 h-6 w-6 ${isDisabled ? "text-muted-foreground/50" : isSelected ? "text-primary" : "text-muted-foreground"}`}
                         />
                         <p
-                          className={`text-sm font-medium $${isDisabled ? "text-muted-foreground/50" : selectedUserType == type.id ? "text-primary" : "text-foreground"}`}
+                          className={`text-sm font-medium ${isDisabled ? "text-muted-foreground/50" : isSelected ? "text-primary" : "text-foreground"}`}
                         >
                           {type.label}
                         </p>
@@ -454,57 +464,100 @@ const AuthModals: React.FC<AuthModalProps> = ({
                     );
                   })}
                 </div>
+                {registerForm.formState.errors.userType && (
+                  <p className="text-sm text-destructive">
+                    {registerForm.formState.errors.userType.message}
+                  </p>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="fullname">الاسم الكامل</Label>
-                <Input
-                  id="fullname"
-                  type="text"
-                  placeholder="الاسم الكامل"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                />
+
+              {/* First & Last Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">الاسم الأول</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    {...registerForm.register("firstName")}
+                  />
+                  {registerForm.formState.errors.firstName && (
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.firstName.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">اسم العائلة</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    {...registerForm.register("lastName")}
+                  />
+                  {registerForm.formState.errors.lastName && (
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.lastName.message}
+                    </p>
+                  )}
+                </div>
               </div>
+
+              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="reg-email">البريد الإلكتروني</Label>
                 <Input
                   id="reg-email"
                   type="email"
                   placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...registerForm.register("email")}
                 />
+                {registerForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">
+                    {registerForm.formState.errors.email.message}
+                  </p>
+                )}
               </div>
+
+              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="reg-password">كلمة المرور</Label>
                 <Input
                   id="reg-password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...registerForm.register("password")}
                 />
+                {registerForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">
+                    {registerForm.formState.errors.password.message}
+                  </p>
+                )}
               </div>
+
+              {/* Confirm Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
                 <Input
                   id="confirm-password"
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
+                  {...registerForm.register("confirmPassword")}
                 />
+                {registerForm.formState.errors.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {registerForm.formState.errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
+
               <Button
                 type="submit"
                 className="cursor-pointer w-full"
-                disabled={isLoading}
+                disabled={registerMutation.isPending}
               >
-                {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+                {registerMutation.isPending
+                  ? "جاري إنشاء الحساب..."
+                  : "إنشاء حساب"}
               </Button>
             </form>
+
             <p className="text-center text-sm text-muted-foreground mt-4">
               لديك حساب بالفعل؟
               <button
@@ -519,18 +572,20 @@ const AuthModals: React.FC<AuthModalProps> = ({
         )}
         {mode === "reset-password" && (
           <div>
-            <form className="space-y-4" onSubmit={handleResetPassword}>
+            <form
+              className="space-y-4"
+              onSubmit={resetPasswordForm.handleSubmit((data) =>
+                resetPasswordMutation.mutate(data),
+              )}
+            >
               <div className="space-y-2">
                 <Label htmlFor="reset-code">رمز التحقق</Label>
                 <Input
                   id="reset-code"
                   type="text"
                   placeholder="000000"
-                  value={resetCode}
-                  onChange={(e) => setResetCode(e.target.value)}
-                  maxLength={6}
                   className="text-center text-2xl tracking-widset"
-                  required
+                  {...resetPasswordForm.register("code")}
                 />
               </div>
               <div className="space-y-2">
@@ -538,9 +593,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 <Input
                   id="new-password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...resetPasswordForm.register("password")}
                 />
               </div>
               <div className="space-y-2">
@@ -548,17 +601,17 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 <Input
                   id="confirm-new-password"
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
+                  {...resetPasswordForm.register("confirmPassword")}
                 />
               </div>
               <Button
                 type="submit"
                 className="w-full cursor-pointer"
-                disabled={isLoading}
+                disabled={resetPasswordMutation.isPending}
               >
-                {isLoading ? "جاري التحديث..." : "تحديث كلمة المرور"}
+                {resetPasswordMutation.isPending
+                  ? "جاري التحديث..."
+                  : "تحديث كلمة المرور"}
               </Button>
               <p className="text-center text-sm text-muted-foreground mt-4">
                 العودة إلى
@@ -575,11 +628,9 @@ const AuthModals: React.FC<AuthModalProps> = ({
         )}
       </DialogContent>
       <EmailVerificationModal
-        open={showEmailVerification}
-        onOpenChange={setShowEmailVerification}
-        email={registrationEmail}
-        onVerified={handleEmailVerified}
-        userType={selectedUserType}
+        open={emailVerificationModal}
+        onOpenChange={showEmailVerificationModal}
+        email={registrationEmailToConfirm}
       />
     </Dialog>
   );
@@ -589,19 +640,14 @@ interface EmailVerificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   email: string;
-  onVerified: () => void;
-  userType: string;
 }
 
 const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   open,
   onOpenChange,
   email,
-  onVerified,
 }) => {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -618,6 +664,42 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     }
   }, [open]);
+
+  const verifyMutation = useMutation({
+    mutationFn: async (code: string) => {
+      return authService.verifyEmail({ email, code });
+    },
+    onSuccess: () => {
+      toast.success("تم التحقق بنجاح!", {
+        description: "تم تأكيد بريدك الإلكتروني",
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast.error("خطأ في التحقق", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "الرمز غير صحيح أو منتهي الصلاحية",
+      });
+    },
+  });
+  const resendMutation = useMutation({
+    mutationFn: () => authService.resendVerificationEmail(email),
+    onSuccess: () => {
+      toast.success("تم إرسال الرمز", {
+        description: "تحقق من بريدك الإلكتروني",
+      });
+      setCountdown(60);
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    },
+    onError: (error) => {
+      toast.error("خطأ", {
+        description: error instanceof Error ? error.message : "فشل إرسال الرمز",
+      });
+    },
+  });
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -652,56 +734,6 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     });
     setOtp(newOtp);
     inputRefs.current[Math.min(pastedData.length, 5)]?.focus();
-  };
-
-  const handleVerify = async () => {
-    const code = otp.join("");
-    if (code.length !== 6) {
-      toast.error("خطأ", {
-        description: "يرجى إدخال الرمز المكون من 6 أرقام",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    const response = await authService.verifyEmail({
-      email,
-      code,
-    });
-
-    if (response.success) {
-      toast.success("تم التحقق بنجاح!", {
-        description: "تم تأكيد بريدك الإلكتروني",
-      });
-      setIsLoading(false);
-      onVerified();
-    } else {
-      toast.error("خطأ في التحقق", {
-        description: response.error || "الرمز غير صحيح أو منتهي الصلاحية",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    setIsResending(true);
-
-    const response = await authService.resendVerificationEmail(email);
-
-    if (response.success) {
-      toast.success("تم إرسال الرمز", {
-        description: "تحقق من بريدك الإلكتروني",
-      });
-      setCountdown(60);
-      setOtp(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
-    } else {
-      toast.error("خطأ", {
-        description: response.error || "فشل إرسال الرمز",
-      });
-    }
-    setIsResending(false);
   };
 
   return (
@@ -749,11 +781,11 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
           {/* Verify Button */}
           <Button
-            onClick={handleVerify}
+            onClick={() => verifyMutation.mutate(otp.join(""))}
             className="w-full cursor-pointer"
-            disabled={isLoading || otp.some((d) => !d)}
+            disabled={verifyMutation.isPending || otp.some((d) => !d)}
           >
-            {isLoading ? (
+            {verifyMutation.isPending ? (
               <>
                 <Loader className="w-4 h-4 ml-2 animate-spin" />
                 جاري التحقق...
@@ -770,12 +802,12 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
             </p>
             <Button
               variant="ghost"
-              onClick={handleResend}
-              disabled={isResending || countdown > 0}
-              className="text-primary"
+              onClick={() => resendMutation.mutate()}
+              disabled={resendMutation.isPending || countdown > 0}
+              className="cursor-pointer text-primary"
             >
               <RefreshCw
-                className={`w-4 h-4 ml-2 ${isResending ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ml-2 ${resendMutation.isPending ? "animate-spin" : ""}`}
               />
               {countdown > 0
                 ? `إعادة الإرسال (${countdown}ث)`

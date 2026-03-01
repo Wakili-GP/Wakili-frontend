@@ -18,6 +18,7 @@ import {
   Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import legalHeroImage from "../assets/legal-hero.jpg";
 import { motion } from "framer-motion";
 import mobileMockup from "../assets/floating-iphones.png";
@@ -36,69 +37,56 @@ import {
   TestimonialCardSkeleton,
 } from "@/components/ui/skeletons";
 
-import {
-  indexPageService,
-  type Testimonial,
-  type LawyerCard as BackendLawyerCard,
-  type FeatureStatistic,
-} from "@/services/indexPage-services";
-
 import Chatbot from "@/components/Chatbot";
 const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
-  useEffect(() => {
-    document.documentElement.style.scrollBehavior = "smooth";
-    return () => {
-      document.documentElement.style.scrollBehavior = "auto";
-    };
-  });
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
-      <nav className="bg-background/95 backdrop-blur-sm border-b border-border fixed top-0 w-full z-50 shadow-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <Scale className="h-12 w-9 text-primary" />
-              <span className="text-2xl font-bold text-foreground">وكيلي</span>
+      <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 fixed top-0 w-full z-50 shadow-card">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-2">
+              <Scale className="w-8 h-8 text-primary" />
+              <span className="text-2xl font-bold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                وكيلك
+              </span>
             </div>
-            {/* Links */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center space-x-6">
               <a
                 href="#services"
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
               >
                 الخدمات
               </a>
               <a
                 href="#lawyers"
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
               >
                 أهم محامينا
               </a>
               <a
                 href="#testimonials"
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
               >
-                ماذا يقول عملاؤنا عنا
+                آراء العملاء
               </a>
               <a
                 href="#features"
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
               >
                 المميزات
               </a>
               <a
                 href="#"
-                className="text-foreground cursor-pointer hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
               >
                 من نحن
               </a>
               <Button
                 className="cursor-pointer"
                 variant="hero"
-                size="lg"
+                size="sm"
                 onClick={() => {
                   setAuthMode("login");
                   setAuthOpen(true);
@@ -486,7 +474,7 @@ interface LawyerCardProps {
   lawyerImg: string;
   lawyerName: string;
   lawyerCases: number | string;
-  lawyerSpecialization: string;
+  specialties: string[];
   lawyerRating: number | string;
   lawyerExperience: string;
 }
@@ -494,71 +482,97 @@ const LawyerCard: FC<LawyerCardProps> = ({
   lawyerImg,
   lawyerName,
   lawyerCases,
-  lawyerSpecialization,
+  specialties,
   lawyerRating,
   lawyerExperience,
 }) => {
   const ratingValue = Number(lawyerRating);
 
   return (
-    <Card className="min-w-[320px] px-7 py-6 mx-4 bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-500 transform hover:-translate-y-2 cursor-pointer">
-      <CardContent className="p-0">
+    <Card
+      className="group relative min-w-[320px] mx-4 overflow-hidden 
+    bg-linear-to-br from-background via-background to-muted/40
+    border border-border/40 backdrop-blur-xl
+    shadow-lg hover:shadow-2xl
+    transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+    >
+      {/* Soft Glow Effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+
+      <CardContent className="p-6 relative z-10 flex flex-col h-full">
         {/* Avatar + Info */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-4 mb-4">
           <div className="relative">
             <img
               src={lawyerImg}
               alt={lawyerName}
-              className="w-14 h-14 rounded-full object-cover shadow-card"
+              className="w-16 h-16 rounded-full object-cover 
+              ring-2 ring-primary/20 group-hover:ring-primary/50
+              transition-all duration-500"
             />
-            <div className="absolute -bottom-1 -right-1 bg-secondary rounded-full p-1">
-              <Award className="w-3 h-3 text-secondary-foreground" />
+            <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1 shadow-md">
+              <Award className="w-3 h-3 text-primary-foreground" />
             </div>
           </div>
 
           <div className="flex-1 leading-tight">
-            <h3 className="text-base font-bold text-foreground">
+            <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors duration-300">
               {lawyerName}
             </h3>
             <p className="text-sm text-muted-foreground">{lawyerExperience}</p>
           </div>
         </div>
 
-        {/* Specialization + Stats */}
-        <div className="mb-3 space-y-2">
-          <p className="text-sm font-medium text-primary">
-            {lawyerSpecialization}
-          </p>
+        {/* Specialization Badge */}
+        <div className="flex flex-wrap gap-2">
+          {specialties.map((spec, index) => (
+            <Badge
+              key={index}
+              variant="secondary"
+              className="text-xs px-3 py-1"
+            >
+              {spec}
+            </Badge>
+          ))}
+        </div>
 
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Briefcase className="w-4 h-4" />
-              <span>{lawyerCases} قضية</span>
-            </div>
+        {/* Stats */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+          <div className="flex items-center gap-1">
+            <Briefcase className="w-4 h-4 text-primary/70" />
+            <span>{lawyerCases} قضية</span>
+          </div>
 
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-warning-amber fill-current" />
-              <span className="font-medium">{lawyerRating}</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <Star className="w-4 h-4 text-warning-amber fill-current" />
+            <span className="font-semibold text-foreground">
+              {lawyerRating}
+            </span>
           </div>
         </div>
 
-        {/* Rating Stars */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/40">
-          <div className="flex gap-0.5">
+        {/* Divider */}
+        <div className="border-t border-border/40 pt-4 mt-auto flex items-center justify-between">
+          {/* Rating Stars */}
+          <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-4 h-4 ${
+                className={`w-4 h-4 transition ${
                   i < Math.floor(ratingValue)
-                    ? "text-warning-amber fill-current"
-                    : "text-muted-foreground/30"
+                    ? "text-warning-amber fill-current scale-100"
+                    : "text-muted-foreground/30 scale-90"
                 }`}
               />
             ))}
           </div>
 
-          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
+          {/* Availability Badge */}
+          <span
+            className="text-xs font-medium
+          bg-emerald-500/10 text-emerald-600
+          px-3 py-1 rounded-full"
+          >
             متاح للاستشارة
           </span>
         </div>
@@ -566,23 +580,13 @@ const LawyerCard: FC<LawyerCardProps> = ({
     </Card>
   );
 };
-
+import {
+  MOCK_TOP_LAWYERS,
+  type Lawyer as LawyerData,
+} from "@/data/indexPage-data";
 const Lawyers: FC = () => {
-  const [lawyers, setLawyers] = useState<BackendLawyerCard[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLawyers = async () => {
-      setIsLoading(true);
-      const response = await indexPageService.getTopLawyers(6);
-      if (response.success && response.data) {
-        setLawyers(response.data);
-      }
-      setIsLoading(false);
-    };
-
-    fetchLawyers();
-  }, []);
+  const [lawyers, setLawyers] = useState<LawyerData[]>(MOCK_TOP_LAWYERS);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <section id="lawyers" className="py-16 bg-muted">
@@ -616,9 +620,9 @@ const Lawyers: FC = () => {
               <LawyerCard
                 key={lawyer.id}
                 lawyerImg={lawyer.profileImage || lawyer_2}
-                lawyerName={`${lawyer.firstName} ${lawyer.lastName}`}
+                lawyerName={lawyer.fullName}
                 lawyerCases={lawyer.reviewCount}
-                lawyerSpecialization={lawyer.specialties.join(", ")}
+                specialties={lawyer.specialties}
                 lawyerRating={lawyer.rating}
                 lawyerExperience={`${lawyer.yearsOfExperience || 0} سنة خبرة`}
               />
@@ -629,22 +633,11 @@ const Lawyers: FC = () => {
     </section>
   );
 };
+import { type Testimonial, MOCK_TESTIMONIALS } from "@/data/indexPage-data";
 const Testimonials = () => {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      setIsLoading(true);
-      const response = await indexPageService.getTestimonials(6);
-      if (response.success && response.data) {
-        setTestimonials(response.data);
-      }
-      setIsLoading(false);
-    };
-
-    fetchTestimonials();
-  }, []);
+  const [testimonials, setTestimonials] =
+    useState<Testimonial[]>(MOCK_TESTIMONIALS);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <section id="testimonials" className="py-20 bg-muted">
@@ -681,7 +674,7 @@ const Testimonials = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card className="bg-gradient-card border-0 shadow-card hover:shadow-elegant transition-all duration-300 h-full">
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 flex flex-col h-full">
                     <div className="flex items-center mb-4">
                       <div className="flex text-warning-amber">
                         {[...Array(5)].map((_, i) => (
@@ -699,7 +692,7 @@ const Testimonials = () => {
                     <p className="text-muted-foreground mb-4 leading-relaxed">
                       "{testimonial.testimonialText}"
                     </p>
-                    <div className="flex items-center">
+                    <div className="flex items-center mt-auto">
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center ml-3">
                         <span className="text-primary font-semibold">
                           {testimonial.clientName.charAt(0)}
@@ -724,22 +717,11 @@ const Testimonials = () => {
     </section>
   );
 };
+import { type FeatureStatistic, MOCK_STATISTICS } from "@/data/indexPage-data";
 const Features = () => {
-  const [statistics, setStatistics] = useState<FeatureStatistic[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      setIsLoading(true);
-      const response = await indexPageService.getStatistics();
-      if (response.success && response.data) {
-        setStatistics(response.data);
-      }
-      setIsLoading(false);
-    };
-
-    fetchStatistics();
-  }, []);
+  const [statistics, setStatistics] =
+    useState<FeatureStatistic[]>(MOCK_STATISTICS);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <section id="features" className="py-20">
@@ -819,22 +801,32 @@ const Features = () => {
             <h3 className="text-2xl font-bold text-foreground mb-6 text-center">
               إحصائيات المنصة
             </h3>
-            {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader className="w-8 h-8 animate-spin text-primary" />
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">
+                  1000+
+                </div>
+                <div className="text-muted-foreground">محامي معتمد</div>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-6">
-                {statistics.map((stat) => (
-                  <div key={stat.id} className="text-center">
-                    <div className="text-3xl font-bold text-primary mb-2">
-                      {stat.value}
-                    </div>
-                    <div className="text-muted-foreground">{stat.label}</div>
-                  </div>
-                ))}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-secondary mb-2">
+                  5000+
+                </div>
+                <div className="text-muted-foreground">استشارة مكتملة</div>
               </div>
-            )}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-success-green mb-2">
+                  24/7
+                </div>
+                <div className="text-muted-foreground">دعم مستمر</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-warning-amber mb-2">
+                  99%
+                </div>
+                <div className="text-muted-foreground">رضا العملاء</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
