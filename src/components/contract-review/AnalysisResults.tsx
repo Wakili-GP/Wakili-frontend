@@ -79,31 +79,19 @@ export default function AnalysisResults({
 
       <Tabs defaultValue="summary" dir="rtl">
         <TabsList className="grid grid-cols-4 w-full h-12">
-          <TabsTrigger
-            value="summary"
-            className="cursor-pointer flex items-center gap-2"
-          >
+          <TabsTrigger value="summary" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             ملخص العقد
           </TabsTrigger>
-          <TabsTrigger
-            value="risks"
-            className="cursor-pointer flex items-center gap-2"
-          >
+          <TabsTrigger value="risks" className="flex items-center gap-2">
             <ShieldAlert className="w-4 h-4" />
             المخاطر
           </TabsTrigger>
-          <TabsTrigger
-            value="obligations"
-            className="cursor-pointer flex items-center gap-2"
-          >
+          <TabsTrigger value="obligations" className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4" />
             الالتزامات
           </TabsTrigger>
-          <TabsTrigger
-            value="comparison"
-            className="cursor-pointer flex items-center gap-2"
-          >
+          <TabsTrigger value="comparison" className="flex items-center gap-2">
             <TableIcon className="w-4 h-4" />
             المقارنة
           </TabsTrigger>
@@ -175,7 +163,7 @@ export default function AnalysisResults({
               >
                 {Object.entries(analysis.obligations).map(([party, duties]) => (
                   <AccordionItem key={party} value={party}>
-                    <AccordionTrigger className=" cursor-pointer text-lg font-semibold hover:no-underline">
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-sm font-bold text-primary">
@@ -228,7 +216,7 @@ export default function AnalysisResults({
                           (col) => (
                             <TableHead
                               key={col}
-                              className="text-center font-bold text-base"
+                              className="text-right font-bold text-base"
                             >
                               {col}
                             </TableHead>
@@ -240,7 +228,7 @@ export default function AnalysisResults({
                       {analysis.comparison_table.map((row, i) => (
                         <TableRow key={i} className="hover:bg-muted/30">
                           {Object.values(row).map((cell, j) => (
-                            <TableCell key={j} className="text-center">
+                            <TableCell key={j} className="text-right">
                               {cell}
                             </TableCell>
                           ))}

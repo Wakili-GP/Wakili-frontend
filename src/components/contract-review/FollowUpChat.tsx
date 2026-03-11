@@ -128,7 +128,7 @@ export default function FollowUpChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="اكتب سؤالك هنا..."
-              className="min-h-10 max-h-24 resize-none"
+              className="min-h-[48px] max-h-24 resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -140,7 +140,7 @@ export default function FollowUpChat() {
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || isTyping}
-              className="shrink-0 h-10 w-10 cursor-pointer"
+              className="shrink-0 h-12 w-12"
             >
               <Send className="w-5 h-5" />
             </Button>

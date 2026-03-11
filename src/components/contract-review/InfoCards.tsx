@@ -9,7 +9,7 @@ import {
   Home,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 const tips = [
   "تأكد من وضوح النص في الملف المرفوع",
@@ -31,71 +31,54 @@ export default function InfoCards() {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {/* Tips Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-      >
-        <Card className="group rounded-2xl border border-border/60 bg-background/80 backdrop-blur-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-4 text-lg font-semibold">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-amber-400/20 to-amber-500/10 flex items-center justify-center">
-                <Lightbulb className="w-6 h-6 text-amber-500" />
-              </div>
-              نصائح قبل رفع العقد
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <ul className="space-y-4">
-              {tips.map((tip, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center text-xs font-bold text-amber-600 shrink-0 mt-0.5">
-                    {i + 1}
-                  </div>
-                  <span className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                    {tip}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </motion.div>
+      <Card className="border-2 hover:shadow-lg transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <Lightbulb className="w-5 h-5 text-amber-500" />
+            </div>
+            نصائح قبل رفع العقد
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            {tips.map((tip, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-xs font-bold text-amber-600 shrink-0 mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="text-muted-foreground">{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
       {/* Contract Types Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        viewport={{ once: true }}
-      >
-        <Card className="group rounded-2xl border border-border/60 bg-background/80 backdrop-blur-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-4 text-lg font-semibold">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                <FileCheck className="w-6 h-6 text-primary" />
-              </div>
-              العقود التي نراجعها
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {contractTypes.map((type, i) => (
-                <div
-                  key={i}
-                  className="flex items-center bg-secondary gap-2 px-4 py-2 rounded-full text-sm hover:bg-primary/10 transition-colors duration-200 cursor-default"
-                >
-                  <type.icon className="w-4 h-4 text-primary" />
-                  <span className="font-medium">{type.name}</span>
-                </div>
-              ))}
+      <Card className="border-2 hover:shadow-lg transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <FileCheck className="w-5 h-5 text-primary" />
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            العقود التي نراجعها
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {contractTypes.map((type, i) => (
+              <Badge
+                key={i}
+                variant="secondary"
+                className="px-4 py-2 text-sm flex items-center gap-2 hover:bg-primary/10 transition-colors cursor-default"
+              >
+                <type.icon className="w-4 h-4" />
+                {type.name}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

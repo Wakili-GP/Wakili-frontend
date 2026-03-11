@@ -8,9 +8,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export interface ContractAnalysis {
   summary: string;
@@ -120,15 +120,12 @@ const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
       if (!file) return;
       setUploadState("uploading");
       setUploadProgress(0);
-
       for (let i = 0; i <= 100; i += 10) {
         await new Promise((r) => setTimeout(r, 150));
         setUploadProgress(i);
       }
-
       setUploadState("analyzing");
       await new Promise((r) => setTimeout(r, 2500));
-
       onAnalysisComplete(mockAnalysis, file.name);
       setUploadState("done");
       toast.success("تم تحليل العقد بنجاح");
@@ -149,137 +146,160 @@ const UploadSection = forwardRef<UploadSectionRef, UploadSectionProps>(
     if (uploadState === "done") return null;
 
     return (
-      <section ref={setSectionRef} id="upload-section">
-        <div className="text-center mb-8">
+      <section ref={setSectionRef} id="upload-section" className="py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10"
+        >
+          <span className="text-sm font-semibold text-secondary tracking-wide mb-3 block">
+            ابدأ الآن
+          </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             ارفع عقدك القانوني
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-muted-foreground text-lg">
             قم برفع ملف العقد وسنتولى الباقي
           </p>
-        </div>
+        </motion.div>
 
-        <Card className="border-2 border-dashed border-primary/30 bg-linear-to-br from-primary/5 to-muted/30 max-w-3xl mx-auto">
-          <CardContent className="p-8">
-            {!file ? (
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setIsDragOver(true);
-                }}
-                onDragLeave={() => setIsDragOver(false)}
-                className={`flex flex-col items-center justify-center py-16 rounded-xl transition-all duration-300 cursor-pointer ${
-                  isDragOver
-                    ? "bg-primary/10 border-2 border-primary/50"
-                    : "hover:bg-primary/5"
-                }`}
-                onClick={() =>
-                  document.getElementById("contract-file-input")?.click()
-                }
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="max-w-2xl mx-auto"
+        >
+          {!file ? (
+            <div
+              onDrop={handleDrop}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragOver(true);
+              }}
+              onDragLeave={() => setIsDragOver(false)}
+              onClick={() =>
+                document.getElementById("contract-file-input")?.click()
+              }
+              className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer p-12 text-center ${
+                isDragOver
+                  ? "border-primary bg-primary/5 scale-[1.02]"
+                  : "border-border hover:border-primary/40 hover:bg-muted/30"
+              }`}
+            >
+              <motion.div
+                animate={isDragOver ? { y: -8 } : { y: 0 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="flex flex-col items-center"
               >
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                  <Upload className="w-16 h-16 text-primary relative z-10" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+                  <Upload className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">
-                  اسحب الملف هنا أو انقر للرفع
+                  اسحب العقد هنا أو اضغط للرفع
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  PDF, DOC, DOCX — حتى 20 ميجابايت
+                <p className="text-muted-foreground text-sm mb-4">
+                  PDF / DOCX — حتى 20 ميجابايت
                 </p>
                 <Button
                   variant="outline"
-                  className="cursor-pointer border-primary/50 hover:bg-primary/10"
+                  size="sm"
+                  className="border-primary/30 text-primary hover:bg-primary/5"
                 >
-                  <Upload className="w-4 h-4 ml-2" />
                   اختر ملفاً
                 </Button>
-                <input
-                  id="contract-file-input"
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFile(f);
-                    e.target.value = "";
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between bg-background/80 rounded-xl p-4 border">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{file.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatFileSize(file.size)}
-                      </p>
-                    </div>
+              </motion.div>
+              <input
+                id="contract-file-input"
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFile(f);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-border bg-background p-6 space-y-5">
+              {/* File info */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-primary" />
                   </div>
+                  <div>
+                    <p className="font-medium text-sm">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatFileSize(file.size)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemoveFile}
+                  disabled={
+                    uploadState === "uploading" || uploadState === "analyzing"
+                  }
+                  className="h-8 w-8"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {uploadState === "uploading" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>جارٍ رفع الملف...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-1.5" />
+                </div>
+              )}
+
+              {uploadState === "analyzing" && (
+                <div className="flex items-center justify-center gap-3 py-6">
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    جارٍ تحليل العقد...
+                  </span>
+                </div>
+              )}
+
+              {errorMessage && uploadState === "error" && (
+                <div className="flex items-center gap-3 bg-destructive/5 border border-destructive/20 rounded-xl p-3">
+                  <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+                  <p className="text-sm text-destructive flex-1">
+                    {errorMessage}
+                  </p>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="cursor-pointer"
-                    onClick={handleRemoveFile}
-                    disabled={
-                      uploadState === "uploading" || uploadState === "analyzing"
-                    }
+                    size="sm"
+                    onClick={handleRetry}
+                    className="text-xs"
                   >
-                    <X className="w-5 h-5" />
+                    <RefreshCw className="w-3 h-3 ml-1" />
+                    إعادة
                   </Button>
                 </div>
+              )}
 
-                {uploadState === "uploading" && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>جارٍ رفع الملف...</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <Progress value={uploadProgress} className="h-2" />
-                  </div>
-                )}
-
-                {uploadState === "analyzing" && (
-                  <div className="flex items-center justify-center gap-3 py-8">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    <span className="text-lg font-medium">
-                      جارٍ تحليل العقد...
-                    </span>
-                  </div>
-                )}
-
-                {errorMessage && uploadState === "error" && (
-                  <div className="flex items-center gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
-                    <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
-                    <p className="text-destructive flex-1">{errorMessage}</p>
-                    <Button variant="outline" size="sm" onClick={handleRetry}>
-                      <RefreshCw className="w-4 h-4 ml-1" />
-                      إعادة المحاولة
-                    </Button>
-                  </div>
-                )}
-
-                {uploadState === "idle" && (
-                  <div className="text-center">
-                    <Button
-                      size="lg"
-                      onClick={handleAnalyze}
-                      className="cursor-pointer text-lg px-10 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <FileText className="w-5 h-5 ml-2" />
-                      تحليل العقد
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {uploadState === "idle" && (
+                <Button
+                  onClick={handleAnalyze}
+                  className="w-full bg-secondary text-secondary-foreground hover:bg-secondary-hover font-bold"
+                  size="lg"
+                >
+                  <FileText className="w-4 h-4 ml-2" />
+                  تحليل العقد
+                </Button>
+              )}
+            </div>
+          )}
+        </motion.div>
       </section>
     );
   },

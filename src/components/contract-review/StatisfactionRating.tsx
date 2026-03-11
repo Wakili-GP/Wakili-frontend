@@ -62,7 +62,7 @@ export default function SatisfactionRating() {
                 className="transition-transform hover:scale-125"
               >
                 <Star
-                  className={`w-10 h-10 transition-colors cursor-pointer ${
+                  className={`w-10 h-10 transition-colors ${
                     star <= (hoveredRating || rating)
                       ? "fill-amber-400 text-amber-400"
                       : "text-muted-foreground/30"
@@ -81,7 +81,7 @@ export default function SatisfactionRating() {
             rows={3}
           />
 
-          <Button onClick={handleSubmit} className="w-full cursor-pointer">
+          <Button onClick={handleSubmit} className="w-full">
             <Send className="w-4 h-4 ml-2" />
             إرسال التقييم
           </Button>
