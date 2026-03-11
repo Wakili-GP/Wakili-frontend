@@ -3,20 +3,26 @@ import { Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "@tanstack/react-query";
+import {
+  analyzeContractService,
+  type HistoryEntry,
+} from "@/services/ai-review.service/ai-review.service";
 
 interface Message {
   id: number;
   role: "user" | "ai";
   content: string;
 }
+interface FollowUpChatProps {
+  analysisId: string;
+}
 
-const mockResponses = [
-  "بناءً على تحليل العقد، يمكنني توضيح أن هذا البند يحمي حقوق البائع بشكل أساسي. ننصح بإضافة شرط جزائي واضح لحماية المشتري أيضاً.",
-  "نعم، هذا البند قانوني ولكنه يميل لصالح أحد الأطراف. يُفضل التفاوض على تعديله ليكون أكثر توازناً.",
-  "وفقاً للأنظمة المعمول بها، يحق لك الاعتراض على هذا البند خلال 30 يوماً من توقيع العقد. ننصح باستشارة محامٍ متخصص للمتابعة.",
-];
+export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
+  const { mutate: chat, isPending } = useMutation({
+    mutationFn: analyzeContractService.chatWithContract,
+  });
 
-export default function FollowUpChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 0,
@@ -26,29 +32,34 @@ export default function FollowUpChat() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMsg: Message = {
+    const query = input;
+    const userMsg = {
       id: messages.length,
-      role: "user",
-      content: input,
+      role: "user" as const,
+      content: query,
     };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setIsTyping(true);
 
-    await new Promise((r) => setTimeout(r, 1500));
-
-    const aiMsg: Message = {
-      id: messages.length + 1,
-      role: "ai",
-      content: mockResponses[messages.length % mockResponses.length],
-    };
-    setMessages((prev) => [...prev, aiMsg]);
-    setIsTyping(false);
+    const history: HistoryEntry[] = messages.map((m) => [
+      m.role === "user" ? "human" : "ai",
+      m.content,
+    ]);
+    chat(
+      { analysis_id: analysisId, query, history },
+      {
+        onSuccess: (data) => {
+          setMessages((prev) => [
+            ...prev,
+            { id: prev.length, role: "ai", content: data.answer },
+          ]);
+        },
+      },
+    );
   };
 
   return (
@@ -106,7 +117,7 @@ export default function FollowUpChat() {
                 </div>
               </div>
             ))}
-            {isTyping && (
+            {isPending && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-white border border-stone-300 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-amber-700" />
@@ -149,7 +160,7 @@ export default function FollowUpChat() {
               <Button
                 size="icon"
                 onClick={handleSend}
-                disabled={!input.trim() || isTyping}
+                disabled={!input.trim() || isPending}
                 className="absolute left-3 bottom-3 h-9 w-9 rounded-full bg-amber-700 text-white hover:bg-amber-800"
               >
                 <Send className="w-4 h-4" />

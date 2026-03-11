@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button";
 import { FileText, Play, Zap, ShieldCheck, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 
-interface HeroSectionProps {
-  onStartNow: () => void;
-}
+// Trust Items for the Hero Section
+const trustItems = [
+  { icon: Zap, text: "تحليل خلال ثوانٍ" },
+  { icon: ShieldCheck, text: "اكتشاف المخاطر القانونية" },
+  { icon: Lightbulb, text: "توصيات قانونية ذكية" },
+];
 
 // Animated contract demo component
-function ContractDemo() {
+const ContractDemo = () => {
   const clauses = [
     { text: "البند الأول: التزامات البائع", risk: false, delay: 0.5 },
     { text: "البند الثاني: شروط الدفع والسداد", risk: false, delay: 1.0 },
@@ -98,15 +101,9 @@ function ContractDemo() {
       </div>
     </div>
   );
-}
+};
 
-export default function HeroSection({ onStartNow }: HeroSectionProps) {
-  const trustItems = [
-    { icon: Zap, text: "تحليل خلال ثوانٍ" },
-    { icon: ShieldCheck, text: "اكتشاف المخاطر القانونية" },
-    { icon: Lightbulb, text: "توصيات قانونية ذكية" },
-  ];
-
+const HeroSection = () => {
   return (
     <section
       className="relative overflow-hidden -mx-4 -mt-8"
@@ -148,17 +145,15 @@ export default function HeroSection({ onStartNow }: HeroSectionProps) {
             <div className="flex flex-wrap gap-3 mb-8">
               <Button
                 variant="cta"
-                size="xl"
+                size="lg"
                 className="shadow-glow text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-                onClick={onStartNow}
               >
                 <FileText className="w-5 h-5 ml-2" />
                 ارفع عقدك الآن
               </Button>
               <Button
-                onClick={onStartNow}
                 variant="outline"
-                size="xl"
+                size="lg"
                 className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
               >
                 <Play className="w-4 h-4 ml-2" />
@@ -196,4 +191,5 @@ export default function HeroSection({ onStartNow }: HeroSectionProps) {
       </div>
     </section>
   );
-}
+};
+export default HeroSection;

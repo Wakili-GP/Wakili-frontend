@@ -31,12 +31,6 @@ interface AnalysisResultsProps {
   onReset: () => void;
 }
 
-const riskSeverity = (index: number): "high" | "medium" | "low" => {
-  if (index === 0) return "high";
-  if (index < 3) return "medium";
-  return "low";
-};
-
 const severityConfig = {
   high: {
     label: "عالي",
@@ -123,7 +117,7 @@ export default function AnalysisResults({
               </p>
               <div className="mt-4">
                 <Badge variant="secondary" className="text-base px-4 py-1">
-                  نوع العقد: عقد بيع سيارة
+                  نوع العقد: {analysis.contract_type}
                 </Badge>
               </div>
             </CardContent>
@@ -141,15 +135,22 @@ export default function AnalysisResults({
             <CardContent>
               <ul className="space-y-4">
                 {analysis.risks.map((risk, i) => {
-                  const severity = riskSeverity(i);
-                  const config = severityConfig[severity];
+                  const config =
+                    severityConfig[risk.level] ?? severityConfig.low;
                   return (
                     <li
                       key={i}
                       className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
                     >
                       <AlertCircle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
-                      <span className="flex-1 text-base">{risk}</span>
+                      <div className="flex-1 space-y-1">
+                        <span className="text-base">{risk.description}</span>
+                        {risk.reference && (
+                          <p className="text-xs text-muted-foreground">
+                            المرجع: {risk.reference}
+                          </p>
+                        )}
+                      </div>
                       <Badge className={config.className}>{config.label}</Badge>
                     </li>
                   );
@@ -219,27 +220,25 @@ export default function AnalysisResults({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {analysis.comparison_table.length > 0 && (
+              {analysis.comparison_table.length > 1 && (
                 <div className="rounded-lg border overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">
-                        {Object.keys(analysis.comparison_table[0]).map(
-                          (col) => (
-                            <TableHead
-                              key={col}
-                              className="text-center font-bold text-primary"
-                            >
-                              {col}
-                            </TableHead>
-                          ),
-                        )}
+                        {analysis.comparison_table[0].map((col, j) => (
+                          <TableHead
+                            key={j}
+                            className="text-center font-bold text-primary"
+                          >
+                            {col}
+                          </TableHead>
+                        ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {analysis.comparison_table.map((row, i) => (
+                      {analysis.comparison_table.slice(1).map((row, i) => (
                         <TableRow key={i} className="hover:bg-muted/30">
-                          {Object.values(row).map((cell, j) => (
+                          {row.map((cell, j) => (
                             <TableCell key={j} className="text-center">
                               {cell}
                             </TableCell>
