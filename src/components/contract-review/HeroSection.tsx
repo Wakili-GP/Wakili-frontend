@@ -117,7 +117,7 @@ export default function HeroSection({ onStartNow }: HeroSectionProps) {
       }}
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-bl from-primary via-primary to-primary/90" />
+      <div className="absolute inset-0 bg-linear-to-bl from-primary/80 via-primary/90 to-primary" />
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
@@ -147,18 +147,19 @@ export default function HeroSection({ onStartNow }: HeroSectionProps) {
 
             <div className="flex flex-wrap gap-3 mb-8">
               <Button
+                variant="cta"
                 size="xl"
+                className="shadow-glow text-primary-foreground hover:bg-primary-foreground hover:text-primary"
                 onClick={onStartNow}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary-hover font-bold shadow-lg"
               >
                 <FileText className="w-5 h-5 ml-2" />
                 ارفع عقدك الآن
               </Button>
               <Button
-                size="lg"
-                variant="outline"
                 onClick={onStartNow}
-                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                variant="outline"
+                size="xl"
+                className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
               >
                 <Play className="w-4 h-4 ml-2" />
                 شاهد كيف يعمل

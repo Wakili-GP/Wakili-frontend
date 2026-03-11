@@ -607,7 +607,7 @@ export default function LawyerProfile() {
                         className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.experience.length - 1 ? "" : "pb-5"}`}
                       >
                         {/* Icon container - LinkedIn style */}
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                             <Briefcase className="w-6 h-6 text-primary" />
                           </div>
@@ -630,7 +630,7 @@ export default function LawyerProfile() {
                             {isOwner && exp.status === "pending" && (
                               <Badge
                                 variant="secondary"
-                                className="bg-amber-100 text-amber-800 flex-shrink-0"
+                                className="bg-amber-100 text-amber-800 shrink-0"
                               >
                                 <Clock className="w-3 h-3 ml-1" />
                                 قيد المراجعة
@@ -663,7 +663,7 @@ export default function LawyerProfile() {
                         className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.education.length - 1 ? "" : "pb-5"}`}
                       >
                         {/* Icon container - LinkedIn style */}
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                             <GraduationCap className="w-6 h-6 text-blue-600" />
                           </div>
@@ -712,7 +712,7 @@ export default function LawyerProfile() {
                         className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.certificates.length - 1 ? "" : "pb-5"}`}
                       >
                         {/* Icon container */}
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                             <Award className="w-6 h-6 text-amber-600" />
                           </div>
@@ -735,7 +735,7 @@ export default function LawyerProfile() {
                             {isOwner && cert.status === "pending" && (
                               <Badge
                                 variant="secondary"
-                                className="bg-amber-100 text-amber-800 flex-shrink-0"
+                                className="bg-amber-100 text-amber-800 shrink-0"
                               >
                                 <Clock className="w-3 h-3 ml-1" />
                                 قيد المراجعة

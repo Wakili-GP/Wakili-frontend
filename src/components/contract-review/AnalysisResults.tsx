@@ -58,7 +58,7 @@ export default function AnalysisResults({
   onReset,
 }: AnalysisResultsProps) {
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 mt-8">
       <div className="text-center mb-4">
         <h2 className="text-3xl md:text-4xl font-bold mb-2">نتائج التحليل</h2>
       </div>
@@ -79,19 +79,31 @@ export default function AnalysisResults({
 
       <Tabs defaultValue="summary" dir="rtl">
         <TabsList className="grid grid-cols-4 w-full h-12">
-          <TabsTrigger value="summary" className="flex items-center gap-2">
+          <TabsTrigger
+            value="summary"
+            className="gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+          >
             <FileText className="w-4 h-4" />
             ملخص العقد
           </TabsTrigger>
-          <TabsTrigger value="risks" className="flex items-center gap-2">
+          <TabsTrigger
+            value="risks"
+            className="gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+          >
             <ShieldAlert className="w-4 h-4" />
             المخاطر
           </TabsTrigger>
-          <TabsTrigger value="obligations" className="flex items-center gap-2">
+          <TabsTrigger
+            value="obligations"
+            className="gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+          >
             <ClipboardList className="w-4 h-4" />
             الالتزامات
           </TabsTrigger>
-          <TabsTrigger value="comparison" className="flex items-center gap-2">
+          <TabsTrigger
+            value="comparison"
+            className="gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+          >
             <TableIcon className="w-4 h-4" />
             المقارنة
           </TabsTrigger>
@@ -216,7 +228,7 @@ export default function AnalysisResults({
                           (col) => (
                             <TableHead
                               key={col}
-                              className="text-right font-bold text-base"
+                              className="text-center font-bold text-primary"
                             >
                               {col}
                             </TableHead>
@@ -228,7 +240,7 @@ export default function AnalysisResults({
                       {analysis.comparison_table.map((row, i) => (
                         <TableRow key={i} className="hover:bg-muted/30">
                           {Object.values(row).map((cell, j) => (
-                            <TableCell key={j} className="text-right">
+                            <TableCell key={j} className="text-center">
                               {cell}
                             </TableCell>
                           ))}
