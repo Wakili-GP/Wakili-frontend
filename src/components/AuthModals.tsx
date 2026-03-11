@@ -36,6 +36,7 @@ import {
   type RegisterInput,
 } from "@/schemas/auth";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 export type AuthMode =
   | "login"
@@ -74,6 +75,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
   onSwitchMode,
 }) => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [emailVerificationModal, showEmailVerificationModal] = useState(false);
   const [registrationEmailToConfirm, setRegistrationEmailToConfirm] =
     useState("");
@@ -89,16 +91,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: LoginInput) => {
-      const response = await authService.login({ email, password });
-      if (!response.success) throw new Error(response.error);
-      return response.data;
+      await login(email, password);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("تم تسجيل الدخول بنجاح!", {
         description: "مرحباً بك في وكيلي",
       });
       onOpenChange(false);
-      console.log("Login Data:", data?.user?.userType);
       navigate("/home");
     },
     onError: (error) => {

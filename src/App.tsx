@@ -10,6 +10,12 @@ import ClientProfile from "./pages/ClientProfile";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/context/ProtectedRoute";
+import HomeLayout from "./components/HomeLayout";
+import AiChatPage from "./pages/AiChatPage";
+import LawyersPage from "./pages/LawyersPage";
+import AiLegalReviewPage from "./pages/AiLegalReviewPage";
+import ForumPage from "./pages/ForumPage";
+import ArticlesPage from "./pages/ArticlesPage";
 
 const App = () => (
   <AuthProvider>
@@ -22,23 +28,23 @@ const App = () => (
           <Route path="/lawyer/:id" element={<LawyerProfile />} />
           <Route path="/lawyer/:id/review" element={<LawyerReview />} />
 
-          {/* Protected Routes - Authenticated Users */}
+          {/* Protected Routes - Shared layout with navbar & footer */}
           <Route
-            path="/home"
             element={
               <ProtectedRoute>
-                <HomePage />
+                <HomeLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ClientProfile />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/ai-chat" element={<AiChatPage />} />
+            <Route path="/lawyers" element={<LawyersPage />} />
+            <Route path="/ai-contract-review" element={<AiLegalReviewPage />} />
+            <Route path="/forum" element={<ForumPage />} />
+            <Route path="/articles" element={<ArticlesPage />} />
+            <Route path="/profile" element={<ClientProfile />} />
+          </Route>
+
           <Route
             path="/verify/lawyer"
             element={

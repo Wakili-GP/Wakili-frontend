@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import AccountSettingsModals from "@/components/AccountSettingsModal";
 import CoverImageEditModal from "@/components/CoverImageEditModal";
@@ -41,9 +41,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import { getInitials, getAvatarColor } from "@/lib/avatarHelpers";
+import { useAuth } from "@/context/AuthContext";
 
 const ClientProfile = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -55,6 +58,7 @@ const ClientProfile = () => {
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [bookingsLoading, setBookingsLoading] = useState(true);
 
+  console.log(user);
   // Fetch profile data on mount
   useEffect(() => {
     fetchProfileData();
@@ -65,6 +69,7 @@ const ClientProfile = () => {
     const response = await clientProfileService.getProfile();
     if (response.success && response.data) {
       setClientData(response.data);
+      console.log(response.data);
     }
     setIsLoading(false);
   };
@@ -231,14 +236,19 @@ const ClientProfile = () => {
           <div className="relative -mt-16 mb-6">
             <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
               <div className="relative">
-                <img
-                  src={
-                    clientData.profileImage ||
-                    "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
-                  }
-                  alt={`${clientData.firstName} ${clientData.lastName}`}
-                  className="w-36 h-36 rounded-full border-4 border-background shadow-lg object-cover"
-                />
+                {clientData.profileImage ? (
+                  <img
+                    src={clientData.profileImage}
+                    alt={`${clientData.firstName} ${clientData.lastName}`}
+                    className="w-36 h-36 rounded-full border-4 border-background shadow-xl object-cover"
+                  />
+                ) : (
+                  <div
+                    className={`w-36 h-36 rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-background shadow-xl ${getAvatarColor(clientData.firstName + clientData.lastName)}`}
+                  >
+                    {getInitials(clientData.firstName, clientData.lastName)}
+                  </div>
+                )}
               </div>
               <div className="flex-1 bg-card p-6 rounded-lg shadow-lg">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

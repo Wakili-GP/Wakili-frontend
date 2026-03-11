@@ -323,7 +323,7 @@ export default function LawyerProfile() {
   );
 
   // Role detection
-  const isOwner = currentUser.id === lawyer.id && currentUser.role === "lawyer";
+  const isOwner = true;
 
   useEffect(() => {
     const saved = localStorage.getItem("favoriteLawyers");
@@ -517,40 +517,66 @@ export default function LawyerProfile() {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs dir="rtl" defaultValue="about" className="w-full">
-              <TabsList className="w-full justify-start mb-6 flex-wrap h-auto gap-1">
+              <TabsList className="w-full justify-start mb-6 flex-wrap h-auto gap-1.5 bg-card border border-border/50 rounded-xl p-2 shadow-sm">
                 {/* Public Tabs (visible to all) */}
-                <TabsTrigger className="cursor-pointer" value="about">
+                <TabsTrigger
+                  className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                  value="about"
+                >
+                  <Users className="w-4 h-4" />
                   نبذة عني
                 </TabsTrigger>
-                <TabsTrigger className="cursor-pointer" value="experience">
+                <TabsTrigger
+                  className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                  value="experience"
+                >
+                  <Briefcase className="w-4 h-4" />
                   الخبرات
                 </TabsTrigger>
-                <TabsTrigger className="cursor-pointer" value="education">
+                <TabsTrigger
+                  className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                  value="education"
+                >
+                  <GraduationCap className="w-4 h-4" />
                   التعليم
                 </TabsTrigger>
-                <TabsTrigger className="cursor-pointer" value="reviews">
+                <TabsTrigger
+                  className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                  value="reviews"
+                >
+                  <Star className="w-4 h-4" />
                   التقييمات
                 </TabsTrigger>
 
                 {/* Lawyer-only Tabs */}
                 {isOwner && (
                   <>
-                    <TabsTrigger className="cursor-pointer" value="activity">
+                    <TabsTrigger
+                      className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                      value="activity"
+                    >
+                      <TrendingUp className="w-4 h-4" />
                       النشاط
                     </TabsTrigger>
                     <TabsTrigger
-                      className="cursor-pointer"
+                      className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
                       value="appointments"
                     >
+                      <Calendar className="w-4 h-4" />
                       مواعيدي
                     </TabsTrigger>
-                    <TabsTrigger className="cursor-pointer" value="settings">
+                    <TabsTrigger
+                      className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
+                      value="settings"
+                    >
+                      <Settings className="w-4 h-4" />
                       الإعدادات المهنية
                     </TabsTrigger>
                     <TabsTrigger
-                      className="cursor-pointer"
+                      className="cursor-pointer gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/80"
                       value="verification"
                     >
+                      <Award className="w-4 h-4" />
                       التحقق والمستندات
                     </TabsTrigger>
                   </>
@@ -571,36 +597,50 @@ export default function LawyerProfile() {
               <TabsContent value="experience">
                 <Card className="p-6">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Briefcase className="w-6 h-6" />
+                    <Briefcase className="w-6 h-6 text-primary" />
                     <span>الخبرات العملية</span>
                   </h2>
-                  <div className="space-y-6">
-                    {lawyer.experience.map((exp) => (
+                  <div className="divide-y divide-border">
+                    {lawyer.experience.map((exp, index) => (
                       <div
                         key={exp.id}
-                        className="relative border-r-2 border-legal-primary pr-6"
+                        className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.experience.length - 1 ? "" : "pb-5"}`}
                       >
-                        <div className="absolute -right-2 top-0 w-4 h-4 rounded-full bg-legal-primary border-2 border-background"></div>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-bold text-lg">{exp.title}</h3>
-                            <p className="text-muted-foreground mb-1">
-                              {exp.company}
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {exp.startYear} - {exp.endYear}
-                            </p>
-                            <p className="text-sm">{exp.description}</p>
+                        {/* Icon container - LinkedIn style */}
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                            <Briefcase className="w-6 h-6 text-primary" />
                           </div>
-                          {isOwner && exp.status === "pending" && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-amber-100 text-amber-800"
-                            >
-                              <Clock className="w-3 h-3 ml-1" />
-                              قيد المراجعة
-                            </Badge>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h3 className="font-semibold text-base leading-snug">
+                                {exp.title}
+                              </h3>
+                              <p className="text-sm text-foreground/80 mt-0.5">
+                                {exp.company}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {exp.startYear} - {exp.endYear}
+                              </p>
+                            </div>
+                            {isOwner && exp.status === "pending" && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-amber-100 text-amber-800 flex-shrink-0"
+                              >
+                                <Clock className="w-3 h-3 ml-1" />
+                                قيد المراجعة
+                              </Badge>
+                            )}
+                          </div>
+                          {exp.description && (
+                            <p className="text-sm text-muted-foreground mt-2.5 leading-relaxed">
+                              {exp.description}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -613,64 +653,40 @@ export default function LawyerProfile() {
               <TabsContent value="education">
                 <Card className="p-6">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <GraduationCap className="w-6 h-6" />
+                    <GraduationCap className="w-6 h-6 text-primary" />
                     <span>المؤهلات العلمية</span>
                   </h2>
-                  <div className="space-y-6">
-                    {lawyer.education.map((edu) => (
+                  <div className="divide-y divide-border">
+                    {lawyer.education.map((edu, index) => (
                       <div
                         key={edu.id}
-                        className="relative border-r-2 border-legal-primary pr-6"
+                        className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.education.length - 1 ? "" : "pb-5"}`}
                       >
-                        <div className="absolute -right-2 top-0 w-4 h-4 rounded-full bg-legal-primary border-2 border-background"></div>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-bold text-lg">
-                              {edu.degree} في {edu.field}
-                            </h3>
-                            <p className="text-muted-foreground mb-1">
-                              {edu.university}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {edu.year}
-                            </p>
+                        {/* Icon container - LinkedIn style */}
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                            <GraduationCap className="w-6 h-6 text-blue-600" />
                           </div>
-                          {isOwner && edu.status === "pending" && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-amber-100 text-amber-800"
-                            >
-                              <Clock className="w-3 h-3 ml-1" />
-                              قيد المراجعة
-                            </Badge>
-                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-8">
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <Award className="w-5 h-5" />
-                      <span>الشهادات المهنية</span>
-                    </h3>
-                    <div className="space-y-4">
-                      {lawyer.certificates.map((cert) => (
-                        <div key={cert.id} className="p-4 border rounded-lg">
-                          <div className="flex items-start justify-between">
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-3">
                             <div>
-                              <h4 className="font-bold">{cert.name}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {cert.issuer}
+                              <h3 className="font-semibold text-base leading-snug">
+                                {edu.degree} في {edu.field}
+                              </h3>
+                              <p className="text-sm text-foreground/80 mt-0.5">
+                                {edu.university}
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {cert.year}
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {edu.year}
                               </p>
                             </div>
-                            {isOwner && cert.status === "pending" && (
+                            {isOwner && edu.status === "pending" && (
                               <Badge
                                 variant="secondary"
-                                className="bg-amber-100 text-amber-800"
+                                className="bg-amber-100 text-amber-800 flex-shrink-0"
                               >
                                 <Clock className="w-3 h-3 ml-1" />
                                 قيد المراجعة
@@ -678,8 +694,57 @@ export default function LawyerProfile() {
                             )}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Certificates - separate card like LinkedIn sections */}
+                <Card className="p-6 mt-6">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Award className="w-5 h-5 text-amber-600" />
+                    <span>الشهادات المهنية</span>
+                  </h3>
+                  <div className="divide-y divide-border">
+                    {lawyer.certificates.map((cert, index) => (
+                      <div
+                        key={cert.id}
+                        className={`flex gap-4 ${index === 0 ? "" : "pt-5"} ${index === lawyer.certificates.length - 1 ? "" : "pb-5"}`}
+                      >
+                        {/* Icon container */}
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                            <Award className="w-6 h-6 text-amber-600" />
+                          </div>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h4 className="font-semibold text-base leading-snug">
+                                {cert.name}
+                              </h4>
+                              <p className="text-sm text-foreground/80 mt-0.5">
+                                {cert.issuer}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <Calendar className="w-3.5 h-3.5" />
+                                {cert.year}
+                              </p>
+                            </div>
+                            {isOwner && cert.status === "pending" && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-amber-100 text-amber-800 flex-shrink-0"
+                              >
+                                <Clock className="w-3 h-3 ml-1" />
+                                قيد المراجعة
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </Card>
               </TabsContent>

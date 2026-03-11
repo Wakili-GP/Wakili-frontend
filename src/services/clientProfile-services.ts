@@ -60,11 +60,11 @@ export interface ProfileUpdateRequest {
 
 const MOCK_CLIENT_PROFILE: ClientProfile = {
   id: "client-1",
-  firstName: "اسامة",
-  lastName: "العريني",
+  firstName: "أسامة",
+  lastName: "محمد",
   email: "usama@email.com",
   phoneNumber: "+20 100 123 4567",
-  profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Usama",
+  profileImage: "",
   coverImage:
     "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=400&fit=crop",
   city: "القاهرة",
