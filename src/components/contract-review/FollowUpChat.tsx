@@ -53,7 +53,7 @@ export default function FollowUpChat() {
 
   return (
     <section>
-      <div className="text-center mb-8">
+      <div className="text-center my-8">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">أسئلة متابعة</h2>
         <p className="text-lg text-muted-foreground">
           اسأل أي سؤال حول العقد الذي تم تحليله
@@ -128,7 +128,7 @@ export default function FollowUpChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="اكتب سؤالك هنا..."
-              className="min-h-[48px] max-h-24 resize-none"
+              className="min-h-12 max-h-24 resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

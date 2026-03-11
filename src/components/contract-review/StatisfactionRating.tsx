@@ -43,7 +43,7 @@ export default function SatisfactionRating() {
 
   return (
     <section>
-      <Card className="max-w-lg mx-auto">
+      <Card className="max-w-lg mt-8 mx-auto">
         <CardHeader className="text-center">
           <CardTitle>قيّم تجربتك</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -59,7 +59,7 @@ export default function SatisfactionRating() {
                 onMouseEnter={() => setHoveredRating(star)}
                 onMouseLeave={() => setHoveredRating(0)}
                 onClick={() => setRating(star)}
-                className="transition-transform hover:scale-125"
+                className="cursor-pointer transition-transform hover:scale-125"
               >
                 <Star
                   className={`w-10 h-10 transition-colors ${
