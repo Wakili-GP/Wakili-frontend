@@ -98,7 +98,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
         description: "مرحباً بك في وكيلي",
       });
       onOpenChange(false);
-      navigate("/home");
+      navigate("/");
     },
     onError: (error) => {
       toast.error("خطأ في تسجيل الدخول", {

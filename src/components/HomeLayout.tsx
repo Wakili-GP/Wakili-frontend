@@ -29,7 +29,7 @@ import { useAuth } from "@/context/AuthContext.tsx";
 import { toast } from "@/components/ui/sonner";
 
 const navTabs = [
-  { path: "/home", label: "الرئيسية", icon: Scale },
+  { path: "/", label: "الرئيسية", icon: Scale },
   { path: "/ai-chat", label: "الذكاء الاصطناعي", icon: MessageCircle },
   { path: "/lawyers", label: "محامي", icon: Users },
   { path: "/ai-contract-review", label: "حلل عقدا", icon: FileText },
