@@ -42,6 +42,9 @@ import Chatbot from "@/components/Chatbot";
 const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const openAiChatPage = () => {
+    window.open("/ai-chat", "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
@@ -52,13 +55,13 @@ const IndexPage = () => {
           setAuthOpen(true);
         }}
       />
-      <Hero />
+      <Hero onOpenAiChat={openAiChatPage} />
       <MobileApp />
       <Services />
       <Lawyers />
       <Testimonials />
       <Features />
-      <CTA />
+      <CTA onOpenAiChat={openAiChatPage} />
       <Footer />
       <AuthModals
         open={authOpen}
@@ -70,7 +73,7 @@ const IndexPage = () => {
     </div>
   );
 };
-const Hero = () => {
+const Hero = ({ onOpenAiChat }: { onOpenAiChat: () => void }) => {
   return (
     <section className="relative pt-28 pb-16 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-hero opacity-90" />
@@ -107,7 +110,8 @@ const Hero = () => {
               <Button
                 variant="outline"
                 size="xl"
-                className="cursor-pointer border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                className="px-7 border-primary-foreground/70 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground hover:text-primary backdrop-blur-sm"
+                onClick={onOpenAiChat}
               >
                 <MessageCircle className="ml-2" />
                 تحدث مع الذكاء الاصطناعي
@@ -797,7 +801,7 @@ const Features = () => {
     </section>
   );
 };
-const CTA = () => {
+const CTA = ({ onOpenAiChat }: { onOpenAiChat: () => void }) => {
   return (
     <section className="py-20 bg-gradient-hero relative overflow-hidden">
       <div className="absolute inset-0 bg-primary/90" />
@@ -822,6 +826,7 @@ const CTA = () => {
             variant="outline"
             size="xl"
             className="cursor-pointer border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            onClick={onOpenAiChat}
           >
             <MessageCircle className="ml-2" />
             تجربة الذكي الاصطناعي

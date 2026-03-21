@@ -23,7 +23,6 @@ interface MainNavbarProps {
 
 const navTabs = [
   { path: "/", label: "حول المنصة" },
-  { path: "/ai-chat", label: "الذكاء الاصطناعي" },
   { path: "/lawyers", label: "اعثر علي محامٍ" },
   { path: "/ai-contract-review", label: "حلل عقدا" },
   { path: "/forum", label: "اسئلة شائعة" },

@@ -33,14 +33,7 @@ const App = () => (
           <Route path="/lawyer/:id/review" element={<LawyerReview />} />
 
           {/* Main Routes */}
-          <Route
-            path="/ai-chat"
-            element={
-              <SharedLayout>
-                <AiChatPage />
-              </SharedLayout>
-            }
-          />
+          <Route path="/ai-chat" element={<AiChatPage />} />
           <Route
             path="/lawyers"
             element={

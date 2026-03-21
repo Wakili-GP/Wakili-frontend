@@ -14,6 +14,9 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Sparkles,
+  Scale,
+  Info,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -138,10 +141,97 @@ const generateResponse = (
   };
 };
 
+const createSeedChats = (): Chat[] => {
+  const now = Date.now();
+
+  return [
+    {
+      id: "seed-1",
+      title: "مراجعة عقد إيجار تجاري",
+      lastMessage: "أرسلت لك أهم البنود التي تحتاج مراجعة فورية.",
+      timestamp: new Date(now - 35 * 60 * 1000),
+      messages: [
+        {
+          id: "seed-1-u1",
+          content: "راجع لي عقد إيجار تجاري بسرعة",
+          sender: "user",
+          timestamp: new Date(now - 48 * 60 * 1000),
+        },
+        {
+          id: "seed-1-b1",
+          content:
+            "بالتأكيد. أهم النقاط التي يجب التأكد منها: مدة العقد، آلية زيادة الإيجار، شرط الإخلاء المبكر، وغرامات التأخير.",
+          sender: "bot",
+          timestamp: new Date(now - 46 * 60 * 1000),
+          references: [
+            {
+              article: "المادة 4",
+              law: "نظام الإيجار",
+              description: "التزامات المؤجر والمستأجر في العقود التجارية.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "seed-2",
+      title: "استشارة حول قانون العمل",
+      lastMessage: "يمكنك المطالبة بالتعويض في حالة الفصل التعسفي.",
+      timestamp: new Date(now - 3 * 60 * 60 * 1000),
+      messages: [
+        {
+          id: "seed-2-u1",
+          content: "ما حقي إذا تم فصلي بدون سبب واضح؟",
+          sender: "user",
+          timestamp: new Date(now - 3.2 * 60 * 60 * 1000),
+        },
+        {
+          id: "seed-2-b1",
+          content:
+            "في حالات الفصل التعسفي، يحق لك المطالبة بالتعويض ومكافأة نهاية الخدمة وفق النظام.",
+          sender: "bot",
+          timestamp: new Date(now - 3.1 * 60 * 60 * 1000),
+          references: [
+            {
+              article: "المادة 77",
+              law: "نظام العمل السعودي",
+              description: "تعويض العامل عن إنهاء العقد غير المشروع.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "seed-3",
+      title: "صياغة اتفاقية عدم إفصاح",
+      lastMessage: "تم تجهيز صيغة أولية ويمكن تخصيصها حسب نوع النشاط.",
+      timestamp: new Date(now - 28 * 60 * 60 * 1000),
+      messages: [
+        {
+          id: "seed-3-u1",
+          content: "أحتاج صياغة NDA لشراكة تقنية",
+          sender: "user",
+          timestamp: new Date(now - 29 * 60 * 60 * 1000),
+        },
+        {
+          id: "seed-3-b1",
+          content:
+            "ممتاز، سأقترح بنود: تعريف المعلومات السرية، مدة الالتزام، الاستثناءات، الجزاءات، والقانون الحاكم.",
+          sender: "bot",
+          timestamp: new Date(now - 28.8 * 60 * 60 * 1000),
+        },
+      ],
+    },
+  ];
+};
+
 // ── Main Component ─────────────────────────────────────
 const ChatPage = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const seededChatsRef = useRef<Chat[]>(createSeedChats());
+  const [chats, setChats] = useState<Chat[]>(seededChatsRef.current);
+  const [activeChatId, setActiveChatId] = useState<string | null>(
+    seededChatsRef.current[0]?.id ?? null,
+  );
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -149,6 +239,15 @@ const ChatPage = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "المساعد القانوني | وكيلي";
+
+    return () => {
+      document.title = previousTitle;
+    };
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
@@ -291,18 +390,21 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="relative flex h-[calc(100vh-4rem)] overflow-hidden rounded-xl border border-amber-900/20 bg-linear-to-br from-stone-100 via-stone-50 to-amber-50/70 shadow-sm">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(146,64,14,0.14),transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(30,41,59,0.12),transparent_40%)]" />
+    <div
+      className="relative flex min-h-screen w-full overflow-hidden bg-background"
+      dir="rtl"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsla(var(--primary),0.16),transparent_45%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,hsla(var(--accent),0.12),transparent_40%)]" />
       {/* ── Center: Chat Area ────────────────────── */}
       <div className="relative z-10 flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <div className="h-14 border-b border-amber-900/15 flex items-center justify-between px-4 bg-white/65 backdrop-blur-sm shrink-0">
+        <div className="h-16 border-b border-border flex items-center justify-between px-5 bg-background/95 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hover:bg-stone-200/70"
+              className="h-9 w-9 hover:bg-muted"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? (
@@ -312,24 +414,19 @@ const ChatPage = () => {
               )}
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center border border-amber-800/20">
-                <Bot className="w-4 h-4 text-amber-700" />
+              <div className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-2">
+                <Scale className="w-4 h-4 text-primary" />
+                <span className="text-sm font-bold text-primary">وكيلي</span>
               </div>
-              <span className="font-semibold text-sm text-slate-900">
-                مساعد وكيلك القانوني
+              <span className="font-semibold text-base text-foreground">
+                المساعد القانوني (AI)
               </span>
               <div className="w-2 h-2 rounded-full bg-success-green animate-pulse" />
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs border-amber-800/25 bg-white/70 hover:bg-amber-50 text-slate-800"
-            onClick={() => createNewChat()}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            محادثة جديدة
-          </Button>
+          <div className="text-sm text-muted-foreground">
+            المحادثات القانونية
+          </div>
         </div>
 
         {/* Messages */}
@@ -341,15 +438,21 @@ const ChatPage = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
-                className="text-center max-w-lg rounded-3xl border border-amber-900/20 bg-white/75 px-8 py-10 shadow-sm backdrop-blur-sm"
+                className="text-center max-w-lg rounded-3xl border border-border bg-card px-8 py-10 shadow-sm"
               >
+                <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                  <Scale className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-primary">
+                    وكيلي
+                  </span>
+                </div>
                 <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-amber-700 to-amber-900 flex items-center justify-center mx-auto mb-6 shadow-md">
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2 text-slate-900">
+                <h2 className="text-2xl font-bold mb-2 text-foreground">
                   مرحباً بك في المساعد القانوني
                 </h2>
-                <p className="text-slate-600 mb-8">
+                <p className="text-muted-foreground mb-8">
                   اسأل أي سؤال قانوني واحصل على إجابة فورية مدعومة بالمراجع
                   القانونية
                 </p>
@@ -361,9 +464,9 @@ const ChatPage = () => {
                         if (!activeChatId) createNewChat(q);
                         else sendMessage(q);
                       }}
-                      className="text-right p-3.5 rounded-xl border border-amber-900/20 bg-white/80 hover:bg-amber-50 hover:border-amber-700/30 transition-all duration-200 text-sm group"
+                      className="text-right p-3.5 rounded-xl border border-border bg-background hover:bg-muted hover:border-primary/30 transition-all duration-200 text-sm group"
                     >
-                      <span className="text-slate-600 group-hover:text-slate-900 transition-colors">
+                      <span className="text-muted-foreground group-hover:text-foreground transition-colors">
                         {q}
                       </span>
                     </button>
@@ -391,8 +494,8 @@ const ChatPage = () => {
                       className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1",
                         msg.sender === "user"
-                          ? "bg-slate-900 text-slate-100"
-                          : "bg-white border border-stone-300 text-slate-700",
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-card border border-border text-foreground",
                       )}
                     >
                       {msg.sender === "user" ? (
@@ -408,8 +511,8 @@ const ChatPage = () => {
                         className={cn(
                           "rounded-2xl px-4 py-3 border",
                           msg.sender === "user"
-                            ? "bg-slate-900 text-slate-100 border-slate-900 rounded-tr-sm shadow-md"
-                            : "bg-white/90 border-stone-300/80 rounded-tl-sm text-slate-800 shadow-sm",
+                            ? "bg-primary text-primary-foreground border-primary rounded-tr-sm shadow-md"
+                            : "bg-card border-border rounded-tl-sm text-foreground shadow-sm",
                         )}
                       >
                         <div className="whitespace-pre-line text-right text-sm leading-relaxed">
@@ -419,8 +522,8 @@ const ChatPage = () => {
                           className={cn(
                             "text-[10px] mt-1.5",
                             msg.sender === "user"
-                              ? "text-slate-300"
-                              : "text-slate-500",
+                              ? "text-primary-foreground/75"
+                              : "text-muted-foreground",
                           )}
                         >
                           {formatTime(msg.timestamp)}
@@ -434,7 +537,7 @@ const ChatPage = () => {
                           <div className="space-y-1.5">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <BookOpen className="w-3 h-3" />
-                              <span className="font-medium text-slate-500">
+                              <span className="font-medium text-muted-foreground">
                                 المراجع القانونية
                               </span>
                             </div>
@@ -457,13 +560,13 @@ const ChatPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex gap-3"
                 >
-                  <div className="w-8 h-8 rounded-full bg-white border border-stone-300 flex items-center justify-center text-slate-700">
+                  <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-foreground">
                     <Bot className="w-4 h-4" />
                   </div>
-                  <div className="bg-white/90 border border-stone-300/80 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                  <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                     <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-700" />
-                      <span className="text-sm text-slate-600">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span className="text-sm text-muted-foreground">
                         جاري الكتابة...
                       </span>
                     </div>
@@ -476,15 +579,15 @@ const ChatPage = () => {
         </div>
 
         {/* Input area */}
-        <div className="border-t border-amber-900/15 p-4 bg-white/65 backdrop-blur-sm shrink-0">
+        <div className="p-4 bg-white shrink-0">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-end gap-2 rounded-2xl border border-amber-900/20 bg-white/90 focus-within:border-amber-700/40 transition-colors p-2 shadow-card">
+            <div className="flex items-end gap-2 rounded-2xl border border-border bg-card focus-within:border-primary/40 transition-colors p-2 shadow-card">
               <textarea
                 ref={textareaRef}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="اكتب سؤالك القانوني هنا..."
-                className="flex-1 resize-none bg-transparent text-right px-3 py-2 text-sm text-slate-800 focus:outline-none placeholder:text-slate-400 min-h-10 max-h-40"
+                className="flex-1 resize-none bg-transparent text-right px-3 py-2 text-sm text-foreground focus:outline-none placeholder:text-muted-foreground min-h-10 max-h-40"
                 rows={1}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -497,15 +600,19 @@ const ChatPage = () => {
                 onClick={handleSend}
                 disabled={!inputMessage.trim() || isTyping}
                 size="icon"
-                className="rounded-xl h-9 w-9 shrink-0 bg-amber-700 text-white hover:bg-amber-800"
+                className="rounded-xl h-9 w-9 shrink-0"
               >
                 <Send className="w-4 h-4" />
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
-              المساعد القانوني يقدم معلومات عامة ولا يغني عن الاستشارة القانونية
-              المتخصصة
-            </p>
+            <div className="mt-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground flex items-start gap-2">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+              <p className="text-right leading-relaxed">
+                معلومات إدخال المستخدم: تجنب مشاركة البيانات شديدة الحساسية. هذا
+                المساعد يقدم إرشاداً عاماً ولا يغني عن الاستشارة القانونية
+                المتخصصة.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -515,22 +622,19 @@ const ChatPage = () => {
         {sidebarOpen && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 280, opacity: 1 }}
+            animate={{ width: 420, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="relative z-10 border-r border-slate-700/70 bg-linear-to-b from-slate-950 to-slate-900 text-slate-100 flex flex-col shrink-0 overflow-hidden"
+            className="relative z-10 w-[420px] border-l border-border bg-muted/70 flex flex-col shrink-0 overflow-hidden"
           >
             {/* Sidebar header */}
-            <div className="h-14 border-b border-slate-700/70 flex items-center justify-between px-4 shrink-0">
-              <span className="font-semibold text-sm text-slate-200">
-                المحادثات
-              </span>
+            <div className="h-16 border-b border-border px-4 bg-background/95 backdrop-blur-sm shrink-0 flex items-center">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-800"
+                size="sm"
+                className="w-full justify-between h-10"
                 onClick={() => createNewChat()}
               >
+                <span>محادثة جديدة</span>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
@@ -539,7 +643,7 @@ const ChatPage = () => {
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-1">
                 {chats.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-xs">
+                  <div className="text-center py-8 text-muted-foreground text-xs">
                     <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     <p>لا توجد محادثات بعد</p>
                   </div>
@@ -551,21 +655,21 @@ const ChatPage = () => {
                       className={cn(
                         "group flex items-start gap-2.5 p-2.5 rounded-lg cursor-pointer transition-all duration-200 text-right",
                         activeChatId === chat.id
-                          ? "bg-slate-800 border border-slate-600"
-                          : "hover:bg-slate-800/70 border border-transparent",
+                          ? "bg-card border border-primary/30"
+                          : "hover:bg-card/80 border border-transparent",
                       )}
                     >
-                      <MessageSquare className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                      <MessageSquare className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate text-slate-100">
+                        <p className="text-sm font-medium truncate text-foreground">
                           {chat.title}
                         </p>
                         {chat.lastMessage && (
-                          <p className="text-xs text-slate-400 truncate mt-0.5">
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
                             {chat.lastMessage}
                           </p>
                         )}
-                        <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500">
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
                           <Clock className="w-3 h-3" />
                           <span>{formatDate(chat.timestamp)}</span>
                         </div>
@@ -575,7 +679,7 @@ const ChatPage = () => {
                           e.stopPropagation();
                           deleteChat(chat.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-slate-400 hover:bg-rose-500/10 hover:text-rose-300"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-muted-foreground hover:bg-rose-500/10 hover:text-rose-600"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -584,6 +688,31 @@ const ChatPage = () => {
                 )}
               </div>
             </ScrollArea>
+
+            <div className="h-20 border-t border-border px-4 bg-background/95 backdrop-blur-sm shrink-0 flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                aria-label="الإعدادات"
+              >
+                <Settings className="w-4.5 h-4.5" />
+              </Button>
+
+              <div className="flex items-center gap-2 text-right">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    أحمد علي
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    الحساب التجريبي
+                  </p>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center text-primary font-semibold">
+                  أ
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
