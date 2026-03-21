@@ -146,7 +146,7 @@ const ClientProfile = () => {
   };
 
   const handleNewConsultation = () => {
-    navigate("/home", { state: { activeSection: "محامي" } });
+    navigate("/", { state: { activeSection: "محامي" } });
   };
 
   const handleRemoveFavorite = async (lawyerId: string) => {
@@ -208,7 +208,7 @@ const ClientProfile = () => {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => navigate("/home")}
+        onClick={() => navigate("/")}
         className="cursor-pointer fixed top-4 right-4 z-50 bg-background/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
       >
         <Home className="w-6 h-6" />

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { FileText, Play, Zap, ShieldCheck, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
+import aiLegalReviewVideo from "@/assets/Ai-legal-review video.mp4";
 
 // Trust Items for the Hero Section
 const trustItems = [
@@ -114,7 +115,18 @@ const HeroSection = () => {
       }}
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-linear-to-bl from-primary/80 via-primary/90 to-primary" />
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        src={aiLegalReviewVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onLoadedData={(event) => {
+          event.currentTarget.playbackRate = 0.6;
+        }}
+      />
+      <div className="absolute inset-0 bg-linear-to-bl from-primary/70 via-primary/80 to-primary/90" />
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
@@ -146,7 +158,7 @@ const HeroSection = () => {
               <Button
                 variant="cta"
                 size="lg"
-                className="shadow-glow text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                className="shadow-glow px-7 bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
                 <FileText className="w-5 h-5 ml-2" />
                 ارفع عقدك الآن
@@ -154,7 +166,7 @@ const HeroSection = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                className="px-7 border-primary-foreground/70 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground hover:text-primary backdrop-blur-sm"
               >
                 <Play className="w-4 h-4 ml-2" />
                 شاهد كيف يعمل

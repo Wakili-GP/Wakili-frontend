@@ -36,68 +36,22 @@ import {
   MarqueeLawyerCardSkeleton,
   TestimonialCardSkeleton,
 } from "@/components/ui/skeletons";
+import MainNavbar from "@/components/MainNavbar";
 
 import Chatbot from "@/components/Chatbot";
 const IndexPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
+
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
-      <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 fixed top-0 w-full z-50 shadow-card">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <Scale className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                وكيلك
-              </span>
-            </div>
-            <div className="hidden md:flex items-center space-x-6">
-              <a
-                href="#services"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
-              >
-                الخدمات
-              </a>
-              <a
-                href="#lawyers"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
-              >
-                أهم محامينا
-              </a>
-              <a
-                href="#testimonials"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
-              >
-                آراء العملاء
-              </a>
-              <a
-                href="#features"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
-              >
-                المميزات
-              </a>
-              <a
-                href="#"
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-all duration-200 font-medium"
-              >
-                من نحن
-              </a>
-              <Button
-                className="cursor-pointer"
-                variant="hero"
-                size="sm"
-                onClick={() => {
-                  setAuthMode("login");
-                  setAuthOpen(true);
-                }}
-              >
-                ابدأ الآن
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <MainNavbar
+        fixed
+        onLoginClick={() => {
+          setAuthMode("login");
+          setAuthOpen(true);
+        }}
+      />
       <Hero />
       <MobileApp />
       <Services />
