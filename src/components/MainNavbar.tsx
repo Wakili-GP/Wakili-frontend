@@ -56,6 +56,18 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
   const location = useLocation();
   const { logout, user, isAuthenticated } = useAuth();
 
+  const handleNavClick = (path: string) => {
+    if (path === location.pathname) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    navigate(path);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -87,7 +99,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
             {navTabs.map((tab) => (
               <button
                 key={tab.path}
-                onClick={() => navigate(tab.path)}
+                onClick={() => handleNavClick(tab.path)}
                 className={`cursor-pointer py-2 px-5 rounded-xl transition-all duration-300 font-medium ${
                   location.pathname === tab.path
                     ? "bg-primary/10 text-primary"

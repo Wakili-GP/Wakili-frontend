@@ -80,7 +80,12 @@ const Hero = () => {
       />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-right">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center lg:text-right"
+          >
             <h1 className="text-4xl lg:text-6xl font-bold text-primary-foreground mb-6 leading-18">
               أول منصة قانونية شاملة في مصر
             </h1>
@@ -108,14 +113,19 @@ const Hero = () => {
                 تحدث مع الذكاء الاصطناعي
               </Button>
             </div>
-          </div>
-          <div className="hidden lg:block">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="hidden lg:block"
+          >
             <img
               src={legalHeroImage}
               alt="منصة وكيلي القانونية"
               className="w-full h-auto rounded-lg shadow-elegant"
             />
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
