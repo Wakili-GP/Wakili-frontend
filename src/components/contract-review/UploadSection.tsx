@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Upload,
   FileText,
@@ -34,9 +34,13 @@ interface UploadSectionProps {
     filename: string,
     analysisId: string,
   ) => void;
+  resetSignal?: number;
 }
 
-const UploadSection = ({ onAnalysisComplete }: UploadSectionProps) => {
+const UploadSection = ({
+  onAnalysisComplete,
+  resetSignal,
+}: UploadSectionProps) => {
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -55,6 +59,14 @@ const UploadSection = ({ onAnalysisComplete }: UploadSectionProps) => {
   });
 
   const file = watch("file");
+
+  useEffect(() => {
+    reset();
+    setUploadState("idle");
+    setUploadProgress(0);
+    setErrorMessage("");
+    clearErrors("file");
+  }, [clearErrors, reset, resetSignal]);
 
   const { mutate: analyze, isPending } = useMutation({
     mutationFn: analyzeContractService.analyzeContract,
