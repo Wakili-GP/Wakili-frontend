@@ -204,7 +204,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
               <Button
                 className="cursor-pointer"
                 variant="hero"
-                size="sm"
+                size="lg"
                 onClick={() => {
                   if (onLoginClick) {
                     onLoginClick();
