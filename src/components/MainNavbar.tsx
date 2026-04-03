@@ -81,7 +81,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
 
   return (
     <nav
-      className={`border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50 ${
+      className={`border-b bg-white backdrop-blur supports-backdrop-filter:bg-white z-50 ${
         fixed ? "fixed top-0 w-full shadow-card" : "sticky top-0"
       }`}
     >
