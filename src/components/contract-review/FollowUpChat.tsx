@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   analyzeContractService,
   type HistoryEntry,
-} from "@/services/ai-review.service/ai-review.service";
+} from "@/services/ai-review.service/ai-review-service";
 
 interface Message {
   id: number;

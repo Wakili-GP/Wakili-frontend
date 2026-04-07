@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   analyzeContractService,
   type AnalysisResult,
-} from "@/services/ai-review.service/ai-review.service";
+} from "@/services/ai-review.service/ai-review-service";
 import { isAxiosError } from "axios";
 import {
   ACCEPTED_CONTRACT_FILE_TYPES,
