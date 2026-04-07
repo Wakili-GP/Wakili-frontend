@@ -14,7 +14,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { categoriesService } from "@/services/categories-services";
+import specializationService from "@/services/specialization-services";
 
 interface ReviewStepProps {
   basicInfo: {
@@ -89,7 +89,7 @@ const ReviewStep = ({
   // Convert practiceArea IDs to names
   useEffect(() => {
     const fetchNames = async () => {
-      const response = await categoriesService.getActiveSpecializations();
+      const response = await specializationService.getActiveSpecializations();
       if (response.success && response.data) {
         const names = basicInfo.practiceAreas
           .map((id) => {

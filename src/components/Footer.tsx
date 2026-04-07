@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 const Footer = () => {
   return (
-    <footer className="bg-foreground text-background py-12 mt-20">
+    <footer className="bg-foreground text-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Title - Two Columns */}

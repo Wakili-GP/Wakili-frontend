@@ -23,7 +23,7 @@ interface MainNavbarProps {
 
 const navTabs = [
   { path: "/", label: "حول المنصة" },
-  { path: "/lawyers", label: "اعثر علي محامٍ" },
+  { path: "/find-lawyers", label: "اعثر علي محامٍ" },
   { path: "/ai-contract-review", label: "حلل عقدا" },
   { path: "/forum", label: "اسئلة شائعة" },
   { path: "/articles", label: "مقالات" },
@@ -94,7 +94,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
             </span>
           </div>
 
-          <div className="hidden md:flex items-center justify-center w-[86%] max-w-6xl gap-4 absolute left-1/2 -translate-x-1/2">
+          <div className="hidden md:flex items-center justify-center w-[86%] max-w-6xl gap-8 absolute left-1/2 -translate-x-1/2">
             {navTabs.map((tab) => (
               <button
                 key={tab.path}

@@ -4,15 +4,15 @@ export interface Specialization {
   id: number;
   name: string;
   description: string;
+  isActive: boolean;
+  createdAt: string;
+  createdBy: number | null;
+  updatedAt: string | null;
+  updatedBy: number | null;
 }
 
-// ============ Service ============
-
-export const categoriesService = {
-  /**
-   * Get all active specializations
-   * GET /api/Specializations/active
-   */
+export const specializationService = {
+  // GET /api/Specializations/active
   async getActiveSpecializations(): Promise<ApiResponse<Specialization[]>> {
     const response = await httpClient.get<Specialization[]>(
       "/Specializations/active",
@@ -34,9 +34,7 @@ export const categoriesService = {
     };
   },
 
-  /**
-   * Get specialization by ID
-   */
+  // GET /api/Specializations/{id}
   async getSpecializationById(
     id: number,
   ): Promise<ApiResponse<Specialization>> {
@@ -60,9 +58,6 @@ export const categoriesService = {
     };
   },
 
-  /**
-   * Get multiple specializations by IDs
-   */
   getSpecializationsByIds(
     ids: number[],
     allSpecializations: Specialization[],
@@ -70,9 +65,7 @@ export const categoriesService = {
     return allSpecializations.filter((spec) => ids.includes(spec.id));
   },
 
-  /**
-   * Convert specialization names to IDs
-   */
+  // Convert specialization names to IDs
   getIdsByNames(
     names: string[],
     allSpecializations: Specialization[],
@@ -82,9 +75,7 @@ export const categoriesService = {
       .map((spec) => spec.id);
   },
 
-  /**
-   * Convert specialization IDs to names
-   */
+  // Convert specialization IDs to names
   getNamesByIds(ids: number[], allSpecializations: Specialization[]): string[] {
     return allSpecializations
       .filter((spec) => ids.includes(spec.id))
@@ -92,4 +83,4 @@ export const categoriesService = {
   },
 };
 
-export default categoriesService;
+export default specializationService;

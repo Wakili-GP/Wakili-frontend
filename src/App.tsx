@@ -12,7 +12,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/context/ProtectedRoute";
 import HomeLayout from "./components/HomeLayout";
 import AiChatPage from "./pages/AiChatPage";
-import LawyersPage from "./pages/LawyersPage";
+import LawyerSearchPage from "./pages/LawyersSearchPage";
 import AiLegalReviewPage from "./pages/AiLegalReviewPage";
 import ForumPage from "./pages/ForumPage";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -31,14 +31,13 @@ const App = () => (
           <Route path="/" element={<IndexPage />} />
           <Route path="/lawyer/:id" element={<LawyerProfile />} />
           <Route path="/lawyer/:id/review" element={<LawyerReview />} />
-
           {/* Main Routes */}
           <Route path="/ai-chat" element={<AiChatPage />} />
           <Route
-            path="/lawyers"
+            path="/find-lawyers"
             element={
               <SharedLayout>
-                <LawyersPage />
+                <LawyerSearchPage />
               </SharedLayout>
             }
           />
@@ -74,7 +73,6 @@ const App = () => (
               </SharedLayout>
             }
           />
-
           <Route
             path="/verify/lawyer"
             element={
@@ -83,10 +81,8 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-
           {/* Access Denied */}
           <Route path="/forbidden" element={<NotFound />} />
-
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

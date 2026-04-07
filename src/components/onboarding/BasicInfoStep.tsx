@@ -19,10 +19,9 @@ import {
 } from "@/components/ui/dialog";
 import { Camera, X, Upload, Loader } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  categoriesService,
+import specializationService, {
   type Specialization,
-} from "@/services/categories-services";
+} from "@/services/specialization-services";
 import { type LawyerBasicInfo } from "@/services/onboarding-services";
 import { toast } from "sonner";
 
@@ -88,7 +87,7 @@ const BasicInfoStep = ({
   useEffect(() => {
     const fetchSpecializations = async () => {
       setIsLoadingSpecializations(true);
-      const response = await categoriesService.getActiveSpecializations();
+      const response = await specializationService.getActiveSpecializations();
       if (response.success && response.data) {
         setSpecializations(response.data);
       } else {
