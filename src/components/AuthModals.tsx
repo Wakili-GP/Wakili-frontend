@@ -37,18 +37,18 @@ import {
 } from "@/schemas/auth";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/stores/auth.store";
+import {
+  useAuthModalStore,
+  type AuthModalMode,
+} from "@/stores/auth-modal.store";
 
-export type AuthMode =
-  | "login"
-  | "register"
-  | "forgot-password"
-  | "reset-password";
+export type AuthMode = AuthModalMode;
 
 interface AuthModalProps {
-  open: boolean;
-  mode: AuthMode;
-  onOpenChange: (open: boolean) => void;
-  onSwitchMode: (open: AuthMode) => void;
+  open?: boolean;
+  mode?: AuthMode;
+  onOpenChange?: (open: boolean) => void;
+  onSwitchMode?: (open: AuthMode) => void;
 }
 
 const HeaderBand = () => (
@@ -69,11 +69,21 @@ const Divider = () => (
 );
 
 const AuthModals: React.FC<AuthModalProps> = ({
-  open,
-  mode,
-  onOpenChange,
-  onSwitchMode,
+  open: controlledOpen,
+  mode: controlledMode,
+  onOpenChange: controlledOnOpenChange,
+  onSwitchMode: controlledOnSwitchMode,
 }) => {
+  const storeOpen = useAuthModalStore((state) => state.isOpen);
+  const storeMode = useAuthModalStore((state) => state.mode);
+  const setStoreOpen = useAuthModalStore((state) => state.setOpen);
+  const setStoreMode = useAuthModalStore((state) => state.setMode);
+
+  const open = controlledOpen ?? storeOpen;
+  const mode = controlledMode ?? storeMode;
+  const onOpenChange = controlledOnOpenChange ?? setStoreOpen;
+  const onSwitchMode = controlledOnSwitchMode ?? setStoreMode;
+
   const navigate = useNavigate();
   const { login } = useAuth();
   const [emailVerificationModal, showEmailVerificationModal] = useState(false);

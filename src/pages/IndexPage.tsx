@@ -29,7 +29,7 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import AuthModals, { type AuthMode } from "@/components/AuthModals";
+import AuthModals from "@/components/AuthModals";
 import Marquee from "react-fast-marquee";
 import lawyer_2 from "../assets/lawyer-2.png";
 import {
@@ -37,11 +37,15 @@ import {
   TestimonialCardSkeleton,
 } from "@/components/ui/skeletons";
 import MainNavbar from "@/components/MainNavbar";
+import { useAuthModalStore } from "@/stores/auth-modal.store";
 
 import Chatbot from "@/components/Chatbot";
 const IndexPage = () => {
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const authOpen = useAuthModalStore((state) => state.isOpen);
+  const authMode = useAuthModalStore((state) => state.mode);
+  const setAuthOpen = useAuthModalStore((state) => state.setOpen);
+  const setAuthMode = useAuthModalStore((state) => state.setMode);
+
   const openAiChatPage = () => {
     window.open("/ai-chat", "_blank", "noopener,noreferrer");
   };

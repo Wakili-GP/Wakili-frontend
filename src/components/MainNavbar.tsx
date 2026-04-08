@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, LogOut, Scale, User } from "lucide-react";
 import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
+import { useAuthModalStore } from "@/stores/auth-modal.store";
 
 interface MainNavbarProps {
   fixed?: boolean;
@@ -54,6 +55,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user, isAuthenticated } = useAuth();
+  const openLogin = useAuthModalStore((state) => state.openLogin);
 
   const handleNavClick = (path: string) => {
     if (path === location.pathname) {
@@ -210,7 +212,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                     onLoginClick();
                     return;
                   }
-                  navigate("/");
+                  openLogin();
                 }}
               >
                 ابدأ الآن
