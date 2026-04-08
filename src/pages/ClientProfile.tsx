@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { data, useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
+import Footer from "../components/DarkFooter";
 import AccountSettingsModals from "@/components/AccountSettingsModal";
 import CoverImageEditModal from "@/components/CoverImageEditModal";
 import ProfileEditModal from "@/components/ProfileEditModal";
