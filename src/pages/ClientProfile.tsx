@@ -42,7 +42,7 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { getInitials, getAvatarColor } from "@/lib/avatarHelpers";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/stores/auth.store";
 
 const ClientProfile = () => {
   const navigate = useNavigate();

@@ -1,4 +1,8 @@
-import { httpClient, type ApiResponse } from "./api/httpClient";
+import {
+  httpClient,
+  setHttpClientToken,
+  type ApiResponse,
+} from "./api/httpClient";
 
 // 1. Location
 // 2. Cover Image
@@ -61,7 +65,7 @@ export const authService = {
       credentials,
     );
     if (response.success && response.data?.accessToken) {
-      httpClient.setToken(response.data.accessToken);
+      setHttpClientToken(response.data.accessToken);
       localStorage.setItem("authToken", response.data.accessToken);
       if (response.data?.refreshToken) {
         localStorage.setItem("refreshToken", response.data.refreshToken);
@@ -113,7 +117,7 @@ export const authService = {
   initializeToken(): void {
     const token = localStorage.getItem("authToken");
     if (token) {
-      httpClient.setToken(token);
+      setHttpClientToken(token);
     }
   },
 };

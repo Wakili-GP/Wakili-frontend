@@ -36,7 +36,7 @@ import {
   type RegisterInput,
 } from "@/schemas/auth";
 import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/stores/auth.store";
 
 export type AuthMode =
   | "login"

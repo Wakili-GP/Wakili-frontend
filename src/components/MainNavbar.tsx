@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, ChevronDown, LogOut, Scale, User } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
 
 interface MainNavbarProps {

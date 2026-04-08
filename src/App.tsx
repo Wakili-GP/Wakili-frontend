@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import IndexPage from "./pages/IndexPage";
 import LawyerOnboarding from "./pages/LawyerOnboarding";
 import LawyerProfile from "./pages/LawyerProfile";
@@ -8,21 +8,27 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import LawyerReview from "./pages/LawyerReview";
 import ClientProfile from "./pages/ClientProfile";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext";
-import { ProtectedRoute } from "@/context/ProtectedRoute";
+import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import HomeLayout from "./components/HomeLayout";
 import AiChatPage from "./pages/AiChatPage";
 import LawyerSearchPage from "./pages/LawyersSearchPage";
 import AiLegalReviewPage from "./pages/AiLegalReviewPage";
 import ForumPage from "./pages/ForumPage";
 import ArticlesPage from "./pages/ArticlesPage";
+import { useAuthStore } from "@/stores/auth.store";
 
 const SharedLayout = ({ children }: { children: ReactNode }) => (
   <HomeLayout>{children}</HomeLayout>
 );
 
-const App = () => (
-  <AuthProvider>
+const App = () => {
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  useEffect(() => {
+    void initializeAuth();
+  }, [initializeAuth]);
+
+  return (
     <TooltipProvider>
       <Sonner />
       <BrowserRouter>
@@ -88,6 +94,6 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </AuthProvider>
-);
+  );
+};
 export default App;

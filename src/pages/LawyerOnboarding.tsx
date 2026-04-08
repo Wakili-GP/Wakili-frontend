@@ -10,7 +10,7 @@ import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
 import { lawyerService } from "@/services/onboarding-services";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/stores/auth.store";
 import { Button } from "@/components/ui/button";
 
 const steps = [
