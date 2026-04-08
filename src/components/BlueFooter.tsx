@@ -47,14 +47,14 @@ const BlueFooter = () => {
             </h4>
             <div className="space-y-2 text-primary-foreground/70 text-sm">
               <p>القاهرة، مصر</p>
-              <p>support@wakilak.com</p>
-              <p>+20 123 456 7890</p>
+              <p>support@wakilak.me</p>
+              <p>+20 1144958064</p>
             </div>
           </div>
         </div>
         <Separator className="my-8 bg-primary-foreground/20" />
         <p className="text-center text-primary-foreground/50 text-sm">
-          &copy; 2024 وكيلك. جميع الحقوق محفوظة.
+          &copy; {new Date().getFullYear()} وكيلي. جميع الحقوق محفوظة.
         </p>
       </div>
     </footer>

@@ -31,11 +31,7 @@ import HeroVideo from "../assets/lawyer-search/Hero Video.mp4";
 import Step1Video from "../assets/lawyer-search/Video Step 1.mp4";
 import Step2Video from "../assets/lawyer-search/Video Step 2.mp4";
 import Step3Video from "../assets/lawyer-search/Video Step 3.mp4";
-import {
-  featuredLawyers,
-  testimonials,
-  specializations,
-} from "../data/lawyer-search";
+import { featuredLawyers, testimonials, specializations } from "../data/data";
 
 const LawyerSearchPage = () => {
   return (

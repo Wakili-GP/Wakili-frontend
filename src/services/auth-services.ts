@@ -4,9 +4,6 @@ import {
   type ApiResponse,
 } from "./api/httpClient";
 
-// 1. Location
-// 2. Cover Image
-// Types
 export interface AuthUser {
   id: string;
   email: string;

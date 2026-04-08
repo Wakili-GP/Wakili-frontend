@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FC } from "react";
 import {
   Scale,
@@ -38,8 +38,11 @@ import {
 } from "@/components/ui/skeletons";
 import MainNavbar from "@/components/MainNavbar";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
-
 import Chatbot from "@/components/Chatbot";
+import { type FeatureStatistic, MOCK_STATISTICS } from "@/data/data.ts";
+import { MOCK_TOP_LAWYERS, type Lawyer as LawyerData } from "@/data/data.ts";
+import { type Testimonial, MOCK_TESTIMONIALS } from "@/data/data.ts";
+
 const IndexPage = () => {
   const authOpen = useAuthModalStore((state) => state.isOpen);
   const authMode = useAuthModalStore((state) => state.mode);
@@ -552,10 +555,6 @@ const LawyerCard: FC<LawyerCardProps> = ({
     </Card>
   );
 };
-import {
-  MOCK_TOP_LAWYERS,
-  type Lawyer as LawyerData,
-} from "@/data/indexPage-data";
 const Lawyers: FC = () => {
   const [lawyers, setLawyers] = useState<LawyerData[]>(MOCK_TOP_LAWYERS);
   const [isLoading, setIsLoading] = useState(false);
@@ -605,7 +604,6 @@ const Lawyers: FC = () => {
     </section>
   );
 };
-import { type Testimonial, MOCK_TESTIMONIALS } from "@/data/indexPage-data";
 const Testimonials = () => {
   const [testimonials, setTestimonials] =
     useState<Testimonial[]>(MOCK_TESTIMONIALS);
@@ -689,7 +687,6 @@ const Testimonials = () => {
     </section>
   );
 };
-import { type FeatureStatistic, MOCK_STATISTICS } from "@/data/indexPage-data";
 const Features = () => {
   const [statistics, setStatistics] =
     useState<FeatureStatistic[]>(MOCK_STATISTICS);

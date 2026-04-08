@@ -36,6 +36,7 @@ const App = () => {
           {/* Public Routes */}
           <Route path="/" element={<IndexPage />} />
           <Route path="/lawyer/:id" element={<LawyerProfile />} />
+          <Route path="/profile" element={<ClientProfile />} />
           <Route path="/lawyer/:id/review" element={<LawyerReview />} />
           {/* Main Routes */}
           <Route path="/ai-chat" element={<AiChatPage />} />
@@ -68,14 +69,6 @@ const App = () => {
             element={
               <SharedLayout>
                 <ArticlesPage />
-              </SharedLayout>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <SharedLayout>
-                <ClientProfile />
               </SharedLayout>
             }
           />
