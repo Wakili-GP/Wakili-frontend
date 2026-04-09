@@ -1,17 +1,17 @@
-import {
-  httpClient,
-  setHttpClientToken,
+import httpClient, {
   type ApiResponse,
+  setHttpClientToken,
 } from "./api/httpClient";
 
 export interface AuthUser {
   id: string;
-  email: string;
   firstName: string;
   lastName: string;
+  email: string;
   phoneNumber?: string;
-  userType: "client" | "lawyer";
-  profileImage?: string | null;
+  userType: "Client" | "Lawyer";
+  status: "Active" | "Inactive" | "Unfinished";
+  imageUrl?: string | null;
   isEmailVerified?: boolean;
   createdAt?: string;
 }
@@ -57,58 +57,60 @@ export interface VerifyEmailRequest {
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    const response = await httpClient.post<LoginResponse>(
-      "/Auth/login",
-      credentials,
-    );
-    if (response.success && response.data?.accessToken) {
-      setHttpClientToken(response.data.accessToken);
-      localStorage.setItem("authToken", response.data.accessToken);
-      if (response.data?.refreshToken) {
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-      }
-    }
-    return response;
+    const response = await httpClient.post("/auth/login", {
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    return response.data;
   },
 
   async register(credentials: RegisterRequest): Promise<ApiResponse<void>> {
-    const response = await httpClient.post<void>("/Auth/register", credentials);
+    const response = (await httpClient.post(
+      "/Auth/register",
+      credentials,
+    )) as unknown as ApiResponse<void>;
     return response;
   },
 
   async forgotPassword(
     credentials: ForgotPasswordRequest,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>(
+    return httpClient.post(
       "/Auth/forget-password",
       credentials,
-    );
+    ) as unknown as Promise<ApiResponse<{ message: string }>>;
   },
 
   async resetPassword(
     credentials: ResetPasswordRequest,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>(
+    return httpClient.post(
       "/Auth/reset-password",
       credentials,
-    );
+    ) as unknown as Promise<ApiResponse<{ message: string }>>;
   },
 
   async verifyEmail(
     credentials: VerifyEmailRequest,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post<{ message: string }>(
+    return httpClient.post(
       "/Auth/veryify-email",
       credentials,
-    );
+    ) as unknown as Promise<ApiResponse<{ message: string }>>;
   },
 
   async resendVerificationEmail(email: string): Promise<ApiResponse<void>> {
-    return httpClient.post<void>("/Auth/resend-verification", email);
+    return httpClient.post(
+      "/Auth/resend-verification",
+      email,
+    ) as unknown as Promise<ApiResponse<void>>;
   },
 
   async getCurrentUser(): Promise<ApiResponse<AuthUser>> {
-    return httpClient.get<AuthUser>("/Auth/me");
+    return httpClient.get("/Auth/me") as unknown as Promise<
+      ApiResponse<AuthUser>
+    >;
   },
 
   initializeToken(): void {

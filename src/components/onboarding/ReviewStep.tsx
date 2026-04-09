@@ -14,7 +14,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import specializationService from "@/services/specialization-services";
+// import specializationService from "@/services/specialization-services";
 
 interface ReviewStepProps {
   basicInfo: {

@@ -40,7 +40,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     const response = await authService.login({ email, password });
     if (response.success && response.data) {
       set({ user: response.data.user, isAuthenticated: true });
+      console.log("User", response.data.user);
     } else {
+      console.error("Auth Store Login failed:", response.error);
       throw new Error(response.error || "Login failed");
     }
   },

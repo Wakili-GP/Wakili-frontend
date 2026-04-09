@@ -36,7 +36,14 @@ const App = () => {
           {/* Public Routes */}
           <Route path="/" element={<IndexPage />} />
           <Route path="/lawyer/:id" element={<LawyerProfile />} />
-          <Route path="/profile" element={<ClientProfile />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute requiredUserType="Client">
+                <ClientProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/lawyer/:id/review" element={<LawyerReview />} />
           {/* Main Routes */}
           <Route path="/ai-chat" element={<AiChatPage />} />
@@ -73,9 +80,9 @@ const App = () => {
             }
           />
           <Route
-            path="/verify/lawyer"
+            path="/lawyer-onboarding"
             element={
-              <ProtectedRoute requiredUserType="lawyer">
+              <ProtectedRoute requiredUserType="Lawyer">
                 <LawyerOnboarding />
               </ProtectedRoute>
             }

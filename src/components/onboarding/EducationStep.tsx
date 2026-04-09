@@ -40,7 +40,7 @@ interface EducationData {
 }
 
 interface EducationStepProps {
-  data: EducationData;
+  defaultValues: EducationData;
   onChange: (data: EducationData) => void;
   onNext: () => void;
   onBack: () => void;

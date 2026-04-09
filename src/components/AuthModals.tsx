@@ -9,6 +9,8 @@ import {
   Mail,
   RefreshCw,
   Loader,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   Dialog,
@@ -85,11 +87,13 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const onSwitchMode = controlledOnSwitchMode ?? setStoreMode;
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [emailVerificationModal, showEmailVerificationModal] = useState(false);
   const [registrationEmailToConfirm, setRegistrationEmailToConfirm] =
     useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const loginForm = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -104,13 +108,24 @@ const AuthModals: React.FC<AuthModalProps> = ({
       await login(email, password);
     },
     onSuccess: () => {
-      toast.success("تم تسجيل الدخول بنجاح!", {
-        description: "مرحباً بك في وكيلي",
-      });
       onOpenChange(false);
-      navigate("/");
+      console.log("User after login:", user);
+      if (user?.userType === "Lawyer" && user?.status === "Unfinished") {
+        toast.success("تم تسجيل الدخول بنجاح!", {
+          description:
+            "يجب عليك إكمال ملفك الشخصي كمحامي للبدء في تلقي الطلبات",
+        });
+        navigate("/lawyer-onboarding");
+      } else {
+        toast.success("تم تسجيل الدخول بنجاح!", {
+          description: "مرحباً بك في وكيلي",
+        });
+
+        navigate("/");
+      }
     },
     onError: (error) => {
+      console.error("Auth Modals Login failed:", error);
       toast.error("خطأ في تسجيل الدخول", {
         description:
           error instanceof Error ? error.message : "تأكد من البريد والرمز",
@@ -186,7 +201,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   const registerMutation = useMutation({
     mutationFn: async (values: RegisterInput) => {
-      const userType = values.userType === "lawyer" ? "lawyer" : "client";
+      const userType = values.userType === "Lawyer" ? "Lawyer" : "Client";
       return authService.register({
         firstName: values.firstName,
         lastName: values.lastName,
@@ -220,6 +235,8 @@ const AuthModals: React.FC<AuthModalProps> = ({
       forgotPasswordForm.reset();
       resetPasswordForm.reset();
       registerForm.reset();
+      setShowPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [
     open,
@@ -298,7 +315,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@email.com"
+                  placeholder="uelareeny@gmail.com"
                   {...loginForm.register("email")}
                 />
                 {loginForm.formState.errors.email && (
@@ -309,11 +326,24 @@ const AuthModals: React.FC<AuthModalProps> = ({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  {...loginForm.register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    {...loginForm.register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {loginForm.formState.errors.password && (
                   <p className="text-sm text-destructive">
                     {loginForm.formState.errors.password.message}
@@ -487,6 +517,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                   <Input
                     id="firstName"
                     type="text"
+                    placeholder="اسامة"
                     {...registerForm.register("firstName")}
                   />
                   {registerForm.formState.errors.firstName && (
@@ -500,6 +531,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                   <Input
                     id="lastName"
                     type="text"
+                    placeholder="العريني"
                     {...registerForm.register("lastName")}
                   />
                   {registerForm.formState.errors.lastName && (
@@ -516,7 +548,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
                 <Input
                   id="reg-email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="uelareeny@gmail.com"
                   {...registerForm.register("email")}
                 />
                 {registerForm.formState.errors.email && (
@@ -529,11 +561,24 @@ const AuthModals: React.FC<AuthModalProps> = ({
               {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="reg-password">كلمة المرور</Label>
-                <Input
-                  id="reg-password"
-                  type="password"
-                  {...registerForm.register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="reg-password"
+                    type={showPassword ? "text" : "password"}
+                    {...registerForm.register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {registerForm.formState.errors.password && (
                   <p className="text-sm text-destructive">
                     {registerForm.formState.errors.password.message}
@@ -544,11 +589,24 @@ const AuthModals: React.FC<AuthModalProps> = ({
               {/* Confirm Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  {...registerForm.register("confirmPassword")}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...registerForm.register("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 {registerForm.formState.errors.confirmPassword && (
                   <p className="text-sm text-destructive">
                     {registerForm.formState.errors.confirmPassword.message}
@@ -599,19 +657,45 @@ const AuthModals: React.FC<AuthModalProps> = ({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  {...resetPasswordForm.register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    type={showPassword ? "text" : "password"}
+                    {...resetPasswordForm.register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-new-password">تأكيد كلمة المرور</Label>
-                <Input
-                  id="confirm-new-password"
-                  type="password"
-                  {...resetPasswordForm.register("confirmPassword")}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirm-new-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...resetPasswordForm.register("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <Button
                 type="submit"

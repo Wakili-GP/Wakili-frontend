@@ -5,7 +5,7 @@ import { Loader } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredUserType?: "client" | "lawyer";
+  requiredUserType?: "Client" | "Lawyer";
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -21,6 +21,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
   if (!isAuthenticated) {
+    console.log("Fuck it");
     return <Navigate to="/" replace />;
   }
   if (requiredUserType && user?.userType !== requiredUserType) {
