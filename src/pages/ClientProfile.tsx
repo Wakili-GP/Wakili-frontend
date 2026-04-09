@@ -1,3 +1,6 @@
+// 1. Pending (Client sends until lawyer acepts)
+// 2. Accepted/Confirmed (Lawyer accepts the booking)
+// 3. Completed ()
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";

@@ -81,7 +81,7 @@ const DEFAULT_VERIFICATION: VerificationData = {
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(3);
   const [completedSteps, setCompletedSteps] = useState<number>(0);
 
   const [savedData, setSavedData] = useState<{
@@ -195,7 +195,15 @@ const LawyerOnboarding = () => {
       </div>
     );
   }
+  // For Clients
+  // 1. Active
+  // 2. Inactive
 
+  // For Lawyers
+  // 1. Active
+  // 2. Inactive
+  // 3. Unfinished
+  // 4.
   if (completedSteps >= 4) {
     return (
       <div

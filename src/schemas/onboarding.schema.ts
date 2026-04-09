@@ -41,3 +41,25 @@ export const educationSchema = z.object({
 });
 
 export type EducationFormData = z.infer<typeof educationSchema>;
+
+export const workExperienceSchema = z
+  .object({
+    jobTitle: z.string().min(1, "مطلوب"),
+    organizationName: z.string().min(1, "مطلوب"),
+    startYear: z.string().min(1, "مطلوب"),
+    endYear: z.string().optional(),
+    isCurrentJob: z.boolean(),
+    description: z.string().min(100, "الوصف مطلوب (100 حرف على الأقل)"),
+  })
+  .refine((data) => data.isCurrentJob || !!data.endYear, {
+    message: "مطلوب",
+    path: ["endYear"],
+  });
+
+export const experienceSchema = z.object({
+  workExperiences: z
+    .array(workExperienceSchema)
+    .min(1, "أضف خبرة عملية واحدة على الأقل"),
+});
+
+export type ExperienceFormData = z.infer<typeof experienceSchema>;
