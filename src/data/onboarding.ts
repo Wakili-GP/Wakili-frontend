@@ -49,3 +49,8 @@ export const YEARS = Array.from({ length: 50 }, (_, i) =>
   (CURRENT_YEAR - i).toString(),
 );
 export const EMPTY_DOC = { file: null, status: "pending" as const };
+
+export const SESSION_TYPE_LABELS: Record<string, string> = {
+  office: "استشارة مكتبية",
+  phone: "استشارة هاتفية",
+};
