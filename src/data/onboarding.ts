@@ -35,3 +35,11 @@ export const PHONE_CODES = [
   { code: "+968", country: "عمان" },
   { code: "+962", country: "الأردن" },
 ];
+
+export const DEGREE_TYPES = [
+  "دكتوراه",
+  "ماجستير",
+  "بكالوريوس",
+  "دبلوم عالي",
+  "دبلوم",
+];

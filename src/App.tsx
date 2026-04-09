@@ -79,14 +79,15 @@ const App = () => {
               </SharedLayout>
             }
           />
-          <Route
+          <Route path="/lawyer-onboarding" element={<LawyerOnboarding />} />
+          {/* <Route
             path="/lawyer-onboarding"
             element={
               <ProtectedRoute requiredUserType="Lawyer">
                 <LawyerOnboarding />
               </ProtectedRoute>
             }
-          />
+          /> */}
           {/* Access Denied */}
           <Route path="/forbidden" element={<NotFound />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

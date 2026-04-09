@@ -81,7 +81,7 @@ const DEFAULT_VERIFICATION: VerificationData = {
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [completedSteps, setCompletedSteps] = useState<number>(0);
 
   const [savedData, setSavedData] = useState<{

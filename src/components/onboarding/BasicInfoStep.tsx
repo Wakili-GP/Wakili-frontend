@@ -38,7 +38,7 @@ import {
   COUNTRIES,
   CITIES_BY_COUNTRY,
   PHONE_CODES,
-} from "@/data/onboarding/basicInfo";
+} from "@/data/onboarding";
 
 interface BasicInfoStepProps {
   defaultValues: LawyerBasicInfo;
@@ -146,7 +146,7 @@ const BasicInfoStep = ({
         </p>
       </div>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        {" Profile Image "}
+        {/* {" Profile Image "} */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div

@@ -16,3 +16,28 @@ export const basicInfoSchema = z.object({
 });
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
+
+export const academicQualificationSchema = z.object({
+  degreeType: z.string().min(1, "مطلوب"),
+  fieldOfStudy: z.string().min(1, "مطلوب"),
+  universityName: z.string().min(1, "مطلوب"),
+  graduationYear: z.string().min(1, "مطلوب"),
+});
+
+export const professionalCertificationSchema = z.object({
+  certificateName: z.string().min(1, "مطلوب"),
+  issuingOrganization: z.string().min(1, "مطلوب"),
+  yearObtained: z.string().min(1, "مطلوب"),
+  document: z.string().nullable().optional(),
+});
+
+export const educationSchema = z.object({
+  academicQualifications: z
+    .array(academicQualificationSchema)
+    .min(1, "أضف مؤهل علمي واحد على الأقل"),
+  professionalCertifications: z.array(
+    professionalCertificationSchema.partial(), // all optional since section is optional
+  ),
+});
+
+export type EducationFormData = z.infer<typeof educationSchema>;
