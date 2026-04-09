@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   basicInfoSchema,
   type BasicInfoFormData,
-} from "@/schemas/onboarding.schema";
+} from "@/schemas/onboarding.schemas";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";

@@ -43,3 +43,9 @@ export const DEGREE_TYPES = [
   "دبلوم عالي",
   "دبلوم",
 ];
+
+const CURRENT_YEAR = new Date().getFullYear();
+export const YEARS = Array.from({ length: 50 }, (_, i) =>
+  (CURRENT_YEAR - i).toString(),
+);
+export const EMPTY_DOC = { file: null, status: "pending" as const };

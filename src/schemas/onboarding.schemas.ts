@@ -63,3 +63,31 @@ export const experienceSchema = z.object({
 });
 
 export type ExperienceFormData = z.infer<typeof experienceSchema>;
+
+export const verificationDocumentSchema = z.object({
+  file: z.instanceof(File, { message: "مطلوب" }).nullable(),
+  status: z.enum(["pending", "uploaded"]),
+});
+
+export const verificationSchema = z.object({
+  nationalIdFront: verificationDocumentSchema.refine((d) => d.file !== null, {
+    message: "مطلوب",
+  }),
+  nationalIdBack: verificationDocumentSchema.refine((d) => d.file !== null, {
+    message: "مطلوب",
+  }),
+  lawyerLicense: verificationDocumentSchema.refine((d) => d.file !== null, {
+    message: "مطلوب",
+  }),
+  lawyerLicenseNumber: z.string().min(1, "مطلوب"),
+  lawyerLicenseIssuingAuthority: z.string().min(1, "مطلوب"),
+  lawyerLicenseYearOfIssue: z.string().min(1, "مطلوب"),
+  educationalCertificates: z
+    .array(verificationDocumentSchema)
+    .refine((certs) => certs.some((c) => c.file !== null), {
+      message: "يجب رفع شهادة علمية واحدة على الأقل",
+    }),
+  professionalCertificates: z.array(verificationDocumentSchema),
+});
+
+export type VerificationFormData = z.infer<typeof verificationSchema>;

@@ -18,12 +18,9 @@ import { type ExperienceData } from "@/services/onboarding-services";
 import {
   experienceSchema,
   type ExperienceFormData,
-} from "@/schemas/onboarding.schema";
+} from "@/schemas/onboarding.schemas";
 
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 50 }, (_, i) =>
-  (CURRENT_YEAR - i).toString(),
-);
+import { YEARS } from "@/data/onboarding";
 
 const EMPTY_EXPERIENCE = {
   jobTitle: "",

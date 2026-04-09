@@ -24,7 +24,7 @@ import { type EducationData } from "@/services/onboarding-services";
 import {
   educationSchema,
   type EducationFormData,
-} from "@/schemas/onboarding.schema";
+} from "@/schemas/onboarding.schemas";
 
 import { DEGREE_TYPES } from "@/data/onboarding";
 
