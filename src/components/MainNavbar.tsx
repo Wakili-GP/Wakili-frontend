@@ -166,9 +166,9 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                       className="cursor-pointer flex items-center space-x-2 space-x-reverse"
                     >
                       <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        {user?.imageUrl ? (
+                        {user?.profileImage ? (
                           <img
-                            src={user.imageUrl}
+                            src={user.profileImage}
                             alt={user.firstName}
                             className="w-full h-full rounded-full object-cover"
                           />

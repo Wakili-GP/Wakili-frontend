@@ -38,3 +38,12 @@ export function getTimeRemaining(dateStr: string, timeStr?: string): string {
   if (diffHours > 0) return `باقي ${diffHours} ساعة`;
   return `باقي ${diffMins} دقيقة`;
 }
+
+export const formatArabicMonthYear = (memberSince: string): string => {
+  const parsedDate = new Date(memberSince);
+  if (Number.isNaN(parsedDate.getTime())) return memberSince;
+  return new Intl.DateTimeFormat("ar-EG-u-ca-gregory", {
+    month: "long",
+    year: "numeric",
+  }).format(parsedDate);
+};

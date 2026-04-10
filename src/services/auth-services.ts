@@ -5,16 +5,22 @@ import httpClient, {
 
 export interface AuthUser {
   id: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phoneNumber?: string;
   userType: "Client" | "Lawyer";
-  // status: "Active" | "Inactive" | "Unfinished";
-  status: "Unfinished";
-  imageUrl?: string | null;
-  isEmailVerified?: boolean;
-  createdAt?: string;
+  status:
+    | "Active"
+    | "Inactive"
+    | "Unfinished"
+    | "SubmittedAndNotApproved"
+    | "SubmittedAndApproved";
+  city: string | null;
+  country: string | null;
+  phoneNumber: string | null;
+  profileImage: string | null;
+  isEmailVerified: boolean;
+  createdAt: string;
 }
 
 export interface AuthTokens {

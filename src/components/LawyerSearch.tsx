@@ -47,7 +47,7 @@ import {
   type Lawyer,
   type PracticeArea,
   type LocationResponse,
-} from "@/services/lawyerSearch-services";
+} from "@/services/clientProfile-services";
 import { LawyerCardSkeleton } from "@/components/ui/skeletons";
 
 const practiceAreas = [
