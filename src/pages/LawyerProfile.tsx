@@ -1376,8 +1376,7 @@ const LawyerProfile = () => {
                                 "16:00",
                               ].map((v) => (
                                 <SelectItem
-                                  justifyContent="flex-end"
-                                  className="cursor-pointer"
+                                  className="cursor-pointer justify-end"
                                   dir="rtl"
                                   key={v}
                                   value={v}
@@ -1924,6 +1923,97 @@ const LawyerProfile = () => {
             </div>
           )}
         </div>
+
+        {activeTab === "bio" && (
+          <section className="max-w-6xl mx-auto py-12 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Rating Breakdown */}
+              <div>
+                <h2 className="text-xl font-bold text-foreground mb-6 uppercase tracking-wide">
+                  رضا العملاء
+                </h2>
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-5xl font-bold text-foreground">
+                    {lawyerData.reviews.average}
+                  </span>
+                  <div>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`w-5 h-5 ${s <= Math.round(lawyerData.reviews.average) ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 uppercase">
+                      بناءً على {lawyerData.reviews.total} تقييم
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <div key={rating} className="flex items-center gap-3">
+                      <span className="text-sm font-medium w-4">{rating}</span>
+                      <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-secondary rounded-full"
+                          style={{
+                            width: `${lawyerData.reviews.breakdown[rating as keyof typeof lawyerData.reviews.breakdown]}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground w-8">
+                        {
+                          lawyerData.reviews.breakdown[
+                            rating as keyof typeof lawyerData.reviews.breakdown
+                          ]
+                        }
+                        %
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Featured Reviews */}
+              <div className="space-y-4">
+                {lawyerData.reviews.items.slice(0, 2).map((review, i) => (
+                  <Card key={i} className="p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={review.image}
+                          alt={review.name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                        <div>
+                          <h4 className="font-bold text-sm">{review.name}</h4>
+                          <p className="text-[11px] text-secondary uppercase tracking-wide">
+                            {review.role}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground">
+                        {review.date}
+                      </span>
+                    </div>
+                    <div className="flex gap-0.5 mb-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={`w-3.5 h-3.5 ${s <= review.rating ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground italic leading-relaxed">
+                      "{review.comment}"
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
       {/* ── Report Review Modal ── */}
