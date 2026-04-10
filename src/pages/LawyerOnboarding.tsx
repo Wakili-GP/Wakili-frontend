@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,21 +68,21 @@ const DEFAULT_EXPERIENCE: ExperienceData = {
 };
 
 const DEFAULT_VERIFICATION: VerificationData = {
-  nationalIdFront: { file: null, fileName: null, status: "pending" },
-  nationalIdBack: { file: null, fileName: null, status: "pending" },
-  lawyerLicense: { file: null, fileName: null, status: "pending" },
+  nationalIdFront: { file: null, status: "pending" },
+  nationalIdBack: { file: null, status: "pending" },
+  lawyerLicense: { file: null, status: "pending" },
   lawyerLicenseNumber: "",
   lawyerLicenseIssuingAuthority: "",
   lawyerLicenseYearOfIssue: "",
-  educationalCertificates: [{ file: null, fileName: null, status: "pending" }],
+  educationalCertificates: [{ file: null, status: "pending" }],
   professionalCertificates: [],
 };
 
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(5);
-  const [completedSteps, setCompletedSteps] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [savedData, setSavedData] = useState<{
     basicInfo: LawyerBasicInfo;
@@ -100,16 +100,28 @@ const LawyerOnboarding = () => {
     queryKey: ["onboarding-progress"],
     queryFn: () => onboardingService.getOnboardingProgress(),
     retry: false,
-    select: (response) => response.data,
   });
 
-  // OnSuccess is deprecated from useQuery V5, so I will use useEffect to watch the data instead of onSuccess
+  // Handle API payloads that may return success=false with a business statusCode.
   useEffect(() => {
     if (!progressResponse) return;
-    const { currentStep: savedStep, completedSteps, data } = progressResponse;
-    setCurrentStep(savedStep ?? 1);
-    setCompletedSteps(completedSteps?.length ?? 0);
 
+    if (!progressResponse.success) {
+      // New lawyer accounts can legitimately have no onboarding profile yet.
+      if (progressResponse.statusCode === 404) {
+        setCurrentStep(1);
+        return;
+      }
+
+      toast.error("خطأ", {
+        description: progressResponse.error || "فشل تحميل تقدم التسجيل",
+      });
+      setCurrentStep(1);
+      return;
+    }
+
+    const { currentStep: savedStep, data } = progressResponse.data ?? {};
+    setCurrentStep(savedStep ?? 1);
     setSavedData((prev) => ({
       basicInfo: { ...prev.basicInfo, ...data?.basicInfo },
       education: data?.education ?? prev.education,
@@ -122,8 +134,10 @@ const LawyerOnboarding = () => {
   const basicInfoMutation = useMutation({
     mutationFn: (data: LawyerBasicInfo) =>
       onboardingService.saveBasicInfo(data),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
+      console.log("response from basicmutaion ", response);
       if (response.success) {
+        setSavedData((prev) => ({ ...prev, basicInfo: variables }));
         toast.success("تم حفظ المعلومات الأساسية");
         setCurrentStep(2);
       } else {
@@ -138,8 +152,9 @@ const LawyerOnboarding = () => {
   // EducationMutation
   const educationMutation = useMutation({
     mutationFn: (data: EducationData) => onboardingService.saveEducation(data),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response.success) {
+        setSavedData((prev) => ({ ...prev, education: variables }));
         toast.success("تم حفظ المؤهلات");
         setCurrentStep(3);
       } else {
@@ -155,8 +170,9 @@ const LawyerOnboarding = () => {
   const experienceMutation = useMutation({
     mutationFn: (data: ExperienceData) =>
       onboardingService.saveExperience(data),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response.success) {
+        setSavedData((prev) => ({ ...prev, experience: variables }));
         toast.success("تم حفظ الخبرات");
         setCurrentStep(4);
       } else {
@@ -172,8 +188,9 @@ const LawyerOnboarding = () => {
   const verificationMutation = useMutation({
     mutationFn: (data: VerificationData) =>
       onboardingService.uploadVerificationDocuments(data),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response.success) {
+        setSavedData((prev) => ({ ...prev, verification: variables }));
         toast.success("تم حفظ المستندات");
         setCurrentStep(5);
       } else {
@@ -204,7 +221,7 @@ const LawyerOnboarding = () => {
   // 2. Inactive
   // 3. Unfinished
   // 4.
-  if (completedSteps >= 4) {
+  if (isSubmitted) {
     return (
       <div
         className="min-h-screen bg-background flex items-center justify-center p-4"

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Globe,
   Scale,
@@ -86,7 +85,6 @@ const AuthModals: React.FC<AuthModalProps> = ({
   const onOpenChange = controlledOnOpenChange ?? setStoreOpen;
   const onSwitchMode = controlledOnSwitchMode ?? setStoreMode;
 
-  const navigate = useNavigate();
   const { login, user } = useAuth();
   const [emailVerificationModal, showEmailVerificationModal] = useState(false);
   const [registrationEmailToConfirm, setRegistrationEmailToConfirm] =
@@ -110,19 +108,9 @@ const AuthModals: React.FC<AuthModalProps> = ({
     onSuccess: () => {
       onOpenChange(false);
       console.log("User after login:", user);
-      if (user?.userType === "Lawyer" && user?.status === "Unfinished") {
-        toast.success("تم تسجيل الدخول بنجاح!", {
-          description:
-            "يجب عليك إكمال ملفك الشخصي كمحامي للبدء في تلقي الطلبات",
-        });
-        navigate("/lawyer-onboarding");
-      } else {
-        toast.success("تم تسجيل الدخول بنجاح!", {
-          description: "مرحباً بك في وكيلي",
-        });
-
-        navigate("/");
-      }
+      toast.success("تم تسجيل الدخول بنجاح!", {
+        description: "مرحباً بك في وكيلي",
+      });
     },
     onError: (error) => {
       console.error("Auth Modals Login failed:", error);
@@ -201,13 +189,12 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   const registerMutation = useMutation({
     mutationFn: async (values: RegisterInput) => {
-      const userType = values.userType === "Lawyer" ? "Lawyer" : "Client";
       return authService.register({
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
-        userType,
+        userType: values.userType,
         acceptTerms: true,
       });
     },
@@ -255,19 +242,22 @@ const AuthModals: React.FC<AuthModalProps> = ({
 
   const userTypes = [
     {
-      id: "client",
+      id: 0,
+      value: "Client",
       label: "عميل",
       icon: User,
       comingSoon: false,
     },
     {
-      id: "lawyer",
+      id: 1,
+      value: "Lawyer",
       label: "محامي حر",
       icon: Briefcase,
       comingSoon: false,
     },
     {
-      id: "law-office",
+      id: 2,
+      value: "LawOffice",
       label: "مكتب محاماة",
       icon: Building2,
       comingSoon: true,
@@ -464,21 +454,21 @@ const AuthModals: React.FC<AuthModalProps> = ({
                     const IconComponent = type.icon;
                     const isDisabled = type.comingSoon;
                     const isSelected =
-                      registerForm.watch("userType") === type.id;
+                      registerForm.watch("userType") === type.value;
                     return (
                       <div
                         key={type.id}
                         onClick={() => {
                           if (isDisabled) return;
-                          if (type.id === "lawyer") {
-                            navigate("/apply/lawyer");
+                          if (
+                            type.value !== "Client" &&
+                            type.value !== "Lawyer"
+                          ) {
                             return;
                           }
-                          registerForm.setValue(
-                            "userType",
-                            type.id as "client" | "lawyer",
-                            { shouldValidate: true },
-                          );
+                          registerForm.setValue("userType", type.value, {
+                            shouldValidate: true,
+                          });
                         }}
                         className={`relative rounded-lg border-2 p-4 text-center transition-all ${
                           isDisabled
@@ -759,9 +749,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   }, [open]);
 
   const verifyMutation = useMutation({
-    mutationFn: async (code: string) => {
-      return authService.verifyEmail({ email, code });
-    },
+    mutationFn: (code: string) => authService.verifyEmail({ email, code }),
     onSuccess: () => {
       toast.success("تم التحقق بنجاح!", {
         description: "تم تأكيد بريدك الإلكتروني",

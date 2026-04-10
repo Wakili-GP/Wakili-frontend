@@ -10,7 +10,8 @@ export interface AuthUser {
   email: string;
   phoneNumber?: string;
   userType: "Client" | "Lawyer";
-  status: "Active" | "Inactive" | "Unfinished";
+  // status: "Active" | "Inactive" | "Unfinished";
+  status: "Unfinished";
   imageUrl?: string | null;
   isEmailVerified?: boolean;
   createdAt?: string;
@@ -37,7 +38,7 @@ export interface RegisterRequest {
   email: string;
   acceptTerms: boolean;
   password: string;
-  userType: "client" | "lawyer";
+  userType: "Client" | "Lawyer";
 }
 
 export interface ForgotPasswordRequest {
@@ -95,22 +96,20 @@ export const authService = {
     credentials: VerifyEmailRequest,
   ): Promise<ApiResponse<{ message: string }>> {
     return httpClient.post(
-      "/Auth/veryify-email",
+      "/Auth/verify-email",
       credentials,
     ) as unknown as Promise<ApiResponse<{ message: string }>>;
   },
 
   async resendVerificationEmail(email: string): Promise<ApiResponse<void>> {
-    return httpClient.post(
-      "/Auth/resend-verification",
+    return httpClient.post("/Auth/resend-verification", {
       email,
-    ) as unknown as Promise<ApiResponse<void>>;
+    }) as unknown as Promise<ApiResponse<void>>;
   },
 
   async getCurrentUser(): Promise<ApiResponse<AuthUser>> {
-    return httpClient.get("/Auth/me") as unknown as Promise<
-      ApiResponse<AuthUser>
-    >;
+    const response = await httpClient.get<ApiResponse<AuthUser>>("/Auth/me");
+    return response.data;
   },
 
   initializeToken(): void {

@@ -28,7 +28,7 @@ export const professionalCertificationSchema = z.object({
   certificateName: z.string().min(1, "مطلوب"),
   issuingOrganization: z.string().min(1, "مطلوب"),
   yearObtained: z.string().min(1, "مطلوب"),
-  document: z.string().nullable().optional(),
+  document: z.instanceof(File).nullable().optional(),
 });
 
 export const educationSchema = z.object({

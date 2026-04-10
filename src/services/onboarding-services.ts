@@ -23,7 +23,7 @@ export interface ProfessionalCertification {
   certificateName: string;
   issuingOrganization: string;
   yearObtained: string;
-  document: string | null;
+  document: File | null;
 }
 
 export interface EducationData {
@@ -45,7 +45,6 @@ export interface ExperienceData {
 }
 
 export interface VerificationDocument {
-  fileName: string | null;
   file: File | null;
   status: "pending" | "uploaded";
 }
@@ -90,11 +89,19 @@ export const onboardingService = {
     formData.append("Country", data.country);
     formData.append("City", data.city);
     formData.append("Bio", data.bio);
-    // FormData only supports string values, so we need to convert numbers and arrays to strings
+    // FormData array values should be appended item-by-item for ASP.NET model binding.
     formData.append("YearsOfExperience", data.yearsOfExperience.toString());
-    formData.append("PracticeAreas", JSON.stringify(data.practiceAreas));
-    formData.append("SessionTypes", JSON.stringify(data.sessionTypes));
-    return httpClient.post("/lawyer/onboarding/basic-info", formData);
+    data.practiceAreas.forEach((areaId) => {
+      formData.append("PracticeAreas", areaId.toString());
+    });
+    data.sessionTypes.forEach((sessionType) => {
+      formData.append("SessionTypes", sessionType);
+    });
+    const response = await httpClient.post<ApiResponse<string>>(
+      "/lawyer/onboarding/basic-info",
+      formData,
+    );
+    return response.data;
   },
 
   // Step 2: Save education and certifications
@@ -109,14 +116,23 @@ export const onboardingService = {
       "ProfessionalCertifications",
       JSON.stringify(data.professionalCertifications),
     );
-    return httpClient.post("/lawyer/onboarding/education", formData);
+    console.log("Education FormData entries:", formData);
+    const response = await httpClient.post<ApiResponse<string>>(
+      "/lawyer/onboarding/education",
+      formData,
+    );
+    return response.data;
   },
 
   // Step 3: Save work experience
   async saveExperience(
     data: ExperienceData,
   ): Promise<ApiResponse<{ message: string }>> {
-    return httpClient.post("/lawyer/onboarding/experience", data);
+    const response = await httpClient.post<ApiResponse<{ message: string }>>(
+      "/lawyer/onboarding/experience",
+      data,
+    );
+    return response.data;
   },
 
   // Step 4: Upload verification documents
@@ -124,7 +140,7 @@ export const onboardingService = {
     data: VerificationData,
   ): Promise<ApiResponse<string>> {
     const formData = new FormData();
-    formData.append("UserId", localStorage.getItem("userId") || "");
+    formData.append("UserId", "string");
 
     if (data.nationalIdFront.file)
       formData.append("NationalIdFront", data.nationalIdFront.file);
@@ -148,11 +164,18 @@ export const onboardingService = {
         formData.append(`ProfessionalCertificates[${i}]`, cert.file);
     });
 
-    return httpClient.post("/lawyer/onboarding/verification", formData);
+    const response = await httpClient.post<ApiResponse<string>>(
+      "/lawyer/onboarding/verification",
+      formData,
+    );
+    return response.data;
   },
 
   async getOnboardingProgress(): Promise<ApiResponse<OnboardingProgress>> {
-    return httpClient.get("/lawyer/onboarding/progress");
+    const response = await httpClient.get<ApiResponse<OnboardingProgress>>(
+      "/lawyer/onboarding/progress",
+    );
+    return response.data;
   },
 };
 

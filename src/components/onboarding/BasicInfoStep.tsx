@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import {
   basicInfoSchema,
@@ -99,11 +99,6 @@ const BasicInfoStep = ({
   const watchedProfileImage = watch("profileImage");
   const watchedPracticeAreas = watch("practiceAreas");
   const watchedSessionTypes = watch("sessionTypes");
-
-  // Resetting City When Country Changes
-  useEffect(() => {
-    setValue("city", "");
-  }, [watchedCountry, setValue]);
 
   const onSubmit = (data: BasicInfoFormData) => {
     onNext(data); // BasicInfoMutation
@@ -278,7 +273,10 @@ const BasicInfoStep = ({
                 <Select
                   dir="rtl"
                   value={field.value}
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setValue("city", "", { shouldValidate: true });
+                  }}
                 >
                   <SelectTrigger
                     className={`cursor-pointer ${errors.country ? "border-destructive" : ""}`}

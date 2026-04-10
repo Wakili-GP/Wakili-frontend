@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { authService, type AuthUser } from "@/services/auth-services";
+import { setHttpClientToken } from "@/services/api/httpClient";
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -23,13 +24,23 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     const token = localStorage.getItem("authToken");
     if (token) {
-      const response = await authService.getCurrentUser();
-      if (response.success && response.data) {
-        set({ user: response.data, isAuthenticated: true });
-      } else {
-        // Token invalid, clear it.
+      try {
+        const response = await authService.getCurrentUser();
+        if (response.success && response.data) {
+          set({ user: response.data, isAuthenticated: true });
+        } else {
+          // Token invalid, clear it.
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("userId");
+          setHttpClientToken(null);
+          set({ user: null, isAuthenticated: false });
+        }
+      } catch {
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("userId");
+        setHttpClientToken(null);
         set({ user: null, isAuthenticated: false });
       }
     }
@@ -39,6 +50,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string) => {
     const response = await authService.login({ email, password });
     if (response.success && response.data) {
+      localStorage.setItem("authToken", response.data.accessToken);
+      if (response.data.refreshToken) {
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+      }
+      localStorage.setItem("userId", response.data.user.id);
+      setHttpClientToken(response.data.accessToken);
       set({ user: response.data.user, isAuthenticated: true });
       console.log("User", response.data.user);
     } else {
@@ -50,6 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    setHttpClientToken(null);
 
     set({ user: null, isAuthenticated: false });
   },

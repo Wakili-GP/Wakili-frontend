@@ -35,7 +35,7 @@ export const registerSchema = z
     firstName: z.string().min(2, "الاسم الأول مطلوب"),
     lastName: z.string().min(2, "الاسم الأخير مطلوب"),
     email: z.string().email("بريد إلكتروني غير صالح"),
-    userType: z.enum(["client", "lawyer"], {
+    userType: z.enum(["Client", "Lawyer"], {
       required_error: "اختر نوع المستخدم",
     }),
     password: z

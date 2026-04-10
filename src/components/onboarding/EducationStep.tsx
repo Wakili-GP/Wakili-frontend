@@ -93,14 +93,7 @@ const EducationStep = ({
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setValue(
-        `professionalCertifications.${index}.document`,
-        reader.result as string,
-      );
-    };
-    reader.readAsDataURL(file);
+    setValue(`professionalCertifications.${index}.document`, file);
   };
 
   return (

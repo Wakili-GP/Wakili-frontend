@@ -1,17 +1,9 @@
-import { useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Home, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
-  //   const location = useLocation();
-
-  //   useEffect(() => {
-  //     console.error(
-  //       "404 Error: User attempted to access non-existent route:",
-  //       location.pathname,
-  //     );
-  //   }, [location.pathname]);
+  const navigate = useNavigate();
 
   return (
     <div
@@ -34,7 +26,7 @@ const NotFound = () => {
         </p>
 
         {/* <Button asChild variant="hero" size="lg"> */}
-        <Button variant="hero" size="lg">
+        <Button variant="hero" size="lg" onClick={() => navigate("/")}>
           {/* <Link to="/" className="gap-2"> */}
           <Home className="w-5 h-5" />
           العودة للرئيسية

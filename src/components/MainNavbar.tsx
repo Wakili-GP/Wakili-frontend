@@ -166,9 +166,9 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                       className="cursor-pointer flex items-center space-x-2 space-x-reverse"
                     >
                       <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        {user?.profileImage ? (
+                        {user?.imageUrl ? (
                           <img
-                            src={user.profileImage}
+                            src={user.imageUrl}
                             alt={user.firstName}
                             className="w-full h-full rounded-full object-cover"
                           />
@@ -185,7 +185,30 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem
                       dir="rtl"
-                      onClick={() => navigate("/profile")}
+                      onClick={() => {
+                        if (user?.userType === "Client") {
+                          navigate("/profile");
+                          return;
+                        } else if (
+                          user?.userType === "Lawyer" &&
+                          user?.status === "Unfinished"
+                        ) {
+                          navigate("/lawyer-onboarding");
+                          toast.info(
+                            "اكمل ملفك الشخصي لتتمكن من استخدام حسابك",
+                            { description: "يرجى إكمال معلوماتك الشخصية" },
+                          );
+                          return;
+                        } else if (
+                          user?.userType === "Lawyer"
+                          // user?.status === "Active"
+                        ) {
+                          navigate("/lawyer-onboarding");
+
+                          // navigate(`/lawyer/${user.id}`);
+                          return;
+                        }
+                      }}
                       className="cursor-pointer flex items-center space-x-2 space-x-reverse"
                     >
                       <User className="w-4 h-4" />
