@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import {
   basicInfoSchema,
@@ -33,29 +33,138 @@ import SpecializationService, {
 import { type ApiResponse } from "@/services/api/httpClient";
 import { type LawyerBasicInfo } from "@/services/onboarding-services";
 import { useAuth } from "@/stores/auth.store";
+import { getAvatarColor, getInitials } from "@/lib/avatarHelpers";
 import {
   SESSION_TYPE_OPTIONS,
   COUNTRIES,
   CITIES_BY_COUNTRY,
-  PHONE_CODES,
 } from "@/data/onboarding";
+import { toast } from "@/components/ui/sonner";
+import { onboardingService } from "@/services/onboarding-services";
+import { useMutation } from "@tanstack/react-query";
 
 interface BasicInfoStepProps {
-  defaultValues: LawyerBasicInfo;
-  onNext: (data: LawyerBasicInfo) => void;
-  isLoading: boolean;
+  onNext: (x: number) => void;
 }
 
-const BasicInfoStep = ({
-  defaultValues,
-  onNext,
-  isLoading,
-}: BasicInfoStepProps) => {
-  const { user } = useAuth();
+type BasicInfoFormInput = z.input<typeof basicInfoSchema>;
 
+const BasicInfoStep = ({ onNext }: BasicInfoStepProps) => {
+  // For fetching the firstName, lastName, and email at first
+  const { user } = useAuth();
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
 
+  const mapPracticeAreasToIds = (
+    areas?:
+      | number[]
+      | Array<{ id: number; name: string; description: string }>
+      | null,
+  ): number[] => {
+    if (!areas?.length) return [];
+    if (typeof areas[0] === "number") return areas as number[];
+    return (areas as Array<{ id: number }>).map((area) => area.id);
+  };
+
+  const urlToFile = async (url: string, fileName = "profile-image") => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const extension = blob.type.split("/")[1] || "jpg";
+    return new File([blob], `${fileName}.${extension}`, { type: blob.type });
+  };
+
+  // Fetching Prev Information
+  const { data: progressResponse, isSuccess } = useQuery({
+    queryKey: ["onboarding-progress"],
+    queryFn: () => onboardingService.getOnboardingProgress(),
+    select: (response) => response.data?.data.basicInfo,
+    retry: false,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<BasicInfoFormInput, unknown, BasicInfoFormData>({
+    resolver: zodResolver(basicInfoSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      country: "",
+      city: "",
+      bio: "",
+      yearsOfExperience: 0,
+      practiceAreas: [],
+      sessionTypes: [],
+    },
+  });
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    console.log(
+      "Onboarding Progress Response BASIC INFO INSIDE SUCCESS:",
+      progressResponse,
+    );
+
+    reset({
+      profileImage: progressResponse?.profileImage || null,
+      firstName: progressResponse?.firstName || user?.firstName || "",
+      lastName: progressResponse?.lastName || user?.lastName || "",
+      phoneNumber: progressResponse?.phoneNumber || "",
+      bio: progressResponse?.bio || "",
+      country: progressResponse?.country || "",
+      city: progressResponse?.city || "",
+      yearsOfExperience: progressResponse?.yearsOfExperience ?? 0,
+      practiceAreas: mapPracticeAreasToIds(progressResponse?.practiceAreas),
+      sessionTypes: progressResponse?.sessionTypes || [],
+    });
+  }, [isSuccess, progressResponse, reset, user?.firstName, user?.lastName]);
+
+  // BasicInfoMutation
+  const basicInfoMutation = useMutation({
+    mutationFn: (data: LawyerBasicInfo) =>
+      onboardingService.saveBasicInfo(data),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("تم حفظ المعلومات الأساسية");
+        onNext(2);
+      } else {
+        toast.error("خطأ", {
+          description: response.error || "فشل حفظ البيانات",
+        });
+      }
+    },
+    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
+  });
+
+  // Mutation Submission Handler
+  const onSubmit = async (data: BasicInfoFormData) => {
+    let profileImage = data.profileImage;
+
+    if (typeof profileImage === "string" && profileImage) {
+      try {
+        profileImage = await urlToFile(profileImage);
+      } catch {
+        toast.error("خطأ", {
+          description: "تعذر تجهيز صورة الملف الشخصي للإرسال",
+        });
+        return;
+      }
+    }
+
+    basicInfoMutation.mutate({
+      ...data,
+      profileImage,
+    } as LawyerBasicInfo);
+  };
+
+  // Fetching Specializations
   const { data: specializations = [], isLoading: isLoadingSpecializations } =
     useQuery<ApiResponse<Specialization[]>, Error, Specialization[]>({
       queryKey: ["specializations"],
@@ -63,50 +172,18 @@ const BasicInfoStep = ({
       select: (response) => response.data ?? [],
     });
 
-  // Form Data
-  // React Hook Form allows 3 types
-  // 1.TFieldValues: Shape of data it received before validation
-  // 2.TContext: Type of context object passed to resolver (not used here)
-  // 3.TOutput: Shape of data after validation (what we get in onSubmit)
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<
-    z.input<typeof basicInfoSchema>,
-    undefined,
-    z.output<typeof basicInfoSchema>
-  >({
-    resolver: zodResolver(basicInfoSchema),
-    defaultValues: {
-      profileImage: defaultValues.profileImage || null,
-      phoneCode: defaultValues.phoneCode || "",
-      phoneNumber: defaultValues.phoneNumber || "",
-      country: defaultValues.country || "",
-      city: defaultValues.city || "",
-      bio: defaultValues.bio || "",
-      yearsOfExperience: defaultValues.yearsOfExperience || 0,
-      practiceAreas: defaultValues.practiceAreas || [],
-      sessionTypes: defaultValues.sessionTypes || [],
-    },
-  });
-
-  const watchedCountry = watch("country");
-  const watchedBio = watch("bio");
+  const watchedBio = watch("bio"); // Watching bio for character count
+  const watchedCountry = watch("country"); // Watching country to reset city when country changes
+  const watchedPracticeAreas = watch("practiceAreas"); // Watching practice areas to toggle selection
+  const watchedSessionTypes = watch("sessionTypes"); // Watching session types to toggle selection
   const watchedProfileImage = watch("profileImage");
-  const watchedPracticeAreas = watch("practiceAreas");
-  const watchedSessionTypes = watch("sessionTypes");
-
-  const onSubmit = (data: BasicInfoFormData) => {
-    onNext(data); // BasicInfoMutation
-  };
 
   const confirmImage = () => {
     if (previewFile) {
-      setValue("profileImage", previewFile, { shouldValidate: true });
+      setValue("profileImage", previewFile, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
       setImageDialogOpen(false);
       setPreviewFile(null);
     }
@@ -121,7 +198,7 @@ const BasicInfoStep = ({
     );
   };
 
-  const toggleSessionType = (id: string) => {
+  const toggleSessionType = (id: number) => {
     const current = watchedSessionTypes || [];
     setValue(
       "sessionTypes",
@@ -140,24 +217,33 @@ const BasicInfoStep = ({
           أكمل معلوماتك الشخصية والمهنية
         </p>
       </div>
+
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        {/* {" Profile Image "} */}
+        {/* Profile Image */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div
-              className={`w-28 h-28 rounded-full border-4 ${
-                errors.profileImage ? "border-destructive" : "border-primary/20"
-              } overflow-hidden bg-muted flex items-center justify-center cursor-pointer`}
+              className={`w-28 h-28 rounded-full border-4 ${errors.profileImage ? "border-destructive" : "border-primary/20"} overflow-hidden bg-muted flex items-center justify-center cursor-pointer`}
               onClick={() => setImageDialogOpen(true)}
             >
               {watchedProfileImage ? (
                 <img
-                  src={URL.createObjectURL(watchedProfileImage)}
-                  alt="profile"
+                  src={
+                    typeof watchedProfileImage === "string"
+                      ? watchedProfileImage
+                      : URL.createObjectURL(watchedProfileImage)
+                  }
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Camera className="cursor-pointer w-4 h-4" />
+                <div
+                  className={`w-full h-full flex items-center justify-center text-3xl font-bold ${getAvatarColor((watch("firstName") || "") + " " + (watch("lastName") || ""))}`}
+                >
+                  {getInitials(
+                    watch("firstName") || "",
+                    watch("lastName") || "",
+                  ) || <Camera className="w-8 h-8 opacity-50" />}
+                </div>
               )}
             </div>
             <button
@@ -165,7 +251,7 @@ const BasicInfoStep = ({
               onClick={() => setImageDialogOpen(true)}
               className="absolute bottom-0 left-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground"
             >
-              <Camera className="cursor-pointer w-4 h-4" />
+              <Camera className="w-4 h-4" />
             </button>
           </div>
           {errors.profileImage && (
@@ -176,23 +262,32 @@ const BasicInfoStep = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* First Name — from auth, disabled */}
           <div className="space-y-2">
             <Label>الاسم الأول</Label>
             <Input
-              value={user?.firstName ?? ""}
-              disabled
-              className="bg-muted"
+              {...register("firstName")}
+              placeholder="الاسم الأول"
+              className={errors.firstName ? "border-destructive" : ""}
             />
+            {errors.firstName && (
+              <p className="text-sm text-destructive">
+                {errors.firstName.message}
+              </p>
+            )}
           </div>
-
-          {/* Last Name — from auth, disabled */}
           <div className="space-y-2">
             <Label>الاسم الأخير</Label>
-            <Input value={user?.lastName ?? ""} disabled className="bg-muted" />
+            <Input
+              {...register("lastName")}
+              placeholder="الاسم الأخير"
+              className={errors.lastName ? "border-destructive" : ""}
+            />
+            {errors.lastName && (
+              <p className="text-sm text-destructive">
+                {errors.lastName.message}
+              </p>
+            )}
           </div>
-
-          {/* Email — from auth, disabled */}
           <div className="space-y-2">
             <Label>البريد الإلكتروني</Label>
             <Input value={user?.email ?? ""} disabled className="bg-muted" />
@@ -204,39 +299,14 @@ const BasicInfoStep = ({
           {/* Phone */}
           <div className="space-y-2">
             <Label>رقم الهاتف *</Label>
-            <div className="flex gap-2">
-              <Controller
-                name="phoneCode"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    dir="rtl"
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="cursor-pointer w-36 text-right">
-                      <SelectValue placeholder="الكود" />
-                    </SelectTrigger>
-                    <SelectContent align="end" className="w-36">
-                      {PHONE_CODES.map((item) => (
-                        <SelectItem
-                          key={item.code}
-                          value={item.code}
-                          className="justify-end cursor-pointer"
-                        >
-                          {item.country} {item.code}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <Input
-                {...register("phoneNumber")}
-                placeholder="رقم الهاتف"
-                className={`flex-1 ${errors.phoneNumber ? "border-destructive" : ""}`}
-              />
-            </div>
+            <Input
+              {...register("phoneNumber")}
+              placeholder="رقم الهاتف"
+              dir="rtl"
+              className={`text-right ${
+                errors.phoneNumber ? "border-destructive" : ""
+              }`}
+            />
             {errors.phoneNumber && (
               <p className="text-sm text-destructive">
                 {errors.phoneNumber.message}
@@ -271,8 +341,9 @@ const BasicInfoStep = ({
               control={control}
               render={({ field }) => (
                 <Select
+                  key={field.value || "country-select"}
                   dir="rtl"
-                  value={field.value}
+                  value={field.value || undefined}
                   onValueChange={(value) => {
                     field.onChange(value);
                     setValue("city", "", { shouldValidate: true });
@@ -312,8 +383,9 @@ const BasicInfoStep = ({
               control={control}
               render={({ field }) => (
                 <Select
+                  key={watchedCountry || "city-select"}
                   dir="rtl"
-                  value={field.value}
+                  value={field.value || undefined}
                   onValueChange={field.onChange}
                   disabled={!watchedCountry}
                 >
@@ -412,12 +484,15 @@ const BasicInfoStep = ({
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Checkbox
-                  id={type.id}
+                  id={`session-type-${type.id}`}
                   className="cursor-pointer"
                   checked={watchedSessionTypes?.includes(type.id) ?? false}
                   onCheckedChange={() => toggleSessionType(type.id)}
                 />
-                <Label htmlFor={type.id} className="cursor-pointer">
+                <Label
+                  htmlFor={`session-type-${type.id}`}
+                  className="cursor-pointer"
+                >
                   {type.label}
                 </Label>
               </div>
@@ -430,22 +505,21 @@ const BasicInfoStep = ({
           )}
         </div>
 
-        {/* Submit */}
         <div className="flex justify-end pt-4">
           <Button
             type="submit"
             size="lg"
-            disabled={isLoading}
+            disabled={basicInfoMutation.isPending}
             className="cursor-pointer"
           >
-            {isLoading ? (
+            {basicInfoMutation.isPending && (
               <Loader className="w-4 h-4 animate-spin ml-2" />
-            ) : null}
+            )}
             التالي
           </Button>
         </div>
       </form>
-      {/* Image Dialog */}
+
       <ImageDialog
         open={imageDialogOpen}
         onOpenChange={(v) => {
@@ -460,7 +534,6 @@ const BasicInfoStep = ({
   );
 };
 
-// Image Dialog
 interface ImageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -475,56 +548,53 @@ const ImageDialog = ({
   previewFile,
   setPreviewFile,
   confirmImage,
-}: ImageDialogProps) => {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setPreviewFile(file);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
-        <DialogHeader>
-          <DialogTitle>رفع صورة الملف الشخصي</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {previewFile ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20">
-                <img
-                  src={URL.createObjectURL(previewFile)}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => setPreviewFile(null)}
-                >
-                  تغيير الصورة
-                </Button>
-                <Button className="cursor-pointer" onClick={confirmImage}>
-                  تأكيد
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <label className="w-full h-40 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors">
-              <Upload className="w-10 h-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">اضغط لرفع صورة</p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
+}: ImageDialogProps) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogHeader>
+        <DialogTitle>رفع صورة الملف الشخصي</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        {previewFile ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20">
+              <img
+                src={URL.createObjectURL(previewFile)}
+                alt="Preview"
+                className="w-full h-full object-cover"
               />
-            </label>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => setPreviewFile(null)}
+              >
+                تغيير الصورة
+              </Button>
+              <Button className="cursor-pointer" onClick={confirmImage}>
+                تأكيد
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <label className="w-full h-40 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors">
+            <Upload className="w-10 h-10 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">اضغط لرفع صورة</p>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setPreviewFile(f);
+              }}
+              className="hidden"
+            />
+          </label>
+        )}
+      </div>
+    </DialogContent>
+  </Dialog>
+);
+
 export default BasicInfoStep;

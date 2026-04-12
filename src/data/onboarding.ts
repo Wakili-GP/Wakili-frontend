@@ -1,6 +1,6 @@
 export const SESSION_TYPE_OPTIONS = [
-  { id: "office", label: "استشارة مكتبية" },
-  { id: "phone", label: "استشارة هاتفية" },
+  { id: 0, label: "استشارة هاتفية" },
+  { id: 1, label: "استشارة مكتبية" },
 ];
 
 export const COUNTRIES = [
@@ -50,7 +50,7 @@ export const YEARS = Array.from({ length: 50 }, (_, i) =>
 );
 export const EMPTY_DOC = { file: null, status: "pending" as const };
 
-export const SESSION_TYPE_LABELS: Record<string, string> = {
-  office: "استشارة مكتبية",
-  phone: "استشارة هاتفية",
+export const SESSION_TYPE_LABELS: Record<number, string> = {
+  0: "استشارة هاتفية",
+  1: "استشارة مكتبية",
 };

@@ -1,18 +1,16 @@
 import { z } from "zod";
 
 export const basicInfoSchema = z.object({
-  profileImage: z
-    .instanceof(File, { message: "صورة الملف الشخصي مطلوبة" })
-    .nullable(),
-  phoneCode: z.string().min(1, "مطلوب"),
+  firstName: z.string().min(1, "الاسم الأول مطلوب"),
+  lastName: z.string().min(1, "الاسم الأخير مطلوب"),
+  profileImage: z.union([z.instanceof(File), z.string()]).nullable(),
   phoneNumber: z.string().min(7, "رقم الهاتف غير صحيح"),
   country: z.string().min(1, "الدولة مطلوبة"),
   city: z.string().min(1, "المدينة مطلوبة"),
   bio: z.string().min(100, "الملخص المهني مطلوب (100 حرف على الأقل)"),
-  // There is a transformation here
   yearsOfExperience: z.coerce.number({ message: "مطلوب" }).min(0).max(60),
   practiceAreas: z.array(z.number()).min(1, "اختر مجال ممارسة واحد على الأقل"),
-  sessionTypes: z.array(z.string()).min(1, "اختر نوع جلسة واحد على الأقل"),
+  sessionTypes: z.array(z.number()).min(1, "اختر نوع جلسة واحد على الأقل"),
 });
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
@@ -22,13 +20,20 @@ export const academicQualificationSchema = z.object({
   fieldOfStudy: z.string().min(1, "مطلوب"),
   universityName: z.string().min(1, "مطلوب"),
   graduationYear: z.string().min(1, "مطلوب"),
+  document: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export const professionalCertificationSchema = z.object({
   certificateName: z.string().min(1, "مطلوب"),
   issuingOrganization: z.string().min(1, "مطلوب"),
   yearObtained: z.string().min(1, "مطلوب"),
-  document: z.instanceof(File).nullable().optional(),
+  document: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export const educationSchema = z.object({
@@ -36,7 +41,7 @@ export const educationSchema = z.object({
     .array(academicQualificationSchema)
     .min(1, "أضف مؤهل علمي واحد على الأقل"),
   professionalCertifications: z.array(
-    professionalCertificationSchema.partial(), // all optional since section is optional
+    professionalCertificationSchema.partial(),
   ),
 });
 
@@ -82,12 +87,6 @@ export const verificationSchema = z.object({
   lawyerLicenseNumber: z.string().min(1, "مطلوب"),
   lawyerLicenseIssuingAuthority: z.string().min(1, "مطلوب"),
   lawyerLicenseYearOfIssue: z.string().min(1, "مطلوب"),
-  educationalCertificates: z
-    .array(verificationDocumentSchema)
-    .refine((certs) => certs.some((c) => c.file !== null), {
-      message: "يجب رفع شهادة علمية واحدة على الأقل",
-    }),
-  professionalCertificates: z.array(verificationDocumentSchema),
 });
 
 export type VerificationFormData = z.infer<typeof verificationSchema>;

@@ -1,15 +1,17 @@
 import httpClient, { type ApiResponse } from "./api/httpClient";
 
 export interface LawyerBasicInfo {
-  profileImage: File | null;
-  phoneCode: string; // E.g., +20
+  firstName: string;
+  lastName: string;
+  profileImage: File | string | null;
   phoneNumber: string;
   country: string;
   city: string;
   bio: string;
   yearsOfExperience: number;
-  practiceAreas: number[]; // IDs of Specializations
-  sessionTypes: string[]; // Array of Strings
+  practiceAreas: number[];
+  // 0: Phone, 1: Office for sessionTypes
+  sessionTypes: number[];
 }
 
 export interface AcademicQualification {
@@ -17,13 +19,14 @@ export interface AcademicQualification {
   fieldOfStudy: string;
   universityName: string;
   graduationYear: string;
+  document: File | string | null;
 }
 
 export interface ProfessionalCertification {
   certificateName: string;
   issuingOrganization: string;
   yearObtained: string;
-  document: File | null;
+  document: File | string | null;
 }
 
 export interface EducationData {
@@ -56,8 +59,6 @@ export interface VerificationData {
   nationalIdFront: VerificationDocument;
   nationalIdBack: VerificationDocument;
   lawyerLicense: VerificationDocument;
-  educationalCertificates: VerificationDocument[];
-  professionalCertificates: VerificationDocument[];
 }
 
 export interface LawyerOnboardingData {
@@ -65,11 +66,6 @@ export interface LawyerOnboardingData {
   education: EducationData;
   experience: ExperienceData;
   verification: VerificationData;
-}
-
-export interface OnboardingSubmitRequest {
-  step: number;
-  data: Partial<LawyerOnboardingData>;
 }
 
 export interface OnboardingProgress {
@@ -83,9 +79,12 @@ export const onboardingService = {
   /// Step 1: Save basic info
   async saveBasicInfo(data: LawyerBasicInfo): Promise<ApiResponse<string>> {
     const formData = new FormData();
-    formData.append("UserId", "string");
-    if (data.profileImage) formData.append("ProfileImage", data.profileImage);
-    formData.append("PhoneNumber", `${data.phoneCode}${data.phoneNumber}`);
+    formData.append("FirstName", data.firstName);
+    formData.append("LastName", data.lastName);
+    if (data.profileImage instanceof File) {
+      formData.append("ProfileImage", data.profileImage);
+    }
+    formData.append("PhoneNumber", data.phoneNumber);
     formData.append("Country", data.country);
     formData.append("City", data.city);
     formData.append("Bio", data.bio);
@@ -95,28 +94,67 @@ export const onboardingService = {
       formData.append("PracticeAreas", areaId.toString());
     });
     data.sessionTypes.forEach((sessionType) => {
-      formData.append("SessionTypes", sessionType);
+      formData.append("SessionTypes", sessionType.toString());
     });
+    console.log("Basic Info FormData entries:", formData);
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/basic-info",
       formData,
     );
+    console.log("Onboarding Basic Info Response DATA:", response.data);
     return response.data;
   },
 
   // Step 2: Save education and certifications
   async saveEducation(data: EducationData): Promise<ApiResponse<string>> {
     const formData = new FormData();
-    formData.append("UserId", "string");
-    formData.append(
-      "AcademicQualifications",
-      JSON.stringify(data.academicQualifications),
-    );
-    formData.append(
-      "ProfessionalCertifications",
-      JSON.stringify(data.professionalCertifications),
-    );
-    console.log("Education FormData entries:", formData);
+
+    data.academicQualifications.forEach((qual, i) => {
+      formData.append(
+        `academicQualifications[${i}].degreeType`,
+        qual.degreeType || "",
+      );
+      formData.append(
+        `academicQualifications[${i}].fieldOfStudy`,
+        qual.fieldOfStudy || "",
+      );
+      formData.append(
+        `academicQualifications[${i}].universityName`,
+        qual.universityName || "",
+      );
+      formData.append(
+        `academicQualifications[${i}].graduationYear`,
+        qual.graduationYear || "",
+      );
+    });
+
+    data.professionalCertifications?.forEach((cert, i) => {
+      formData.append(
+        `professionalCertifications[${i}].certificateName`,
+        cert.certificateName || "",
+      );
+      formData.append(
+        `professionalCertifications[${i}].issuingOrganization`,
+        cert.issuingOrganization || "",
+      );
+      formData.append(
+        `professionalCertifications[${i}].yearObtained`,
+        cert.yearObtained || "",
+      );
+
+      if (cert.document && cert.document instanceof File) {
+        formData.append(
+          `professionalCertifications[${i}].document`,
+          cert.document,
+        );
+      }
+    });
+
+    console.log("Education FormData entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/education",
       formData,
@@ -136,11 +174,10 @@ export const onboardingService = {
   },
 
   // Step 4: Upload verification documents
-  async uploadVerificationDocuments(
+  async saveVerificationDocuments(
     data: VerificationData,
   ): Promise<ApiResponse<string>> {
     const formData = new FormData();
-    formData.append("UserId", "string");
 
     if (data.nationalIdFront.file)
       formData.append("NationalIdFront", data.nationalIdFront.file);
@@ -155,19 +192,11 @@ export const onboardingService = {
     );
     formData.append("License.LicenseYear", data.lawyerLicenseYearOfIssue);
 
-    data.educationalCertificates.forEach((cert, i) => {
-      if (cert.file)
-        formData.append(`EducationalCertificates[${i}]`, cert.file);
-    });
-    data.professionalCertificates.forEach((cert, i) => {
-      if (cert.file)
-        formData.append(`ProfessionalCertificates[${i}]`, cert.file);
-    });
-
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/verification",
       formData,
     );
+    console.log("Verification Upload Response DATA:", response.data);
     return response.data;
   },
 
@@ -175,6 +204,7 @@ export const onboardingService = {
     const response = await httpClient.get<ApiResponse<OnboardingProgress>>(
       "/lawyer/onboarding/progress",
     );
+    console.log("Onboarding Progress Response DATA:", response.data);
     return response.data;
   },
 };

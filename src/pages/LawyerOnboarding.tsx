@@ -4,13 +4,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scale, Clock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
 import EducationStep from "@/components/onboarding/EducationStep";
 import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
-
 import {
   onboardingService,
   type LawyerBasicInfo,
@@ -18,8 +18,6 @@ import {
   type ExperienceData,
   type VerificationData,
 } from "@/services/onboarding-services";
-import { Button } from "@/components/ui/button";
-
 const STEPS = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -28,11 +26,10 @@ const STEPS = [
   { title: "المراجعة", description: "تأكيد البيانات" },
 ];
 
-// Default Values
-
 const DEFAULT_BASIC_INFO: LawyerBasicInfo = {
+  firstName: "",
+  lastName: "",
   profileImage: null,
-  phoneCode: "+20",
   phoneNumber: "",
   country: "",
   city: "",
@@ -49,6 +46,7 @@ const DEFAULT_EDUCATION: EducationData = {
       fieldOfStudy: "",
       universityName: "",
       graduationYear: "",
+      document: null,
     },
   ],
   professionalCertifications: [],
@@ -74,26 +72,17 @@ const DEFAULT_VERIFICATION: VerificationData = {
   lawyerLicenseNumber: "",
   lawyerLicenseIssuingAuthority: "",
   lawyerLicenseYearOfIssue: "",
-  educationalCertificates: [{ file: null, status: "pending" }],
-  professionalCertificates: [],
 };
 
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
-
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [savedData, setSavedData] = useState<{
-    basicInfo: LawyerBasicInfo;
-    education: EducationData;
-    experience: ExperienceData;
-    verification: VerificationData;
-  }>({
-    basicInfo: DEFAULT_BASIC_INFO,
-    education: DEFAULT_EDUCATION,
-    experience: DEFAULT_EXPERIENCE,
-    verification: DEFAULT_VERIFICATION,
+  const [savedData, setSavedData] = useState({
+    education: DEFAULT_EDUCATION as EducationData,
+    experience: DEFAULT_EXPERIENCE as ExperienceData,
+    verification: DEFAULT_VERIFICATION as VerificationData,
   });
 
   const { data: progressResponse, isLoading } = useQuery({
@@ -102,17 +91,15 @@ const LawyerOnboarding = () => {
     retry: false,
   });
 
-  // Handle API payloads that may return success=false with a business statusCode.
+  // OnSucces of useQuery is not supported in Tanstack Query v5, so we use useEffect to handle the response
   useEffect(() => {
     if (!progressResponse) return;
 
     if (!progressResponse.success) {
-      // New lawyer accounts can legitimately have no onboarding profile yet.
       if (progressResponse.statusCode === 404) {
         setCurrentStep(1);
         return;
       }
-
       toast.error("خطأ", {
         description: progressResponse.error || "فشل تحميل تقدم التسجيل",
       });
@@ -129,25 +116,6 @@ const LawyerOnboarding = () => {
       verification: { ...prev.verification, ...data?.verification },
     }));
   }, [progressResponse]);
-
-  // BasicInfoMutation
-  const basicInfoMutation = useMutation({
-    mutationFn: (data: LawyerBasicInfo) =>
-      onboardingService.saveBasicInfo(data),
-    onSuccess: (response, variables) => {
-      console.log("response from basicmutaion ", response);
-      if (response.success) {
-        setSavedData((prev) => ({ ...prev, basicInfo: variables }));
-        toast.success("تم حفظ المعلومات الأساسية");
-        setCurrentStep(2);
-      } else {
-        toast.error("خطأ", {
-          description: response.error || "فشل حفظ البيانات",
-        });
-      }
-    },
-    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
-  });
 
   // EducationMutation
   const educationMutation = useMutation({
@@ -187,15 +155,15 @@ const LawyerOnboarding = () => {
   // VerificationMutation
   const verificationMutation = useMutation({
     mutationFn: (data: VerificationData) =>
-      onboardingService.uploadVerificationDocuments(data),
+      onboardingService.saveVerificationDocuments(data),
     onSuccess: (response, variables) => {
       if (response.success) {
         setSavedData((prev) => ({ ...prev, verification: variables }));
-        toast.success("تم حفظ المستندات");
+        toast.success("تم حفظ بيانات التوثيق");
         setCurrentStep(5);
       } else {
         toast.error("خطأ", {
-          description: response.error || "فشل حفظ المستندات",
+          description: response.error || "فشل حفظ البيانات",
         });
       }
     },
@@ -212,15 +180,7 @@ const LawyerOnboarding = () => {
       </div>
     );
   }
-  // For Clients
-  // 1. Active
-  // 2. Inactive
 
-  // For Lawyers
-  // 1. Active
-  // 2. Inactive
-  // 3. Unfinished
-  // 4.
   if (isSubmitted) {
     return (
       <div
@@ -277,13 +237,7 @@ const LawyerOnboarding = () => {
 
         <Card className="mt-8">
           <CardContent className="p-6 md:p-8">
-            {currentStep === 1 && (
-              <BasicInfoStep
-                defaultValues={savedData.basicInfo}
-                onNext={(data) => basicInfoMutation.mutate(data)}
-                isLoading={basicInfoMutation.isPending}
-              />
-            )}
+            {currentStep === 1 && <BasicInfoStep onNext={setCurrentStep} />}
             {currentStep === 2 && (
               <EducationStep
                 defaultValues={savedData.education}

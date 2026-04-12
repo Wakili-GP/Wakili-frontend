@@ -1,4 +1,4 @@
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,25 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Upload,
-  FileText,
-  Trash2,
-  IdCard,
-  Award,
-  GraduationCap,
-  AlertTriangle,
-  CheckCircle,
-  Loader,
-} from "lucide-react";
+import { IdCard, Award, AlertTriangle, Loader } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { type VerificationData } from "@/services/onboarding-services";
 import {
   verificationSchema,
   type VerificationFormData,
 } from "@/schemas/onboarding.schemas";
-
 import { YEARS, EMPTY_DOC } from "@/data/onboarding";
+import FileUploadField from "@/components/FileUploadField";
 
 interface VerificationStepProps {
   defaultValues: VerificationData;
@@ -53,7 +43,7 @@ const VerificationStep = ({
     formState: { errors },
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
-    defaultValues: {
+    values: {
       nationalIdFront: defaultValues.nationalIdFront,
       nationalIdBack: defaultValues.nationalIdBack,
       lawyerLicense: defaultValues.lawyerLicense,
@@ -61,94 +51,12 @@ const VerificationStep = ({
       lawyerLicenseIssuingAuthority:
         defaultValues.lawyerLicenseIssuingAuthority,
       lawyerLicenseYearOfIssue: defaultValues.lawyerLicenseYearOfIssue,
-      educationalCertificates: defaultValues.educationalCertificates.length
-        ? defaultValues.educationalCertificates
-        : [EMPTY_DOC],
-      professionalCertificates: defaultValues.professionalCertificates ?? [],
     },
   });
-
-  const {
-    fields: eduFields,
-    append: appendEdu,
-    update: updateEdu,
-  } = useFieldArray({ control, name: "educationalCertificates" });
-
-  const {
-    fields: profFields,
-    append: appendProf,
-    update: updateProf,
-  } = useFieldArray({ control, name: "professionalCertificates" });
 
   const onSubmit = (data: VerificationFormData) => {
     onNext(data as VerificationData);
   };
-
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onFile: (file: File) => void,
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) onFile(file);
-  };
-
-  const UploadBox = ({
-    label,
-    icon,
-    file,
-    error,
-    onFile,
-    onRemove,
-  }: {
-    label: string;
-    icon: React.ReactNode;
-    file: File | null;
-    error?: string;
-    onFile: (file: File) => void;
-    onRemove: () => void;
-  }) => (
-    <div className="space-y-2">
-      <Label className="flex items-center gap-2">
-        {icon}
-        {label}
-      </Label>
-      {file ? (
-        <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted">
-          <CheckCircle className="w-5 h-5 text-primary" />
-          <div className="flex-1">
-            <p className="text-sm font-medium">{file.name}</p>
-            <p className="text-xs text-muted-foreground">تم الرفع بنجاح</p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      ) : (
-        <label
-          className={`flex flex-col items-center gap-2 p-6 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${error ? "border-destructive" : "border-border"}`}
-        >
-          <Upload className="w-8 h-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground text-center">
-            اضغط لرفع ملف <br />
-            <span className="text-xs">PDF أو صورة</span>
-          </p>
-          <input
-            type="file"
-            accept=".pdf,image/*"
-            className="hidden"
-            onChange={(e) => handleFileChange(e, onFile)}
-          />
-        </label>
-      )}
-      {error && <p className="text-sm text-destructive">{error}</p>}
-    </div>
-  );
 
   const nationalIdFront = watch("nationalIdFront.file");
   const nationalIdBack = watch("nationalIdBack.file");
@@ -182,9 +90,8 @@ const VerificationStep = ({
               <h3 className="text-lg font-semibold">الهوية الوطنية *</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <UploadBox
+              <FileUploadField
                 label="الوجه الأمامي"
-                icon={<FileText className="w-4 h-4" />}
                 file={nationalIdFront ?? null}
                 error={errors.nationalIdFront?.message}
                 onFile={(file) =>
@@ -200,9 +107,8 @@ const VerificationStep = ({
                   })
                 }
               />
-              <UploadBox
+              <FileUploadField
                 label="الوجه الخلفي"
-                icon={<FileText className="w-4 h-4" />}
                 file={nationalIdBack ?? null}
                 error={errors.nationalIdBack?.message}
                 onFile={(file) =>
@@ -230,9 +136,8 @@ const VerificationStep = ({
               <h3 className="text-lg font-semibold">رخصة المحاماة *</h3>
             </div>
 
-            <UploadBox
+            <FileUploadField
               label="رخصة المحاماة / كارنيه النقابة"
-              icon={<FileText className="w-4 h-4" />}
               file={lawyerLicense ?? null}
               error={errors.lawyerLicense?.message}
               onFile={(file) =>
@@ -318,99 +223,6 @@ const VerificationStep = ({
                   </p>
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Educational Certificates */}
-        <Card
-          className={`border-border ${errors.educationalCertificates ? "border-destructive" : ""}`}
-        >
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">
-                  الشهادات العلمية <span className="text-destructive">*</span>
-                </h3>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="cursor-pointer"
-                onClick={() => appendEdu(EMPTY_DOC)}
-              >
-                إضافة شهادة
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              يجب رفع شهادة علمية واحدة على الأقل (شهادة البكالوريوس أو أعلى)
-            </p>
-            {errors.educationalCertificates?.message && (
-              <p className="text-sm text-destructive">
-                {errors.educationalCertificates.message}
-              </p>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {eduFields.map((field, index) => {
-                const file = watch(`educationalCertificates.${index}.file`);
-                return (
-                  <UploadBox
-                    key={field.id}
-                    label={`الشهادة ${index + 1}`}
-                    icon={<FileText className="w-4 h-4" />}
-                    file={file ?? null}
-                    error={
-                      errors.educationalCertificates?.[index]?.file?.message
-                    }
-                    onFile={(f) =>
-                      updateEdu(index, { file: f, status: "uploaded" })
-                    }
-                    onRemove={() => updateEdu(index, EMPTY_DOC)}
-                  />
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Professional Certificates */}
-        <Card className="border-border">
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">
-                  الشهادات المهنية (اختياري)
-                </h3>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="cursor-pointer"
-                onClick={() => appendProf(EMPTY_DOC)}
-              >
-                إضافة شهادة
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profFields.map((field, index) => {
-                const file = watch(`professionalCertificates.${index}.file`);
-                return (
-                  <UploadBox
-                    key={field.id}
-                    label={`الشهادة ${index + 1}`}
-                    icon={<FileText className="w-4 h-4" />}
-                    file={file ?? null}
-                    onFile={(f) =>
-                      updateProf(index, { file: f, status: "uploaded" })
-                    }
-                    onRemove={() => updateProf(index, EMPTY_DOC)}
-                  />
-                );
-              })}
             </div>
           </CardContent>
         </Card>

@@ -41,7 +41,6 @@ httpClient.interceptors.request.use(
 httpClient.interceptors.response.use(
   (response) => {
     console.log("Axios API Response:", response);
-    console.log("Axios Response Data:", response.data);
     return response;
   },
   (error) => {
