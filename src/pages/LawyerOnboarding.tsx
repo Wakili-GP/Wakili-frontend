@@ -117,24 +117,6 @@ const LawyerOnboarding = () => {
     }));
   }, [progressResponse]);
 
-  // ExperienceMutation
-  const experienceMutation = useMutation({
-    mutationFn: (data: ExperienceData) =>
-      onboardingService.saveExperience(data),
-    onSuccess: (response, variables) => {
-      if (response.success) {
-        setSavedData((prev) => ({ ...prev, experience: variables }));
-        toast.success("تم حفظ الخبرات");
-        setCurrentStep(4);
-      } else {
-        toast.error("خطأ", {
-          description: response.error || "فشل حفظ البيانات",
-        });
-      }
-    },
-    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
-  });
-
   // VerificationMutation
   const verificationMutation = useMutation({
     mutationFn: (data: VerificationData) =>
@@ -224,14 +206,8 @@ const LawyerOnboarding = () => {
             {currentStep === 2 && (
               <EducationStep HandleNextBack={setCurrentStep} />
             )}
-
             {currentStep === 3 && (
-              <ExperienceStep
-                defaultValues={savedData.experience}
-                onNext={(data) => experienceMutation.mutate(data)}
-                onBack={() => setCurrentStep(2)}
-                isLoading={experienceMutation.isPending}
-              />
+              <ExperienceStep HandleNextBack={setCurrentStep} />
             )}
             {currentStep === 4 && (
               <VerificationStep

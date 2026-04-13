@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -13,14 +14,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Trash2, Briefcase, Loader, Building2 } from "lucide-react";
-import { type ExperienceData } from "@/services/onboarding-services";
+import onboardingService, {
+  type ExperienceData,
+} from "@/services/onboarding-services";
 import {
   experienceSchema,
   type ExperienceFormData,
 } from "@/schemas/onboarding.schemas";
 import { YEARS } from "@/data/onboarding";
+import { toast } from "../ui/sonner";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
-const EMPTY_EXPERIENCE = {
+interface ExperienceStepProps {
+  HandleNextBack: (step: number) => void;
+}
+
+const EMPTY_EXPERIENCE: ExperienceFormData["workExperiences"][number] = {
   jobTitle: "",
   organizationName: "",
   startYear: "",
@@ -29,59 +38,67 @@ const EMPTY_EXPERIENCE = {
   description: "",
 };
 
-interface ExperienceStepProps {
-  defaultValues: ExperienceData;
-  onNext: (data: ExperienceData) => void;
-  onBack: () => void;
-  isLoading: boolean;
-}
+const ExperienceStep = ({ HandleNextBack }: ExperienceStepProps) => {
+  // Fetching Progress
+  const { data: progressData } = useQuery({
+    queryKey: ["onboarding-progress"],
+    queryFn: () => onboardingService.getOnboardingProgress(),
+    select: (response) => response.data?.data.experience,
+    retry: false,
+  });
+  // ExperienceMutation
+  const experienceMutation = useMutation({
+    mutationFn: (data: ExperienceData) =>
+      onboardingService.saveExperience(data),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("تم حفظ الخبرات");
+        HandleNextBack(4);
+      } else {
+        toast.error("خطأ", {
+          description: response.error || "فشل حفظ البيانات",
+        });
+      }
+    },
+    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
+  });
+  const onSubmit = (data: ExperienceFormData) =>
+    experienceMutation.mutate(data as ExperienceData);
 
-const FieldGroup = ({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) => (
-  <div className="space-y-1.5">
-    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      {label}
-    </Label>
-    {children}
-    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
-  </div>
-);
-
-const ExperienceStep = ({
-  defaultValues,
-  onNext,
-  onBack,
-  isLoading,
-}: ExperienceStepProps) => {
   const {
     register,
     control,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceSchema),
-    values: {
-      workExperiences: defaultValues.workExperiences.length
-        ? defaultValues.workExperiences
-        : [EMPTY_EXPERIENCE],
+    defaultValues: {
+      workExperiences: [],
     },
   });
+
+  useEffect(() => {
+    reset({
+      workExperiences: progressData?.workExperiences?.length
+        ? progressData.workExperiences.map((experience) => ({
+            jobTitle: experience.jobTitle ?? "",
+            organizationName: experience.organizationName ?? "",
+            startYear: experience.startYear ?? "",
+            endYear: experience.endYear ?? "",
+            isCurrentJob: Boolean(experience.isCurrentJob),
+            description: experience.description ?? "",
+          }))
+        : [],
+    });
+  }, [progressData, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "workExperiences",
   });
-
-  const onSubmit = (data: ExperienceFormData) => onNext(data as ExperienceData);
 
   return (
     <div className="space-y-8" dir="rtl">
@@ -405,16 +422,18 @@ const ExperienceStep = ({
             type="button"
             variant="outline"
             className="cursor-pointer rounded-xl h-10 px-5"
-            onClick={onBack}
+            onClick={() => HandleNextBack(2)}
           >
             السابق
           </Button>
           <Button
             type="submit"
             className="cursor-pointer rounded-xl h-10 px-6 gap-2"
-            disabled={isLoading}
+            disabled={experienceMutation.isPending}
           >
-            {isLoading && <Loader className="w-4 h-4 animate-spin" />}
+            {experienceMutation.isPending && (
+              <Loader className="w-4 h-4 animate-spin" />
+            )}
             التالي
           </Button>
         </div>
@@ -422,5 +441,23 @@ const ExperienceStep = ({
     </div>
   );
 };
+
+const FieldGroup = ({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {label}
+    </Label>
+    {children}
+    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+  </div>
+);
 
 export default ExperienceStep;
