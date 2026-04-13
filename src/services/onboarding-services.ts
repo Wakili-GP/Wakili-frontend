@@ -109,51 +109,53 @@ export const onboardingService = {
   async saveEducation(data: EducationData): Promise<ApiResponse<string>> {
     const formData = new FormData();
 
-    data.academicQualifications.forEach((qual, i) => {
+    data.academicQualifications.forEach((qualification, i) => {
       formData.append(
-        `academicQualifications[${i}].degreeType`,
-        qual.degreeType || "",
+        `AcademicQualifications[${i}].degreeType`,
+        qualification.degreeType || "",
       );
       formData.append(
-        `academicQualifications[${i}].fieldOfStudy`,
-        qual.fieldOfStudy || "",
+        `AcademicQualifications[${i}].fieldOfStudy`,
+        qualification.fieldOfStudy || "",
       );
       formData.append(
-        `academicQualifications[${i}].universityName`,
-        qual.universityName || "",
+        `AcademicQualifications[${i}].universityName`,
+        qualification.universityName || "",
       );
       formData.append(
-        `academicQualifications[${i}].graduationYear`,
-        qual.graduationYear || "",
+        `AcademicQualifications[${i}].graduationYear`,
+        qualification.graduationYear || "",
       );
-    });
-
-    data.professionalCertifications?.forEach((cert, i) => {
-      formData.append(
-        `professionalCertifications[${i}].certificateName`,
-        cert.certificateName || "",
-      );
-      formData.append(
-        `professionalCertifications[${i}].issuingOrganization`,
-        cert.issuingOrganization || "",
-      );
-      formData.append(
-        `professionalCertifications[${i}].yearObtained`,
-        cert.yearObtained || "",
-      );
-
-      if (cert.document && cert.document instanceof File) {
+      if (qualification.document instanceof File) {
         formData.append(
-          `professionalCertifications[${i}].document`,
-          cert.document,
+          `AcademicQualifications[${i}].document`,
+          qualification.document,
         );
       }
     });
 
-    console.log("Education FormData entries:");
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
+    data.professionalCertifications?.forEach((certification, i) => {
+      formData.append(
+        `ProfessionalCertifications[${i}].certificateName`,
+        certification.certificateName || "",
+      );
+      formData.append(
+        `ProfessionalCertifications[${i}].issuingOrganization`,
+        certification.issuingOrganization || "",
+      );
+      formData.append(
+        `ProfessionalCertifications[${i}].yearObtained`,
+        certification.yearObtained || "",
+      );
+      if (certification.document instanceof File) {
+        formData.append(
+          `ProfessionalCertifications[${i}].document`,
+          certification.document,
+        );
+      }
+    });
+
+    console.log("Education FormData entries:", formData.entries());
 
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/education",
@@ -179,11 +181,11 @@ export const onboardingService = {
   ): Promise<ApiResponse<string>> {
     const formData = new FormData();
 
-    if (data.nationalIdFront.file)
+    if (data.nationalIdFront.file instanceof File)
       formData.append("NationalIdFront", data.nationalIdFront.file);
-    if (data.nationalIdBack.file)
+    if (data.nationalIdBack.file instanceof File)
       formData.append("NationalIdBack", data.nationalIdBack.file);
-    if (data.lawyerLicense.file)
+    if (data.lawyerLicense.file instanceof File)
       formData.append("License.LicenseFile", data.lawyerLicense.file);
     formData.append("License.LicenseNumber", data.lawyerLicenseNumber);
     formData.append(

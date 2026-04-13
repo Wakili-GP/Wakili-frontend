@@ -42,6 +42,7 @@ import {
 import { toast } from "@/components/ui/sonner";
 import { onboardingService } from "@/services/onboarding-services";
 import { useMutation } from "@tanstack/react-query";
+import fileService from "@/services/files-services";
 
 interface BasicInfoStepProps {
   onNext: (x: number) => void;
@@ -54,24 +55,6 @@ const BasicInfoStep = ({ onNext }: BasicInfoStepProps) => {
   const { user } = useAuth();
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
-
-  const mapPracticeAreasToIds = (
-    areas?:
-      | number[]
-      | Array<{ id: number; name: string; description: string }>
-      | null,
-  ): number[] => {
-    if (!areas?.length) return [];
-    if (typeof areas[0] === "number") return areas as number[];
-    return (areas as Array<{ id: number }>).map((area) => area.id);
-  };
-
-  const urlToFile = async (url: string, fileName = "profile-image") => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const extension = blob.type.split("/")[1] || "jpg";
-    return new File([blob], `${fileName}.${extension}`, { type: blob.type });
-  };
 
   // Fetching Prev Information
   const { data: progressResponse, isSuccess } = useQuery({
@@ -121,7 +104,7 @@ const BasicInfoStep = ({ onNext }: BasicInfoStepProps) => {
       country: progressResponse?.country || "",
       city: progressResponse?.city || "",
       yearsOfExperience: progressResponse?.yearsOfExperience ?? 0,
-      practiceAreas: mapPracticeAreasToIds(progressResponse?.practiceAreas),
+      practiceAreas: progressResponse?.practiceAreas || [],
       sessionTypes: progressResponse?.sessionTypes || [],
     });
   }, [isSuccess, progressResponse, reset, user?.firstName, user?.lastName]);
@@ -149,7 +132,10 @@ const BasicInfoStep = ({ onNext }: BasicInfoStepProps) => {
 
     if (typeof profileImage === "string" && profileImage) {
       try {
-        profileImage = await urlToFile(profileImage);
+        profileImage = await fileService.pathToFile(
+          profileImage,
+          "profile-image",
+        );
       } catch {
         toast.error("خطأ", {
           description: "تعذر تجهيز صورة الملف الشخصي للإرسال",

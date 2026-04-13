@@ -40,9 +40,7 @@ export const educationSchema = z.object({
   academicQualifications: z
     .array(academicQualificationSchema)
     .min(1, "أضف مؤهل علمي واحد على الأقل"),
-  professionalCertifications: z.array(
-    professionalCertificationSchema.partial(),
-  ),
+  professionalCertifications: z.array(professionalCertificationSchema),
 });
 
 export type EducationFormData = z.infer<typeof educationSchema>;

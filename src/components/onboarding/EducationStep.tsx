@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -26,143 +27,38 @@ import {
 } from "@/schemas/onboarding.schemas";
 import { DEGREE_TYPES } from "@/data/onboarding";
 import FileUploadField from "@/components/FileUploadField";
-
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 50 }, (_, i) =>
-  (CURRENT_YEAR - i).toString(),
-);
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { onboardingService } from "@/services/onboarding-services";
+import { toast } from "@/components/ui/sonner";
+import { YEARS } from "@/data/onboarding";
 
 interface EducationStepProps {
-  defaultValues: EducationData;
-  onNext: (data: EducationData) => void;
-  onBack: () => void;
-  isLoading: boolean;
+  HandleNextBack: (step: number) => void;
 }
 
-const FieldGroup = ({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) => (
-  <div className="space-y-1.5">
-    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-      {label}
-    </Label>
-    {children}
-    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
-  </div>
-);
-
-const SectionHeader = ({
-  icon,
-  title,
-  badge,
-  onAdd,
-  addLabel,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  badge?: number;
-  onAdd: () => void;
-  addLabel: string;
-}) => (
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-2.5">
-      <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary/10">
-        {icon}
-      </div>
-      <span className="text-sm font-semibold text-foreground">{title}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-          {badge}
-        </span>
-      )}
-    </div>
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      className="cursor-pointer gap-1.5 text-xs h-8 px-3 rounded-lg border-dashed hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
-      onClick={onAdd}
-    >
-      <Plus className="w-3.5 h-3.5" />
-      {addLabel}
-    </Button>
-  </div>
-);
-
-const EmptyState = ({
-  icon,
-  title,
-  subtitle,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  onClick: () => void;
-}) => (
-  <div
-    className="flex flex-col items-center justify-center py-12 rounded-2xl border-2 border-dashed border-border cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group"
-    onClick={onClick}
-  >
-    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
-      {icon}
-    </div>
-    <p className="text-sm font-medium text-muted-foreground">{title}</p>
-    <p className="text-xs text-muted-foreground/60 mt-0.5">{subtitle}</p>
-  </div>
-);
-
-const EducationStep = ({
-  defaultValues,
-  onNext,
-  onBack,
-  isLoading,
-}: EducationStepProps) => {
-  const src = defaultValues as EducationData & Record<string, unknown>;
-
-  const rawAcademic = (src.academicQualifications ??
-    src.AcademicQualifications ??
-    []) as unknown[];
-  const normalizedAcademic = (
-    Array.isArray(rawAcademic) ? rawAcademic : []
-  ).map((q) => {
-    const o =
-      typeof q === "object" && q !== null ? (q as Record<string, unknown>) : {};
-    const rawDoc =
-      o.document ?? o.Document ?? o.documentUrl ?? o.DocumentUrl ?? null;
-    return {
-      degreeType: String(o.degreeType ?? o.DegreeType ?? ""),
-      fieldOfStudy: String(o.fieldOfStudy ?? o.FieldOfStudy ?? ""),
-      universityName: String(o.universityName ?? o.UniversityName ?? ""),
-      graduationYear: String(o.graduationYear ?? o.GraduationYear ?? ""),
-      document:
-        rawDoc instanceof File || typeof rawDoc === "string" ? rawDoc : null,
-    };
+const EducationStep = ({ HandleNextBack }: EducationStepProps) => {
+  // EducationMutation
+  const educationMutation = useMutation({
+    mutationFn: (data: EducationData) => onboardingService.saveEducation(data),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("تم حفظ المؤهلات");
+        HandleNextBack(3);
+      } else {
+        toast.error("خطأ", {
+          description: response.error || "فشل حفظ البيانات",
+        });
+      }
+    },
+    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
   });
 
-  const rawCerts = (src.professionalCertifications ??
-    src.ProfessionalCertifications ??
-    []) as unknown[];
-  const normalizedCerts = (Array.isArray(rawCerts) ? rawCerts : []).map((c) => {
-    const o =
-      typeof c === "object" && c !== null ? (c as Record<string, unknown>) : {};
-    const rawDoc =
-      o.document ?? o.Document ?? o.documentUrl ?? o.DocumentUrl ?? null;
-    return {
-      certificateName: String(o.certificateName ?? o.CertificateName ?? ""),
-      issuingOrganization: String(
-        o.issuingOrganization ?? o.IssuingOrganization ?? "",
-      ),
-      yearObtained: String(o.yearObtained ?? o.YearObtained ?? ""),
-      document:
-        rawDoc instanceof File || typeof rawDoc === "string" ? rawDoc : null,
-    };
+  // Fetching Prev Information
+  const { data: progressResponse, isSuccess } = useQuery({
+    queryKey: ["onboarding-progress"],
+    queryFn: () => onboardingService.getOnboardingProgress(),
+    select: (response) => response.data?.data.education,
+    retry: false,
   });
 
   const {
@@ -171,25 +67,36 @@ const EducationStep = ({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<EducationFormData>({
     resolver: zodResolver(educationSchema),
-    values: {
-      academicQualifications:
-        normalizedAcademic.length > 0
-          ? normalizedAcademic
-          : [
-              {
-                degreeType: "",
-                fieldOfStudy: "",
-                universityName: "",
-                graduationYear: "",
-                document: null,
-              },
-            ],
-      professionalCertifications: normalizedCerts,
+    defaultValues: {
+      academicQualifications: [],
+      professionalCertifications: [],
     },
   });
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    reset({
+      academicQualifications:
+        progressResponse?.academicQualifications.map((qualification) => ({
+          degreeType: qualification.degreeType,
+          fieldOfStudy: qualification.fieldOfStudy,
+          universityName: qualification.universityName,
+          graduationYear: qualification.graduationYear,
+          document: qualification.document ?? null,
+        })) ?? [],
+      professionalCertifications:
+        progressResponse?.professionalCertifications.map((certification) => ({
+          certificateName: certification.certificateName,
+          issuingOrganization: certification.issuingOrganization,
+          yearObtained: certification.yearObtained,
+          document: certification.document ?? null,
+        })) ?? [],
+    });
+  }, [isSuccess, progressResponse, reset]);
 
   const {
     fields: qualificationFields,
@@ -203,7 +110,37 @@ const EducationStep = ({
     remove: removeCertification,
   } = useFieldArray({ control, name: "professionalCertifications" });
 
-  const onSubmit = (data: EducationFormData) => onNext(data as EducationData);
+  const onSubmit = async (data: EducationFormData) => {
+    try {
+      const academicQualifications = data.academicQualifications.map((q) => ({
+        degreeType: String(q.degreeType ?? ""),
+        fieldOfStudy: String(q.fieldOfStudy ?? ""),
+        universityName: String(q.universityName ?? ""),
+        graduationYear: String(q.graduationYear ?? ""),
+        // Preserve previously uploaded document URLs when user doesn't replace the file.
+        document: q.document ?? null,
+      }));
+
+      const professionalCertifications = data.professionalCertifications.map(
+        (c) => ({
+          certificateName: String(c.certificateName ?? ""),
+          issuingOrganization: String(c.issuingOrganization ?? ""),
+          yearObtained: String(c.yearObtained ?? ""),
+          // Preserve previously uploaded document URLs when user doesn't replace the file.
+          document: c.document ?? null,
+        }),
+      );
+
+      educationMutation.mutate({
+        academicQualifications,
+        professionalCertifications,
+      });
+    } catch {
+      toast.error("خطأ", {
+        description: "تعذر تجهيز المستندات للإرسال",
+      });
+    }
+  };
 
   return (
     <div className="space-y-8" dir="rtl">
@@ -274,7 +211,7 @@ const EducationStep = ({
                     key={field.id}
                     className="relative rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/60 to-primary/20 rounded-r-full" />
+                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-linear-to-b from-primary/60 to-primary/20 rounded-r-full" />
                     <div className="p-5 pr-6">
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
@@ -636,16 +573,18 @@ const EducationStep = ({
             type="button"
             variant="outline"
             className="cursor-pointer rounded-xl h-10 px-5"
-            onClick={onBack}
+            onClick={() => HandleNextBack(1)}
           >
             السابق
           </Button>
           <Button
             type="submit"
             className="cursor-pointer rounded-xl h-10 px-6 gap-2"
-            disabled={isLoading}
+            disabled={educationMutation.isPending}
           >
-            {isLoading && <Loader className="w-4 h-4 animate-spin" />}
+            {educationMutation.isPending && (
+              <Loader className="w-4 h-4 animate-spin" />
+            )}
             التالي
           </Button>
         </div>
@@ -653,5 +592,84 @@ const EducationStep = ({
     </div>
   );
 };
+
+const FieldGroup = ({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {label}
+    </Label>
+    {children}
+    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+  </div>
+);
+
+const SectionHeader = ({
+  icon,
+  title,
+  badge,
+  onAdd,
+  addLabel,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  badge?: number;
+  onAdd: () => void;
+  addLabel: string;
+}) => (
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary/10">
+        {icon}
+      </div>
+      <span className="text-sm font-semibold text-foreground">{title}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+          {badge}
+        </span>
+      )}
+    </div>
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      className="cursor-pointer gap-1.5 text-xs h-8 px-3 rounded-lg border-dashed hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+      onClick={onAdd}
+    >
+      <Plus className="w-3.5 h-3.5" />
+      {addLabel}
+    </Button>
+  </div>
+);
+
+const EmptyState = ({
+  icon,
+  title,
+  subtitle,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) => (
+  <div
+    className="flex flex-col items-center justify-center py-12 rounded-2xl border-2 border-dashed border-border cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group"
+    onClick={onClick}
+  >
+    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
+      {icon}
+    </div>
+    <p className="text-sm font-medium text-muted-foreground">{title}</p>
+    <p className="text-xs text-muted-foreground/60 mt-0.5">{subtitle}</p>
+  </div>
+);
 
 export default EducationStep;
