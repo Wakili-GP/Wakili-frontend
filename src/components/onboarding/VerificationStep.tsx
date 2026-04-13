@@ -13,27 +13,58 @@ import {
 } from "@/components/ui/select";
 import { IdCard, Award, AlertTriangle, Loader } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { type VerificationData } from "@/services/onboarding-services";
+import onboardingService, {
+  type VerificationData,
+  type OnboardingProgress,
+  type ApiResponse,
+} from "@/services/onboarding-services";
 import {
   verificationSchema,
   type VerificationFormData,
 } from "@/schemas/onboarding.schemas";
-import { YEARS, EMPTY_DOC } from "@/data/onboarding";
+import { YEARS } from "@/data/onboarding";
 import FileUploadField from "@/components/FileUploadField";
+import { toast } from "../ui/sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface VerificationStepProps {
-  defaultValues: VerificationData;
-  onNext: (data: VerificationData) => void;
-  onBack: () => void;
-  isLoading: boolean;
+  HandleNextBack: (step: number) => void;
 }
 
-const VerificationStep = ({
-  defaultValues,
-  onNext,
-  onBack,
-  isLoading,
-}: VerificationStepProps) => {
+const VerificationStep = ({ HandleNextBack }: VerificationStepProps) => {
+  const queryClient = useQueryClient();
+
+  // Read synchronously from cache so defaultValues are populated before first render
+  const cached = queryClient.getQueryData<ApiResponse<OnboardingProgress>>([
+    "onboarding-progress",
+  ]);
+  const cachedLicense = cached?.data?.data.verification?.lawyerLicense;
+
+  const verificationMutation = useMutation({
+    mutationFn: (data: VerificationData) =>
+      onboardingService.saveVerificationDocuments(data),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("تم حفظ بيانات التوثيق");
+        HandleNextBack(5);
+      } else {
+        toast.error("خطأ", {
+          description: response.error || "فشل حفظ البيانات",
+        });
+      }
+    },
+    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
+  });
+
+  // Keep the query alive so other steps stay in sync, but we don't use its data here
+  useQuery({
+    queryKey: ["onboarding-progress"],
+    queryFn: () => onboardingService.getOnboardingProgress(),
+    retry: false,
+  });
+
+  const cachedVerification = cached?.data?.data.verification;
+
   const {
     register,
     control,
@@ -43,24 +74,23 @@ const VerificationStep = ({
     formState: { errors },
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
-    values: {
-      nationalIdFront: defaultValues.nationalIdFront,
-      nationalIdBack: defaultValues.nationalIdBack,
-      lawyerLicense: defaultValues.lawyerLicense,
-      lawyerLicenseNumber: defaultValues.lawyerLicenseNumber,
-      lawyerLicenseIssuingAuthority:
-        defaultValues.lawyerLicenseIssuingAuthority,
-      lawyerLicenseYearOfIssue: defaultValues.lawyerLicenseYearOfIssue,
+    defaultValues: {
+      nationalIdFront: cachedVerification?.nationalIdFront ?? null,
+      nationalIdBack: cachedVerification?.nationalIdBack ?? null,
+      lawyerLicense: cachedLicense?.licensePath ?? null,
+      lawyerLicenseNumber: cachedLicense?.licenseNumber ?? "",
+      lawyerLicenseIssuingAuthority: cachedLicense?.issuingAuthority ?? "",
+      lawyerLicenseYearOfIssue: cachedLicense?.licenseYear ?? "",
     },
   });
 
   const onSubmit = (data: VerificationFormData) => {
-    onNext(data as VerificationData);
+    verificationMutation.mutate(data as VerificationData);
   };
 
-  const nationalIdFront = watch("nationalIdFront.file");
-  const nationalIdBack = watch("nationalIdBack.file");
-  const lawyerLicense = watch("lawyerLicense.file");
+  const nationalIdFront = watch("nationalIdFront");
+  const nationalIdBack = watch("nationalIdBack");
+  const lawyerLicense = watch("lawyerLicense");
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -95,16 +125,10 @@ const VerificationStep = ({
                 file={nationalIdFront ?? null}
                 error={errors.nationalIdFront?.message}
                 onFile={(file) =>
-                  setValue(
-                    "nationalIdFront",
-                    { file, status: "uploaded" },
-                    { shouldValidate: true },
-                  )
+                  setValue("nationalIdFront", file, { shouldValidate: true })
                 }
                 onRemove={() =>
-                  setValue("nationalIdFront", EMPTY_DOC, {
-                    shouldValidate: true,
-                  })
+                  setValue("nationalIdFront", null, { shouldValidate: true })
                 }
               />
               <FileUploadField
@@ -112,16 +136,10 @@ const VerificationStep = ({
                 file={nationalIdBack ?? null}
                 error={errors.nationalIdBack?.message}
                 onFile={(file) =>
-                  setValue(
-                    "nationalIdBack",
-                    { file, status: "uploaded" },
-                    { shouldValidate: true },
-                  )
+                  setValue("nationalIdBack", file, { shouldValidate: true })
                 }
                 onRemove={() =>
-                  setValue("nationalIdBack", EMPTY_DOC, {
-                    shouldValidate: true,
-                  })
+                  setValue("nationalIdBack", null, { shouldValidate: true })
                 }
               />
             </div>
@@ -141,14 +159,10 @@ const VerificationStep = ({
               file={lawyerLicense ?? null}
               error={errors.lawyerLicense?.message}
               onFile={(file) =>
-                setValue(
-                  "lawyerLicense",
-                  { file, status: "uploaded" },
-                  { shouldValidate: true },
-                )
+                setValue("lawyerLicense", file, { shouldValidate: true })
               }
               onRemove={() =>
-                setValue("lawyerLicense", EMPTY_DOC, { shouldValidate: true })
+                setValue("lawyerLicense", null, { shouldValidate: true })
               }
             />
 
@@ -232,12 +246,18 @@ const VerificationStep = ({
             type="button"
             variant="outline"
             className="cursor-pointer"
-            onClick={onBack}
+            onClick={() => HandleNextBack(3)}
           >
             السابق
           </Button>
-          <Button type="submit" className="cursor-pointer" disabled={isLoading}>
-            {isLoading && <Loader className="w-4 h-4 animate-spin ml-2" />}
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            disabled={verificationMutation.isPending}
+          >
+            {verificationMutation.isPending && (
+              <Loader className="w-4 h-4 animate-spin ml-2" />
+            )}
             التالي
           </Button>
         </div>

@@ -1,5 +1,6 @@
 import httpClient, { type ApiResponse } from "./api/httpClient";
 
+// POST Interfaces
 export interface LawyerBasicInfo {
   firstName: string;
   lastName: string;
@@ -10,7 +11,6 @@ export interface LawyerBasicInfo {
   bio: string;
   yearsOfExperience: number;
   practiceAreas: number[];
-  // 0: Phone, 1: Office for sessionTypes
   sessionTypes: number[];
 }
 
@@ -47,36 +47,86 @@ export interface ExperienceData {
   workExperiences: WorkExperience[];
 }
 
-export interface VerificationDocument {
-  file: File | null;
-  status: "pending" | "uploaded";
-}
-
 export interface VerificationData {
+  nationalIdFront: File | string | null;
+  nationalIdBack: File | string | null;
+  lawyerLicense: File | string | null;
   lawyerLicenseNumber: string;
   lawyerLicenseIssuingAuthority: string;
   lawyerLicenseYearOfIssue: string;
-  nationalIdFront: VerificationDocument;
-  nationalIdBack: VerificationDocument;
-  lawyerLicense: VerificationDocument;
 }
 
-export interface LawyerOnboardingData {
-  basicInfo: LawyerBasicInfo;
-  education: EducationData;
-  experience: ExperienceData;
-  verification: VerificationData;
+// GET Interfaces
+export interface ProgressBasicInfo {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  profileImage: string | null;
+  phoneNumber: string;
+  country: string;
+  city: string;
+  bio: string;
+  yearsOfExperience: number;
+  practiceAreas: number[];
+  sessionTypes: number[];
+}
+
+export interface ProgressAcademicQualification {
+  degreeType: string;
+  fieldOfStudy: string;
+  universityName: string;
+  graduationYear: string;
+  document: string | null;
+}
+
+export interface ProgressProfessionalCertification {
+  certificateName: string;
+  issuingOrganization: string;
+  yearObtained: string;
+  document: string | null;
+}
+
+export interface ProgressEducation {
+  academicQualifications: ProgressAcademicQualification[];
+  professionalCertifications: ProgressProfessionalCertification[];
+}
+
+export interface ProgressExperience {
+  workExperiences: WorkExperience[];
+}
+
+// The Server Nests LawyerLicense Object
+export interface ProgressLawyerLicense {
+  licensePath: string | null;
+  licenseNumber: string;
+  issuingAuthority: string;
+  licenseYear: string;
+}
+
+export interface ProgressVerification {
+  nationalIdFront: string | null;
+  nationalIdBack: string | null;
+  lawyerLicense: ProgressLawyerLicense | null;
+  professionalCertificates?: unknown[];
+}
+
+export interface ProgressData {
+  basicInfo?: ProgressBasicInfo;
+  education?: ProgressEducation;
+  experience?: ProgressExperience;
+  verification?: ProgressVerification;
 }
 
 export interface OnboardingProgress {
   currentStep: number;
   completedSteps: number[];
-  data: Partial<LawyerOnboardingData>;
+  data: ProgressData;
   lastUpdated: string;
 }
 
+// SERVICE
+
 export const onboardingService = {
-  /// Step 1: Save basic info
   async saveBasicInfo(data: LawyerBasicInfo): Promise<ApiResponse<string>> {
     const formData = new FormData();
     formData.append("FirstName", data.firstName);
@@ -88,74 +138,63 @@ export const onboardingService = {
     formData.append("Country", data.country);
     formData.append("City", data.city);
     formData.append("Bio", data.bio);
-    // FormData array values should be appended item-by-item for ASP.NET model binding.
     formData.append("YearsOfExperience", data.yearsOfExperience.toString());
-    data.practiceAreas.forEach((areaId) => {
-      formData.append("PracticeAreas", areaId.toString());
-    });
-    data.sessionTypes.forEach((sessionType) => {
-      formData.append("SessionTypes", sessionType.toString());
-    });
-    console.log("Basic Info FormData entries:", formData);
+    data.practiceAreas.forEach((id) =>
+      formData.append("PracticeAreas", id.toString()),
+    );
+    data.sessionTypes.forEach((t) =>
+      formData.append("SessionTypes", t.toString()),
+    );
+
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/basic-info",
       formData,
     );
-    console.log("Onboarding Basic Info Response DATA:", response.data);
     return response.data;
   },
 
-  // Step 2: Save education and certifications
   async saveEducation(data: EducationData): Promise<ApiResponse<string>> {
     const formData = new FormData();
 
-    data.academicQualifications.forEach((qualification, i) => {
-      formData.append(
-        `AcademicQualifications[${i}].degreeType`,
-        qualification.degreeType || "",
-      );
+    data.academicQualifications.forEach((q, i) => {
+      formData.append(`AcademicQualifications[${i}].degreeType`, q.degreeType);
       formData.append(
         `AcademicQualifications[${i}].fieldOfStudy`,
-        qualification.fieldOfStudy || "",
+        q.fieldOfStudy,
       );
       formData.append(
         `AcademicQualifications[${i}].universityName`,
-        qualification.universityName || "",
+        q.universityName,
       );
       formData.append(
         `AcademicQualifications[${i}].graduationYear`,
-        qualification.graduationYear || "",
+        q.graduationYear,
       );
-      if (qualification.document instanceof File) {
-        formData.append(
-          `AcademicQualifications[${i}].document`,
-          qualification.document,
-        );
+      if (q.document instanceof File) {
+        formData.append(`AcademicQualifications[${i}].document`, q.document);
       }
     });
 
-    data.professionalCertifications?.forEach((certification, i) => {
+    data.professionalCertifications?.forEach((c, i) => {
       formData.append(
         `ProfessionalCertifications[${i}].certificateName`,
-        certification.certificateName || "",
+        c.certificateName,
       );
       formData.append(
         `ProfessionalCertifications[${i}].issuingOrganization`,
-        certification.issuingOrganization || "",
+        c.issuingOrganization,
       );
       formData.append(
         `ProfessionalCertifications[${i}].yearObtained`,
-        certification.yearObtained || "",
+        c.yearObtained,
       );
-      if (certification.document instanceof File) {
+      if (c.document instanceof File) {
         formData.append(
           `ProfessionalCertifications[${i}].document`,
-          certification.document,
+          c.document,
         );
       }
     });
-
-    console.log("Education FormData entries:", formData.entries());
 
     const response = await httpClient.post<ApiResponse<string>>(
       "/lawyer/onboarding/education",
@@ -164,7 +203,6 @@ export const onboardingService = {
     return response.data;
   },
 
-  // Step 3: Save work experience
   async saveExperience(
     data: ExperienceData,
   ): Promise<ApiResponse<{ message: string }>> {
@@ -175,18 +213,16 @@ export const onboardingService = {
     return response.data;
   },
 
-  // Step 4: Upload verification documents
   async saveVerificationDocuments(
     data: VerificationData,
   ): Promise<ApiResponse<string>> {
     const formData = new FormData();
-
-    if (data.nationalIdFront.file instanceof File)
-      formData.append("NationalIdFront", data.nationalIdFront.file);
-    if (data.nationalIdBack.file instanceof File)
-      formData.append("NationalIdBack", data.nationalIdBack.file);
-    if (data.lawyerLicense.file instanceof File)
-      formData.append("License.LicenseFile", data.lawyerLicense.file);
+    if (data.nationalIdFront instanceof File)
+      formData.append("NationalIdFront", data.nationalIdFront);
+    if (data.nationalIdBack instanceof File)
+      formData.append("NationalIdBack", data.nationalIdBack);
+    if (data.lawyerLicense instanceof File)
+      formData.append("License.LicenseFile", data.lawyerLicense);
     formData.append("License.LicenseNumber", data.lawyerLicenseNumber);
     formData.append(
       "License.IssuingAuthority",
@@ -198,7 +234,13 @@ export const onboardingService = {
       "/lawyer/onboarding/verification",
       formData,
     );
-    console.log("Verification Upload Response DATA:", response.data);
+    return response.data;
+  },
+
+  async submitOnboarding(): Promise<ApiResponse<string>> {
+    const response = await httpClient.post<ApiResponse<string>>(
+      "/lawyer/onboarding/submit-for-review",
+    );
     return response.data;
   },
 
@@ -206,7 +248,6 @@ export const onboardingService = {
     const response = await httpClient.get<ApiResponse<OnboardingProgress>>(
       "/lawyer/onboarding/progress",
     );
-    console.log("Onboarding Progress Response DATA:", response.data);
     return response.data;
   },
 };

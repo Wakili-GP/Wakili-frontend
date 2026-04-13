@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scale, Clock } from "lucide-react";
-import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
@@ -11,13 +10,8 @@ import EducationStep from "@/components/onboarding/EducationStep";
 import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
-import {
-  onboardingService,
-  type LawyerBasicInfo,
-  type EducationData,
-  type ExperienceData,
-  type VerificationData,
-} from "@/services/onboarding-services";
+import { onboardingService } from "@/services/onboarding-services";
+
 const STEPS = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
   { title: "المؤهلات", description: "الشهادات العلمية" },
@@ -26,114 +20,30 @@ const STEPS = [
   { title: "المراجعة", description: "تأكيد البيانات" },
 ];
 
-const DEFAULT_BASIC_INFO: LawyerBasicInfo = {
-  firstName: "",
-  lastName: "",
-  profileImage: null,
-  phoneNumber: "",
-  country: "",
-  city: "",
-  bio: "",
-  yearsOfExperience: 0,
-  practiceAreas: [],
-  sessionTypes: [],
-};
-
-const DEFAULT_EDUCATION: EducationData = {
-  academicQualifications: [
-    {
-      degreeType: "",
-      fieldOfStudy: "",
-      universityName: "",
-      graduationYear: "",
-      document: null,
-    },
-  ],
-  professionalCertifications: [],
-};
-
-const DEFAULT_EXPERIENCE: ExperienceData = {
-  workExperiences: [
-    {
-      jobTitle: "",
-      organizationName: "",
-      startYear: "",
-      endYear: "",
-      isCurrentJob: false,
-      description: "",
-    },
-  ],
-};
-
-const DEFAULT_VERIFICATION: VerificationData = {
-  nationalIdFront: { file: null, status: "pending" },
-  nationalIdBack: { file: null, status: "pending" },
-  lawyerLicense: { file: null, status: "pending" },
-  lawyerLicenseNumber: "",
-  lawyerLicenseIssuingAuthority: "",
-  lawyerLicenseYearOfIssue: "",
-};
-
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [savedData, setSavedData] = useState({
-    education: DEFAULT_EDUCATION as EducationData,
-    experience: DEFAULT_EXPERIENCE as ExperienceData,
-    verification: DEFAULT_VERIFICATION as VerificationData,
-  });
-
-  const { data: progressResponse, isLoading } = useQuery({
+  const { data: progressData, isLoading } = useQuery({
     queryKey: ["onboarding-progress"],
     queryFn: () => onboardingService.getOnboardingProgress(),
+    select: (response) => response.data,
     retry: false,
   });
 
-  // OnSucces of useQuery is not supported in Tanstack Query v5, so we use useEffect to handle the response
   useEffect(() => {
-    if (!progressResponse) return;
+    const stepFromProgress = progressData?.currentStep;
+    if (typeof stepFromProgress !== "number") return;
 
-    if (!progressResponse.success) {
-      if (progressResponse.statusCode === 404) {
-        setCurrentStep(1);
-        return;
-      }
-      toast.error("خطأ", {
-        description: progressResponse.error || "فشل تحميل تقدم التسجيل",
-      });
-      setCurrentStep(1);
+    if (stepFromProgress === -1) {
+      setIsSubmitted(true);
       return;
     }
 
-    const { currentStep: savedStep, data } = progressResponse.data ?? {};
-    setCurrentStep(savedStep ?? 1);
-    setSavedData((prev) => ({
-      basicInfo: { ...prev.basicInfo, ...data?.basicInfo },
-      education: data?.education ?? prev.education,
-      experience: data?.experience ?? prev.experience,
-      verification: { ...prev.verification, ...data?.verification },
-    }));
-  }, [progressResponse]);
-
-  // VerificationMutation
-  const verificationMutation = useMutation({
-    mutationFn: (data: VerificationData) =>
-      onboardingService.saveVerificationDocuments(data),
-    onSuccess: (response, variables) => {
-      if (response.success) {
-        setSavedData((prev) => ({ ...prev, verification: variables }));
-        toast.success("تم حفظ بيانات التوثيق");
-        setCurrentStep(5);
-      } else {
-        toast.error("خطأ", {
-          description: response.error || "فشل حفظ البيانات",
-        });
-      }
-    },
-    onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
-  });
+    setIsSubmitted(false);
+    setCurrentStep(Math.min(Math.max(stepFromProgress, 1), 5));
+  }, [progressData?.currentStep]);
 
   if (isLoading) {
     return (
@@ -181,6 +91,8 @@ const LawyerOnboarding = () => {
     );
   }
 
+  const completedSteps = progressData?.completedSteps ?? [];
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b bg-card">
@@ -198,7 +110,12 @@ const LawyerOnboarding = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <OnboardingStepper currentStep={currentStep} steps={STEPS} />
+        <OnboardingStepper
+          currentStep={currentStep}
+          completedSteps={completedSteps}
+          steps={STEPS}
+          onStepClick={setCurrentStep}
+        />
 
         <Card className="mt-8">
           <CardContent className="p-6 md:p-8">
@@ -210,26 +127,12 @@ const LawyerOnboarding = () => {
               <ExperienceStep HandleNextBack={setCurrentStep} />
             )}
             {currentStep === 4 && (
-              <VerificationStep
-                defaultValues={savedData.verification}
-                onNext={(data) => verificationMutation.mutate(data)}
-                onBack={() => setCurrentStep(3)}
-                isLoading={verificationMutation.isPending}
-              />
+              <VerificationStep HandleNextBack={setCurrentStep} />
             )}
             {currentStep === 5 && (
               <ReviewStep
-                basicInfo={savedData.basicInfo}
-                education={savedData.education}
-                experience={savedData.experience}
-                verification={savedData.verification}
                 onEdit={setCurrentStep}
-                onSubmit={() => {
-                  setIsSubmitted(true);
-                  toast.success("تم إرسال طلبك بنجاح!", {
-                    description: "سيتم مراجعة بياناتك من قبل فريق الإدارة",
-                  });
-                }}
+                onSubmitted={() => setIsSubmitted(true)}
               />
             )}
           </CardContent>

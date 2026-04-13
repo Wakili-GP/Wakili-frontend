@@ -67,24 +67,43 @@ export const experienceSchema = z.object({
 
 export type ExperienceFormData = z.infer<typeof experienceSchema>;
 
-export const verificationDocumentSchema = z.object({
-  file: z.instanceof(File, { message: "مطلوب" }).nullable(),
-  status: z.enum(["pending", "uploaded"]),
-});
+export const verificationDocumentSchema = z
+  .union([z.instanceof(File), z.string()])
+  .nullable();
 
-export const verificationSchema = z.object({
-  nationalIdFront: verificationDocumentSchema.refine((d) => d.file !== null, {
-    message: "مطلوب",
-  }),
-  nationalIdBack: verificationDocumentSchema.refine((d) => d.file !== null, {
-    message: "مطلوب",
-  }),
-  lawyerLicense: verificationDocumentSchema.refine((d) => d.file !== null, {
-    message: "مطلوب",
-  }),
-  lawyerLicenseNumber: z.string().min(1, "مطلوب"),
-  lawyerLicenseIssuingAuthority: z.string().min(1, "مطلوب"),
-  lawyerLicenseYearOfIssue: z.string().min(1, "مطلوب"),
-});
+export const verificationSchema = z
+  .object({
+    nationalIdFront: verificationDocumentSchema,
+    nationalIdBack: verificationDocumentSchema,
+    lawyerLicense: verificationDocumentSchema,
+    lawyerLicenseNumber: z.string().min(1, "مطلوب"),
+    lawyerLicenseIssuingAuthority: z.string().min(1, "مطلوب"),
+    lawyerLicenseYearOfIssue: z.string().min(1, "مطلوب"),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.nationalIdFront) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "مطلوب",
+        path: ["nationalIdFront"],
+      });
+    }
+
+    if (!data.nationalIdBack) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "مطلوب",
+        path: ["nationalIdBack"],
+      });
+    }
+
+    if (!data.lawyerLicense) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "مطلوب",
+        path: ["lawyerLicense"],
+      });
+    }
+  });
 
 export type VerificationFormData = z.infer<typeof verificationSchema>;
