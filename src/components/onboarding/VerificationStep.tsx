@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import onboardingService, {
   type VerificationData,
   type OnboardingProgress,
-  type ApiResponse,
 } from "@/services/onboarding-services";
+import { type ApiResponse } from "@/services/api/httpClient";
 import {
   verificationSchema,
   type VerificationFormData,
@@ -26,6 +27,7 @@ import { YEARS } from "@/data/onboarding";
 import FileUploadField from "@/components/FileUploadField";
 import { toast } from "../ui/sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import fileService from "@/services/files-services";
 
 interface VerificationStepProps {
   HandleNextBack: (step: number) => void;
@@ -56,10 +58,10 @@ const VerificationStep = ({ HandleNextBack }: VerificationStepProps) => {
     onError: () => toast.error("خطأ", { description: "فشل الاتصال بالخادم" }),
   });
 
-  // Keep the query alive so other steps stay in sync, but we don't use its data here
-  useQuery({
+  const { data: progressResponse, isSuccess } = useQuery({
     queryKey: ["onboarding-progress"],
     queryFn: () => onboardingService.getOnboardingProgress(),
+    select: (response) => response.data?.data.verification,
     retry: false,
   });
 
@@ -71,6 +73,7 @@ const VerificationStep = ({ HandleNextBack }: VerificationStepProps) => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
@@ -84,8 +87,59 @@ const VerificationStep = ({ HandleNextBack }: VerificationStepProps) => {
     },
   });
 
-  const onSubmit = (data: VerificationFormData) => {
-    verificationMutation.mutate(data as VerificationData);
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    reset({
+      nationalIdFront: progressResponse?.nationalIdFront ?? null,
+      nationalIdBack: progressResponse?.nationalIdBack ?? null,
+      lawyerLicense: progressResponse?.lawyerLicense?.licensePath ?? null,
+      lawyerLicenseNumber: progressResponse?.lawyerLicense?.licenseNumber ?? "",
+      lawyerLicenseIssuingAuthority:
+        progressResponse?.lawyerLicense?.issuingAuthority ?? "",
+      lawyerLicenseYearOfIssue:
+        progressResponse?.lawyerLicense?.licenseYear ?? "",
+    });
+  }, [isSuccess, progressResponse, reset]);
+
+  const onSubmit = async (data: VerificationFormData) => {
+    try {
+      let nationalIdFront = data.nationalIdFront;
+      let nationalIdBack = data.nationalIdBack;
+      let lawyerLicense = data.lawyerLicense;
+
+      if (typeof nationalIdFront === "string" && nationalIdFront) {
+        nationalIdFront = await fileService.pathToFile(
+          nationalIdFront,
+          "national-id-front",
+        );
+      }
+
+      if (typeof nationalIdBack === "string" && nationalIdBack) {
+        nationalIdBack = await fileService.pathToFile(
+          nationalIdBack,
+          "national-id-back",
+        );
+      }
+
+      if (typeof lawyerLicense === "string" && lawyerLicense) {
+        lawyerLicense = await fileService.pathToFile(
+          lawyerLicense,
+          "lawyer-license",
+        );
+      }
+
+      verificationMutation.mutate({
+        ...data,
+        nationalIdFront,
+        nationalIdBack,
+        lawyerLicense,
+      } as VerificationData);
+    } catch {
+      toast.error("خطأ", {
+        description: "تعذر تجهيز مستندات التحقق للإرسال",
+      });
+    }
   };
 
   const nationalIdFront = watch("nationalIdFront");

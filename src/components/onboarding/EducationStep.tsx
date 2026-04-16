@@ -31,6 +31,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { onboardingService } from "@/services/onboarding-services";
 import { toast } from "@/components/ui/sonner";
 import { YEARS } from "@/data/onboarding";
+import fileService from "@/services/files-services";
 
 interface EducationStepProps {
   HandleNextBack: (step: number) => void;
@@ -112,22 +113,45 @@ const EducationStep = ({ HandleNextBack }: EducationStepProps) => {
 
   const onSubmit = async (data: EducationFormData) => {
     try {
-      const academicQualifications = data.academicQualifications.map((q) => ({
-        degreeType: String(q.degreeType ?? ""),
-        fieldOfStudy: String(q.fieldOfStudy ?? ""),
-        universityName: String(q.universityName ?? ""),
-        graduationYear: String(q.graduationYear ?? ""),
-        // Preserve previously uploaded document URLs when user doesn't replace the file.
-        document: q.document ?? null,
-      }));
+      const academicQualifications = await Promise.all(
+        data.academicQualifications.map(async (q, index) => {
+          // Fetching the first at first
+          let document = q.document ?? null;
 
-      const professionalCertifications = data.professionalCertifications.map(
-        (c) => ({
-          certificateName: String(c.certificateName ?? ""),
-          issuingOrganization: String(c.issuingOrganization ?? ""),
-          yearObtained: String(c.yearObtained ?? ""),
-          // Preserve previously uploaded document URLs when user doesn't replace the file.
-          document: c.document ?? null,
+          if (typeof document === "string" && document) {
+            document = await fileService.pathToFile(
+              document,
+              `academic-qualification-${index + 1}`,
+            );
+          }
+
+          return {
+            degreeType: String(q.degreeType ?? ""),
+            fieldOfStudy: String(q.fieldOfStudy ?? ""),
+            universityName: String(q.universityName ?? ""),
+            graduationYear: String(q.graduationYear ?? ""),
+            document,
+          };
+        }),
+      );
+
+      const professionalCertifications = await Promise.all(
+        data.professionalCertifications.map(async (c, index) => {
+          let document = c.document ?? null;
+
+          if (typeof document === "string" && document) {
+            document = await fileService.pathToFile(
+              document,
+              `professional-certification-${index + 1}`,
+            );
+          }
+
+          return {
+            certificateName: String(c.certificateName ?? ""),
+            issuingOrganization: String(c.issuingOrganization ?? ""),
+            yearObtained: String(c.yearObtained ?? ""),
+            document,
+          };
         }),
       );
 
