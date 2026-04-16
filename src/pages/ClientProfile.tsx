@@ -13,12 +13,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import MainNavbar from "@/components/MainNavbar";
+import { useAuth } from "@/stores/auth.store";
 import BlueFooter from "@/components/BlueFooter";
 import { getAvatarColor, getInitials } from "@/lib/avatarHelpers";
 import { toast } from "sonner";
 import clientProfileService, {
   type ClientBookingInterface,
   type ClientProfileInterface,
+  type ClientProfileUpdatePayload,
 } from "@/services/clientProfile-services";
 import favoritesService from "@/services/favorites-services";
 import BookingsTab from "@/components/client/profile/BookingsTab";
@@ -28,7 +30,7 @@ import ActivityTab from "@/components/client/profile/ActivityTab";
 import BookingDetailsDialog from "@/components/client/profile/BookingDetailsDialog";
 import ProfileEditModal, {
   type ProfileData,
-} from "@/components/client/profile/ProfileEditModal";
+} from "../components/client/profile/ProfileEditModal";
 import AccountSettingsModal from "@/components/client/profile/AccountSettingsModal";
 
 const TABS = [
@@ -40,6 +42,7 @@ const TABS = [
 
 const ClientProfile = () => {
   const queryClient = useQueryClient();
+  const { refreshUser } = useAuth();
 
   const [activeTab, setActiveTab] =
     useState<(typeof TABS)[number]["id"]>("bookings");
@@ -61,13 +64,7 @@ const ClientProfile = () => {
   } = useQuery({
     queryKey: ["clientProfile"],
     queryFn: () => clientProfileService.getClientProfile(),
-    select: (response): ClientProfileInterface | null => {
-      if (response && typeof response === "object" && "data" in response) {
-        const wrapped = response as { data?: ClientProfileInterface };
-        return wrapped.data ?? null;
-      }
-      return (response as unknown as ClientProfileInterface) ?? null;
-    },
+    select: (response): ClientProfileInterface | null => response.data ?? null,
   });
 
   const {
@@ -94,7 +91,7 @@ const ClientProfile = () => {
   const displayedFavorites = favoritesResponse?.data ?? [];
 
   const updateProfileMutation = useMutation({
-    mutationFn: (data: Partial<ClientProfileInterface>) =>
+    mutationFn: (data: Partial<ClientProfileUpdatePayload>) =>
       clientProfileService.updateClientProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clientProfile"] });
@@ -131,7 +128,10 @@ const ClientProfile = () => {
       throw new Error(response.error || "Failed to update client profile");
     }
     toast.success("تم تحديث الملف الشخصي بنجاح");
-    await queryClient.invalidateQueries({ queryKey: ["clientProfile"] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["clientProfile"] }),
+      refreshUser(),
+    ]);
   };
 
   const handleChangePassword = async (
@@ -167,12 +167,14 @@ const ClientProfile = () => {
 
   if (isClientProfileLoading || (!profile && !isError)) {
     return (
-      <div className="min-h-screen bg-muted/30" dir="rtl">
-        <MainNavbar fixed />
-        <div className="pt-36 pb-24 flex items-center justify-center">
-          <p className="text-muted-foreground">جاري تحميل الملف الشخصي...</p>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background" dir="rtl">
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin" />
+          </div>
+          <p className="text-muted-foreground text-sm font-medium">جاري تحميل الملف الشخصي...</p>
         </div>
-        <BlueFooter />
       </div>
     );
   }
@@ -370,7 +372,7 @@ const ClientProfile = () => {
           city: profile.city ?? "",
           phoneNumber: profile.phoneNumber ?? "",
           bio: profile.bio ?? "",
-          profileImage: profile.profileImage ?? "",
+          profileImage: profile.profileImage ?? null,
         }}
         onSave={handleProfileSave}
         isSaving={updateProfileMutation.isPending}

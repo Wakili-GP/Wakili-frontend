@@ -11,7 +11,6 @@ export const profileSchema = z.object({
     .max(50, "اسم العائلة طويل جداً"),
   country: z.string().min(1, "يرجى اختيار الدولة"),
   city: z.string().min(1, "يرجى اختيار المدينة"),
-  phoneCode: z.string().min(1, "يرجى اختيار كود الدولة"),
   phoneNumber: z
     .string()
     .min(7, "رقم الهاتف قصير جداً")

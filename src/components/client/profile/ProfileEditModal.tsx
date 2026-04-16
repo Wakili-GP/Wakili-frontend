@@ -23,7 +23,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { getAvatarColor, getInitials } from "@/lib/avatarHelpers";
-import { COUNTRIES, CITIES_BY_COUNTRY, PHONE_CODES } from "@/data/onboarding";
+import { COUNTRIES, CITIES_BY_COUNTRY } from "@/data/onboarding";
 import {
   profileSchema,
   type ProfileFormValues,
@@ -36,7 +36,7 @@ export interface ProfileData {
   country: string;
   phoneNumber: string;
   bio: string;
-  profileImage: string;
+  profileImage: File | string | null;
 }
 
 interface ProfileEditModalProps {
@@ -65,23 +65,9 @@ const ProfileEditModal = ({
   } | null>(null);
   const [showCropper, setShowCropper] = useState(false);
 
-  const parsePhone = (fullPhone: string, fallbackCode = "+20") => {
-    const normalized = fullPhone.trim();
-    const sortedCodes = PHONE_CODES.map((p) => p.code).sort(
-      (a, b) => b.length - a.length,
-    );
-    const matchedCode =
-      sortedCodes.find((code) => normalized.startsWith(code)) ?? "";
+  const normalizePhoneInput = (phone: string) =>
+    phone.replace(/^\+20\s*/, "").trim();
 
-    if (!matchedCode) {
-      return { phoneCode: fallbackCode, phoneNumber: normalized };
-    }
-
-    const localNumber = normalized.slice(matchedCode.length).trim();
-    return { phoneCode: matchedCode, phoneNumber: localNumber };
-  };
-
-  const initialPhone = parsePhone(currentData.phoneNumber, "+20");
   const {
     register,
     handleSubmit,
@@ -96,8 +82,7 @@ const ProfileEditModal = ({
       lastName: currentData.lastName,
       country: currentData.country,
       city: currentData.city,
-      phoneCode: initialPhone.phoneCode,
-      phoneNumber: initialPhone.phoneNumber,
+      phoneNumber: normalizePhoneInput(currentData.phoneNumber),
       bio: currentData.bio,
     },
   });
@@ -107,20 +92,19 @@ const ProfileEditModal = ({
 
   useEffect(() => {
     if (!open) return;
-    const nextPhone = parsePhone(currentData.phoneNumber);
     reset({
       firstName: currentData.firstName,
       lastName: currentData.lastName,
       country: currentData.country,
       city: currentData.city,
-      phoneCode: nextPhone.phoneCode,
-      phoneNumber: nextPhone.phoneNumber,
+      phoneNumber: normalizePhoneInput(currentData.phoneNumber),
       bio: currentData.bio,
     });
     setImageSrc(null);
     setShowCropper(false);
     setZoom(1);
     setCrop({ x: 0, y: 0 });
+    setCroppedAreaPixels(null);
   }, [
     open,
     currentData.firstName,
@@ -142,58 +126,76 @@ const ProfileEditModal = ({
     [],
   );
 
-  const createCroppedImage = async (): Promise<string | null> => {
+  const createCroppedImageFile = async (): Promise<File | null> => {
     if (!imageSrc || !croppedAreaPixels) return null;
+
     const image = new Image();
     image.src = imageSrc;
+
     return new Promise((resolve) => {
       image.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         canvas.width = croppedAreaPixels.width;
         canvas.height = croppedAreaPixels.height;
+
         if (!ctx) {
           resolve(null);
           return;
         }
+
         ctx.drawImage(
           image,
           croppedAreaPixels.x,
           croppedAreaPixels.y,
-          croppedAreaPixels.height,
           croppedAreaPixels.width,
+          croppedAreaPixels.height,
           0,
           0,
           croppedAreaPixels.width,
           croppedAreaPixels.height,
         );
+
         canvas.toBlob((blob) => {
-          resolve(blob ? URL.createObjectURL(blob) : null);
+          if (!blob) {
+            resolve(null);
+            return;
+          }
+
+          resolve(
+            new File([blob], `client-profile-${Date.now()}.jpg`, {
+              type: "image/jpeg",
+            }),
+          );
         }, "image/jpeg");
       };
     });
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
-    let finalImage = currentData.profileImage;
+    let finalImage: File | string | null = currentData.profileImage;
+
     if (showCropper && imageSrc) {
-      const croppedImage = await createCroppedImage();
-      if (croppedImage) finalImage = croppedImage;
+      const croppedImageFile = await createCroppedImageFile();
+      if (croppedImageFile) finalImage = croppedImageFile;
     }
+
     await onSave({
       firstName: values.firstName,
       lastName: values.lastName,
       country: values.country,
       city: values.city,
-      phoneNumber: `${values.phoneCode}${values.phoneNumber}`,
+      phoneNumber: values.phoneNumber,
       bio: values.bio ?? "",
       profileImage: finalImage,
     });
+
     onOpenChange(false);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
+
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.addEventListener("load", () => {
@@ -248,6 +250,7 @@ const ProfileEditModal = ({
                   onClick={() => {
                     setShowCropper(false);
                     setImageSrc(null);
+                    setCroppedAreaPixels(null);
                   }}
                   className="cursor-pointer mt-4 w-full"
                 >
@@ -256,7 +259,8 @@ const ProfileEditModal = ({
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                {currentData.profileImage ? (
+                {typeof currentData.profileImage === "string" &&
+                currentData.profileImage ? (
                   <img
                     src={currentData.profileImage}
                     className="w-32 h-32 rounded-full object-cover border-4 border-border"
@@ -325,47 +329,15 @@ const ProfileEditModal = ({
           </div>
 
           <div className="space-y-2">
-            <Label>رقم الهاتف</Label>
-            <div className="flex gap-2">
-              <Select
-                dir="rtl"
-                value={watch("phoneCode")}
-                onValueChange={(value) =>
-                  setValue("phoneCode", value, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              >
-                <SelectTrigger className="w-36 cursor-pointer">
-                  <SelectValue placeholder="الكود" />
-                </SelectTrigger>
-                <SelectContent align="end" className="w-36">
-                  {PHONE_CODES.map((item) => (
-                    <SelectItem
-                      key={item.code}
-                      value={item.code}
-                      className="justify-end cursor-pointer"
-                    >
-                      {item.country} {item.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Input
-                type="tel"
-                inputMode="numeric"
-                placeholder="رقم الهاتف"
-                className="flex-1"
-                {...register("phoneNumber")}
-              />
-            </div>
-            {errors.phoneCode && (
-              <p className="text-sm text-destructive">
-                {errors.phoneCode.message}
-              </p>
-            )}
+            <Label htmlFor="profile-phone">رقم الهاتف</Label>
+            <Input
+              id="profile-phone"
+              type="tel"
+              inputMode="numeric"
+              placeholder="رقم الهاتف"
+              className="w-full"
+              {...register("phoneNumber")}
+            />
             {errors.phoneNumber && (
               <p className="text-sm text-destructive">
                 {errors.phoneNumber.message}

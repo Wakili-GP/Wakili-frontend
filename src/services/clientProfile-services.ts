@@ -1,4 +1,5 @@
 import httpClient, { type ApiResponse } from "@/services/api/httpClient";
+import fileService from "@/services/files-services";
 
 export interface ClientProfileInterface {
   firstName: string;
@@ -10,6 +11,16 @@ export interface ClientProfileInterface {
   bio: string | null;
   memberSince: string;
   email: string;
+}
+
+export interface ClientProfileUpdatePayload {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string | null;
+  city: string | null;
+  country: string | null;
+  profileImage: File | string | null;
+  bio: string | null;
 }
 // Status
 // Pending: 0
@@ -73,11 +84,45 @@ export const clientProfileService = {
     return response.data;
   },
   async updateClientProfile(
-    data: Partial<ClientProfileInterface>,
+    data: Partial<ClientProfileUpdatePayload>,
   ): Promise<ApiResponse<string>> {
+    const formData = new FormData();
+
+    if (typeof data.firstName === "string") {
+      formData.append("FirstName", data.firstName);
+    }
+    if (typeof data.lastName === "string") {
+      formData.append("LastName", data.lastName);
+    }
+    if (typeof data.phoneNumber === "string") {
+      formData.append("PhoneNumber", data.phoneNumber);
+    }
+    if (typeof data.city === "string") {
+      formData.append("City", data.city);
+    }
+    if (typeof data.country === "string") {
+      formData.append("Country", data.country);
+    }
+    if (typeof data.bio === "string") {
+      formData.append("Bio", data.bio);
+    }
+
+    if (data.profileImage instanceof File) {
+      formData.append("ProfileImage", data.profileImage);
+    } else if (typeof data.profileImage === "string" && data.profileImage) {
+      const imageFile = await fileService.pathToFile(
+        data.profileImage,
+        "client-profile-image",
+      );
+      formData.append("ProfileImage", imageFile);
+    }
+
     const response = await httpClient.put<ApiResponse<string>>(
       "/Account/client-info",
-      data,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
     );
     return response.data;
   },
