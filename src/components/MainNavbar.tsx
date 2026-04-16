@@ -189,24 +189,24 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                         if (user?.userType === "Client") {
                           navigate("/profile");
                           return;
-                        } else if (
-                          user?.userType === "Lawyer" &&
-                          user?.status === "Unfinished"
-                        ) {
-                          navigate("/lawyer-onboarding");
-                          toast.info(
-                            "اكمل ملفك الشخصي لتتمكن من استخدام حسابك",
-                            { description: "يرجى إكمال معلوماتك الشخصية" },
-                          );
-                          return;
-                        } else if (
-                          user?.userType === "Lawyer"
-                          // user?.status === "Active"
-                        ) {
-                          navigate("/lawyer-onboarding");
+                        }
 
-                          // navigate(`/lawyer/${user.id}`);
-                          return;
+                        if (user?.userType === "Lawyer") {
+                          if (user.status === "Unfinished") {
+                            navigate("/lawyer-onboarding");
+                            toast.info(
+                              "اكمل ملفك الشخصي لتتمكن من استخدام حسابك",
+                              { description: "يرجى إكمال معلوماتك الشخصية" },
+                            );
+                          } else if (user.status === "SubmittedAndNotApproved") {
+                            navigate("/lawyer-onboarding");
+                            toast.info(
+                              "طلبك قيد المراجعة",
+                              { description: "سيتم إشعارك عند اكتمال عملية التحقق" },
+                            );
+                          } else if (user.status === "SubmittedAndApproved") {
+                            navigate(`/lawyer/${user.id}`);
+                          }
                         }
                       }}
                       className="cursor-pointer flex items-center space-x-2 space-x-reverse"

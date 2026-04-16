@@ -11,6 +11,7 @@ import ExperienceStep from "@/components/onboarding/ExperienceStep";
 import VerificationStep from "@/components/onboarding/VerificationStep";
 import ReviewStep from "@/components/onboarding/ReviewStep";
 import { onboardingService } from "@/services/onboarding-services";
+import { useAuth } from "@/stores/auth.store";
 
 const STEPS = [
   { title: "المعلومات الأساسية", description: "بياناتك الشخصية" },
@@ -22,17 +23,31 @@ const STEPS = [
 
 const LawyerOnboarding = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // If the lawyer is already approved, redirect them straight to their profile.
+  useEffect(() => {
+    if (user?.status === "SubmittedAndApproved" && user?.id) {
+      navigate(`/lawyer/${user.id}`, { replace: true });
+    }
+  }, [user?.status, user?.id, navigate]);
+
+  // SubmittedAndNotApproved → always show the waiting screen.
+  const isWaitingForReview = user?.status === "SubmittedAndNotApproved";
 
   const { data: progressData, isLoading } = useQuery({
     queryKey: ["onboarding-progress"],
     queryFn: () => onboardingService.getOnboardingProgress(),
     select: (response) => response.data,
     retry: false,
+    // No need to fetch progress when we already know the final status.
+    enabled: !isWaitingForReview && user?.status === "Unfinished",
   });
 
   useEffect(() => {
+    if (isWaitingForReview) return;
     const stepFromProgress = progressData?.currentStep;
     if (typeof stepFromProgress !== "number") return;
 
@@ -43,7 +58,7 @@ const LawyerOnboarding = () => {
 
     setIsSubmitted(false);
     setCurrentStep(Math.min(Math.max(stepFromProgress, 1), 5));
-  }, [progressData?.currentStep]);
+  }, [progressData?.currentStep, isWaitingForReview]);
 
   if (isLoading) {
     return (
@@ -56,7 +71,7 @@ const LawyerOnboarding = () => {
     );
   }
 
-  if (isSubmitted) {
+  if (isSubmitted || isWaitingForReview) {
     return (
       <div
         className="min-h-screen bg-background flex items-center justify-center p-4"

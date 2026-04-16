@@ -11,7 +11,6 @@ export interface AuthUser {
   userType: "Client" | "Lawyer";
   status:
     | "Active"
-    | "Inactive"
     | "Unfinished"
     | "SubmittedAndNotApproved"
     | "SubmittedAndApproved";

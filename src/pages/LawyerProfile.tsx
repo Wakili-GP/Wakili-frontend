@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useParams } from "react-router-dom";
 import {
   Award,
   Calendar as CalendarIcon,
@@ -291,7 +292,8 @@ const LawyerProfile = () => {
   };
 
   const { user } = useAuth();
-  const isOwner = true;
+  const { id } = useParams<{ id: string }>();
+  const isOwner = user?.userType === "Lawyer" && user?.id === id;
 
   const [activeTab, setActiveTab] = useState("bio");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
