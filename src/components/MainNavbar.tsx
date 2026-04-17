@@ -159,7 +159,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                   </PopoverContent>
                 </Popover>
 
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"

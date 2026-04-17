@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import HomeLayout from "./components/HomeLayout";
 import AiChatPage from "./pages/AiChatPage";
 import LawyerSearchPage from "./pages/LawyersSearchPage";
+import LawyerSearch from "./components/LawyerSearch";
 import AiLegalReviewPage from "./pages/AiLegalReviewPage";
 import ForumPage from "./pages/ForumPage";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -52,6 +53,14 @@ const App = () => {
             element={
               <SharedLayout>
                 <LawyerSearchPage />
+              </SharedLayout>
+            }
+          />
+          <Route
+            path="/find-lawyers/results"
+            element={
+              <SharedLayout>
+                <LawyerSearch />
               </SharedLayout>
             }
           />

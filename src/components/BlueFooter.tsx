@@ -48,7 +48,7 @@ const BlueFooter = () => {
             <div className="space-y-2 text-primary-foreground/70 text-sm">
               <p>القاهرة، مصر</p>
               <p>support@wakilak.me</p>
-              <p>+20 1144958064</p>
+              <p>01144958064</p>
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ const DarkFooter = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">التواصل</h4>
             <ul className="space-y-2 text-background/80">
-              <li>+20 1144958064</li>
+              <li>01144958064</li>
               <li>info@wakili.me</li>
               <li>اكتوبر, الجيزة, جمهورية مصر العربية</li>
             </ul>

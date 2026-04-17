@@ -10,8 +10,12 @@ import {
   Scale,
   Heart,
   ChevronDown,
+  ChevronLeft,
   X,
   Users,
+  ArrowRight,
+  Calendar,
+  BadgeCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -42,34 +46,107 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
-import {
-  lawyerSearchService,
-  type Lawyer,
-  type PracticeArea,
-  type LocationResponse,
-} from "@/services/clientProfile-services";
+// Mocked Lawyer Interface & Service for UI testing
+export interface Lawyer {
+  id: string;
+  firstName: string;
+  specialty: string;
+  specialties?: string[];
+  city: string;
+  rating: number;
+  reviewCount: number;
+  sessionTypes: string[];
+  yearsOfExperience: number;
+  hourlyRate: number;
+  phoneSessionPrice?: number;
+  officeSessionPrice?: number;
+  joiningDate?: string;
+  profileImage: string | null;
+}
+
+const mockLawyers: Lawyer[] = [
+  {
+    id: "1",
+    firstName: "أحمد",
+    lastName: "محمود",
+    specialty: "قانون تجاري",
+    specialties: ["قانون تجاري", "شركات", "ضرائب"],
+    city: "القاهرة",
+    rating: 4.8,
+    reviewCount: 124,
+    sessionTypes: ["مكتب", "هاتف"],
+    yearsOfExperience: 15,
+    hourlyRate: 500,
+    phoneSessionPrice: 350,
+    officeSessionPrice: 600,
+    joiningDate: "يناير 2023",
+    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed",
+  },
+  {
+    id: "2",
+    firstName: "سارة",
+    lastName: "علي",
+    specialty: "أحوال شخصية",
+    specialties: ["أحوال شخصية", "أسرة"],
+    city: "الإسكندرية",
+    rating: 4.9,
+    reviewCount: 89,
+    sessionTypes: ["مكتب"],
+    yearsOfExperience: 8,
+    hourlyRate: 350,
+    phoneSessionPrice: 200,
+    officeSessionPrice: 400,
+    joiningDate: "مارس 2022",
+    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara",
+  },
+  {
+    id: "3",
+    firstName: "محمد",
+    lastName: "حسن",
+    specialty: "قانون جنائي",
+    specialties: ["قانون جنائي", "جرائم إلكترونية"],
+    city: "الجيزة",
+    rating: 4.7,
+    reviewCount: 210,
+    sessionTypes: ["هاتف"],
+    yearsOfExperience: 20,
+    hourlyRate: 800,
+    phoneSessionPrice: 500,
+    officeSessionPrice: 850,
+    joiningDate: "أغسطس 2021",
+    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mohamed",
+  }
+];
+
+const lawyerSearchService = {
+  searchLawyers: async (_params: any) => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return {
+      success: true,
+      data: {
+        data: (_params.query || _params.practiceArea) ? mockLawyers.slice(0, 1) : mockLawyers,
+        pagination: { totalItems: (_params.query || _params.practiceArea) ? 1 : mockLawyers.length, totalPages: 1, currentPage: 1 }
+      }
+    };
+  },
+  addToFavorites: async (_id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  },
+  removeFromFavorites: async (_id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { success: true };
+  }
+};
 import { LawyerCardSkeleton } from "@/components/ui/skeletons";
-
-const practiceAreas = [
-  "قانون تجاري",
-  "قانون الأسرة",
-  "قانون جنائي",
-  "قانون العمل",
-  "قانون مدني",
-  "قانون الهجرة",
-  "قانون العقارات",
-  "قانون الشركات",
-];
-
-const locations = [
-  "القاهرة",
-  "الإسكندرية",
-  "الجيزة",
-  "المنصورة",
-  "طنطا",
-  "أسيوط",
-  "الأقصر",
-];
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import SpecializationService, {
+  type Specialization,
+} from "@/services/specializations-services";
+import { type ApiResponse } from "@/services/api/httpClient";
+import { COUNTRIES, CITIES_BY_COUNTRY } from "@/data/onboarding";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -123,8 +200,15 @@ const ScrollToTopButton = () => {
 };
 
 export default function LawyerSearch() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedArea, setSelectedArea] = useState<string>("all");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialSearch = searchParams.get("search") || "";
+  const initialSpecialty = searchParams.get("specialty") || "";
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [selectedArea, setSelectedArea] = useState<string>(
+    initialSpecialty || "all",
+  );
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [minRating, setMinRating] = useState(0);
@@ -138,38 +222,21 @@ export default function LawyerSearch() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Fetch specializations from API
+  const { data: specializations = [] } =
+    useQuery<ApiResponse<Specialization[]>, Error, Specialization[]>({
+      queryKey: ["specializations"],
+      queryFn: () => SpecializationService.getSpecializations(),
+      select: (response) => response.data ?? [],
+    });
+
+  // Only Egyptian cities for the location filter
+  const allCities = CITIES_BY_COUNTRY["مصر"] || [];
+
   // Data fetching states
-  const [practiceAreasData, setPracticeAreasData] = useState<PracticeArea[]>(
-    [],
-  );
-  const [locationsData, setLocationsData] = useState<LocationResponse[]>([]);
   const [searchResults, setSearchResults] = useState<Lawyer[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Fetch practice areas and locations on mount
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [areasRes, locationsRes] = await Promise.all([
-          lawyerSearchService.getPracticeAreas(),
-          lawyerSearchService.getLocations(),
-        ]);
-
-        if (areasRes.success && areasRes.data) {
-          setPracticeAreasData(areasRes.data);
-        }
-        if (locationsRes.success && locationsRes.data) {
-          setLocationsData(locationsRes.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch initial data:", error);
-        toast.error("فشل تحميل البيانات");
-      }
-    };
-
-    fetchInitialData();
-  }, []);
 
   // Scroll to results when page changes
   useEffect(() => {
@@ -292,104 +359,80 @@ export default function LawyerSearch() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Search Header */}
-      <div
-        className="relative -mx-4 -mt-8 overflow-hidden"
-        style={{
-          marginLeft: "calc(-50vw + 50%)",
-          marginRight: "calc(-50vw + 50%)",
-          width: "100vw",
-        }}
-      >
-        <div className="relative min-h-[50vh] md:min-h-[65vh] flex items-center justify-center bg-linear-to-br from-primary via-primary/90 to-primary/70">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, hsl(var(--primary-glow)) 0%, transparent 50%), radial-gradient(circle at 75% 75%, hsl(var(--secondary)) 0%, transparent 50%)`,
-              }}
-            />
-          </div>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djZoLTJ2LTZoMnptMC0xMHY2aC0ydi02aDJ6bTAtMTB2NmgtMlY4aDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
+    <div className="space-y-8 pb-12 bg-linear-to-b from-background to-muted/20 min-h-screen">
+      {/* Search Hero Header */}
+      <div className="w-full relative bg-linear-to-br from-primary via-primary/95 to-primary/80 py-16 px-4 shadow-xl overflow-hidden">
+        {/* Decorative Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 30%, hsl(var(--primary-glow)) 0%, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--secondary)) 0%, transparent 40%)`,
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
 
-          {/* Content */}
-          <div className="relative z-10 text-center px-4 py-16 md:py-24 max-w-4xl mx-auto space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-4"
+        <div className="relative z-10 container mx-auto flex flex-col items-center max-w-4xl space-y-6">
+          {/* Back link + title */}
+          <div className="w-full flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/80 hover:text-white hover:bg-white/20 transition-all font-semibold rounded-full px-4"
+              onClick={() => navigate("/find-lawyers")}
             >
-              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
-                ابحث عن محاميك المثالي
-              </h1>
-              <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed">
-                اعثر على محامين متخصصين وموثوقين حسب احتياجاتك القانونية
+              <ArrowRight className="w-4 h-4 ml-2" />
+              العودة للرئيسية
+            </Button>
+          </div>
+          
+          <div className="w-full space-y-2 text-right">
+            <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-md">
+              نتائج البحث
+            </h1>
+            {(initialSearch || initialSpecialty) && (
+              <p className="text-white/80 text-lg md:text-xl font-medium">
+                {initialSearch && (
+                  <span className="mr-1">عن "{initialSearch}"</span>
+                )}
+                {initialSpecialty && (
+                  <span className="mr-1">في تخصص {initialSpecialty}</span>
+                )}
               </p>
-            </motion.div>
-
-            {/* Search Bar inside Hero */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative max-w-3xl mx-auto"
-            >
-              <div className="flex items-center gap-2 bg-background/95 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-2 shadow-2xl focus-within:border-white/40 transition-all">
-                <Search className="w-6 h-6 text-muted-foreground mr-3" />
-                <Input
-                  type="text"
-                  placeholder="ابحث بالاسم أو التخصص..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 border-0 text-lg focus-visible:ring-0 bg-transparent"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="relative"
-                >
-                  <Filter className="w-5 h-5 ml-2" />
-                  الفلاتر
-                  {activeFiltersCount > 0 && (
-                    <Badge className="absolute -top-2 -left-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex items-center justify-center gap-8 text-white/70 text-sm"
-            >
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>500+ محامي</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 fill-current" />
-                <span>تقييم 4.8+</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Scale className="w-4 h-4" />
-                <span>جميع التخصصات</span>
-              </div>
-            </motion.div>
+            )}
           </div>
 
-          {/* Bottom Fade */}
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-background to-transparent" />
+          {/* Search Bar */}
+          <div className="w-full flex items-center gap-2 bg-background/95 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-2xl focus-within:border-white/50 focus-within:shadow-primary/30 transition-all duration-300">
+            <Search className="w-6 h-6 text-muted-foreground mr-3" />
+            <Input
+              type="text"
+              placeholder="ابحث بالاسم أو التخصص القانوني..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 border-0 text-lg focus-visible:ring-0 bg-transparent h-12 placeholder:text-muted-foreground/70"
+            />
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              size="lg"
+              onClick={() => setShowFilters(!showFilters)}
+              className="relative cursor-pointer transition-colors shadow-sm h-12 px-6 rounded-xl border-primary/20"
+            >
+              <Filter className="w-5 h-5 ml-2" />
+              فلاتر
+              {activeFiltersCount > 0 && (
+                <Badge className="absolute -top-2 -left-2 h-5 w-5 p-0 flex items-center justify-center text-xs animate-in zoom-in">
+                  {activeFiltersCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="flex flex-col lg:flex-row gap-8">
         {/* Filters Sidebar */}
         <AnimatePresence>
           {showFilters && (
@@ -446,23 +489,13 @@ export default function LawyerSearch() {
                           <SelectItem className="cursor-pointer" value="all">
                             جميع التخصصات
                           </SelectItem>
-                          {practiceAreasData.length > 0
-                            ? practiceAreasData.map((area) => (
+                          {specializations.map((area) => (
                                 <SelectItem
                                   className="cursor-pointer"
                                   key={area.id}
                                   value={area.name}
                                 >
                                   {area.name}
-                                </SelectItem>
-                              ))
-                            : practiceAreas.map((area) => (
-                                <SelectItem
-                                  className="cursor-pointer"
-                                  key={area}
-                                  value={area}
-                                >
-                                  {area}
                                 </SelectItem>
                               ))}
                         </SelectContent>
@@ -494,23 +527,13 @@ export default function LawyerSearch() {
                           <SelectItem className="cursor-pointer" value="all">
                             جميع المدن
                           </SelectItem>
-                          {locationsData.length > 0
-                            ? locationsData.map((loc) => (
+                          {allCities.map((city) => (
                                 <SelectItem
                                   className="cursor-pointer"
-                                  key={loc.id}
-                                  value={loc.city}
+                                  key={city}
+                                  value={city}
                                 >
-                                  {loc.name}
-                                </SelectItem>
-                              ))
-                            : locations.map((loc) => (
-                                <SelectItem
-                                  className="cursor-pointer"
-                                  key={loc}
-                                  value={loc}
-                                >
-                                  {loc}
+                                  {city}
                                 </SelectItem>
                               ))}
                         </SelectContent>
@@ -528,20 +551,22 @@ export default function LawyerSearch() {
                       <ChevronDown className="w-4 h-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-4 space-y-4">
-                      <Slider
-                        value={priceRange}
-                        onValueChange={(value) => {
-                          setPriceRange(value);
-                          setCurrentPage(1);
-                        }}
-                        max={1000}
-                        min={0}
-                        step={50}
-                        className="w-full"
-                      />
+                      <div dir="ltr">
+                        <Slider
+                          value={priceRange}
+                          onValueChange={(value) => {
+                            setPriceRange(value);
+                            setCurrentPage(1);
+                          }}
+                          max={1000}
+                          min={0}
+                          step={50}
+                          className="w-full"
+                        />
+                      </div>
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>{priceRange[0]} ج.م</span>
                         <span>{priceRange[1]} ج.م</span>
+                        <span>{priceRange[0]} ج.م</span>
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -671,143 +696,129 @@ export default function LawyerSearch() {
           {/* Lawyer Cards Grid */}
           {!isLoading && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
                 <AnimatePresence mode="wait">
                   {searchResults.map((lawyer, index) => (
                     <motion.div
                       key={lawyer.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.05 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <Card
-                        className="
-  group relative overflow-hidden
-  border border-border/40
-  bg-linear-to-br from-background via-background to-muted/30
-  backdrop-blur-xl
-  shadow-md hover:shadow-2xl
-  transition-all duration-500
-  hover:-translate-y-1
-  hover:border-primary/40
-"
+                        className="group relative overflow-hidden border border-border/40 bg-card/60 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] transition-all duration-[800ms] ease-out hover:-translate-y-2 hover:border-primary/40 cursor-pointer flex flex-col sm:flex-row items-stretch overflow-hidden"
+                        onClick={() => navigate(`/lawyers/${lawyer.id}`)}
                       >
-                        <CardContent className="p-0">
-                          <div className="flex h-full">
-                            {/* Lawyer Image */}
-                            <div className="relative w-32 h-40 shrink-0 overflow-hidden">
-                              <img
-                                src={
-                                  lawyer.profileImage ||
-                                  "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
-                                }
-                                alt={`${lawyer.firstName} ${lawyer.lastName}`}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              />
+                        {/* Image Section — Right Side in RTL */}
+                        <div className="relative w-full sm:w-48 xl:w-52 h-56 sm:h-auto shrink-0 overflow-hidden border-b sm:border-b-0 sm:border-l border-border/20">
+                          <img
+                            src={
+                              lawyer.profileImage ||
+                              "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
+                            }
+                            alt={`${lawyer.firstName} ${lawyer.lastName}`}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent sm:bg-gradient-to-l sm:from-transparent sm:via-black/10 sm:to-black/60 opacity-90 transition-opacity duration-700 group-hover:opacity-70" />
 
-                              {/* Image gradient overlay */}
-                              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-70" />
+                          {/* Floating Favorite Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(lawyer.id);
+                            }}
+                            className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-background/30 backdrop-blur-xl border border-white/20 shadow-lg text-white hover:bg-white hover:text-red-500 transition-all duration-500 hover:scale-110 active:scale-95 z-10"
+                          >
+                            <Heart
+                              className={`w-4 h-4 transition-all duration-300 ${
+                                favorites.includes(lawyer.id)
+                                  ? "text-red-500 fill-red-500"
+                                  : ""
+                              }`}
+                            />
+                          </button>
 
-                              {/* Favorite Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFavorite(lawyer.id);
-                                }}
-                                className="cursor-pointer absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md bg-background/60 border border-border/40 shadow-md transition-all duration-300 hover:scale-110 hover:bg-background active:scale-95"
-                              >
-                                <Heart
-                                  className={`
-      w-5 h-5 transition-all duration-300
-      ${
-        favorites.includes(lawyer.id)
-          ? "text-red-500 fill-red-500 scale-110 drop-shadow-sm"
-          : "text-muted-foreground group-hover:text-primary"
-      }
-    `}
-                                />
-                              </button>
+                          {/* Image Badges */}
+                          <div className="absolute bottom-5 right-5 left-5 flex flex-wrap gap-2 items-end justify-between z-10">
+                            <div className="flex gap-2">
+                              <Badge className="bg-white/20 text-white backdrop-blur-md border border-white/30 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xl">
+                                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                                {lawyer.rating}
+                                <span className="opacity-70 font-normal">({lawyer.reviewCount})</span>
+                              </Badge>
                             </div>
+                            <div className="bg-primary p-2 rounded-full shadow-lg border border-white/20 transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                               <ArrowRight className="w-4 h-4 text-white -rotate-45" />
+                            </div>
+                          </div>
+                        </div>
 
-                            {/* Lawyer Info */}
-                            <div className="flex-1 p-5 flex flex-col">
-                              {/* Name + Specialty */}
+                        {/* Content Section — Left Side in RTL */}
+                        <CardContent className="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                          
+                          {/* Header Block */}
+                          <div className="space-y-2.5">
+                            <div className="flex items-start justify-between gap-3">
                               <div>
-                                <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
+                                <h3 className="font-extrabold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors duration-500 flex items-center gap-2">
                                   {lawyer.firstName} {lawyer.lastName}
+                                  <BadgeCheck className="w-4 h-4 text-primary shrink-0" />
                                 </h3>
-
+                                
+                                <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[13px] text-muted-foreground font-medium">
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="w-3.5 h-3.5 text-primary/70" />
+                                    <span>{lawyer.city}</span>
+                                  </div>
+                                  <span className="w-1 h-1 rounded-full bg-border" />
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5 text-primary/70" />
+                                    <span>انضم {lawyer.joiningDate || "يناير 2023"}</span>
+                                  </div>
+                                  <span className="w-1 h-1 rounded-full bg-border" />
+                                  <span className="text-secondary-foreground font-bold">{lawyer.yearsOfExperience} سنوات خبرة</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Categories */}
+                            <div className="flex flex-wrap gap-1.5">
+                              {(lawyer.specialties || [lawyer.specialty]).map((cat, idx) => (
                                 <Badge
+                                  key={idx}
                                   variant="secondary"
-                                  className="mt-2 text-xs px-3 py-1 rounded-full"
+                                  className="bg-muted hover:bg-primary/10 transition-colors duration-300 text-foreground border-border/50 font-bold px-2 py-0.5 rounded-lg text-[10px]"
                                 >
-                                  {lawyer.specialty}
+                                  {cat}
                                 </Badge>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Pricing Grid */}
+                          <div className="flex flex-wrap gap-2 pt-3 border-t border-border/40">
+                            <div className="flex-1 min-w-[110px] flex items-center gap-2 bg-card/40 rounded-xl p-2 border border-border/50 shadow-sm transition-all duration-300 group-hover:border-primary/20 group-hover:bg-primary/5">
+                              <div className="w-8 h-8 rounded-lg bg-background shadow-sm flex items-center justify-center text-primary shrink-0">
+                                <Phone className="w-4 h-4" />
                               </div>
-
-                              {/* Location + Rating */}
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-3">
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="w-4 h-4 text-primary/70" />
-                                  {lawyer.city}
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 text-warning-amber fill-warning-amber" />
-                                  <span className="font-semibold text-foreground">
-                                    {lawyer.rating}
-                                  </span>
-                                  <span className="text-xs">
-                                    ({lawyer.reviewCount})
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Session Types + Experience */}
-                              <div className="flex items-center gap-2 flex-wrap mt-3">
-                                {lawyer.sessionTypes.map((type) => (
-                                  <Badge
-                                    key={type}
-                                    variant="outline"
-                                    className="text-xs px-2 py-1 rounded-full"
-                                  >
-                                    {type === "مكتب" ? (
-                                      <Building2 className="w-3 h-3 ml-1" />
-                                    ) : (
-                                      <Phone className="w-3 h-3 ml-1" />
-                                    )}
-                                    {type}
-                                  </Badge>
-                                ))}
-
-                                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                                  {lawyer.yearsOfExperience} سنة خبرة
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">استشارة هاتفية</span>
+                                <span className="font-extrabold text-foreground text-sm">
+                                  {lawyer.phoneSessionPrice || lawyer.hourlyRate} <span className="text-[10px] text-muted-foreground font-normal">ج.م</span>
                                 </span>
                               </div>
+                            </div>
 
-                              {/* Bottom Section */}
-                              <div className="pt-4 mt-4 border-t border-border/40 flex items-center justify-between">
-                                <div className="flex flex-col">
-                                  <span className="text-xl font-bold text-primary">
-                                    {lawyer.hourlyRate} ج.م
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    لكل جلسة
-                                  </span>
-                                </div>
-
-                                <Button
-                                  size="sm"
-                                  className="
-            cursor-pointer
-            rounded-full px-5
-            transition-all duration-300
-            group-hover:shadow-md
-          "
-                                >
-                                  عرض الملف
-                                </Button>
+                            <div className="flex-1 min-w-[110px] flex items-center gap-2 bg-card/40 rounded-xl p-2 border border-border/50 shadow-sm transition-all duration-300 group-hover:border-primary/20 group-hover:bg-primary/5">
+                              <div className="w-8 h-8 rounded-lg bg-background shadow-sm flex items-center justify-center text-primary shrink-0">
+                                <Building2 className="w-4 h-4" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">استشارة مكتبية</span>
+                                <span className="font-extrabold text-foreground text-sm">
+                                  {lawyer.officeSessionPrice || (lawyer.hourlyRate + 200)} <span className="text-[10px] text-muted-foreground font-normal">ج.م</span>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -894,6 +905,7 @@ export default function LawyerSearch() {
             </>
           )}
         </div>
+      </div>
       </div>
       <ScrollToTopButton />
     </div>

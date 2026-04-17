@@ -19,6 +19,9 @@ import {
   UserCheck,
   Award,
   TrendingUp,
+  Clock,
+  Loader,
+  ArrowUpRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -26,12 +29,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 import HeroVideo from "../assets/lawyer-search/Hero Video.mp4";
 import Step1Video from "../assets/lawyer-search/Video Step 1.mp4";
 import Step2Video from "../assets/lawyer-search/Video Step 2.mp4";
 import Step3Video from "../assets/lawyer-search/Video Step 3.mp4";
-import { featuredLawyers, testimonials, specializations } from "../data/data";
+import { featuredLawyers, testimonials } from "../data/data";
+import { useAuth } from "@/stores/auth.store";
+import { useAuthModalStore } from "@/stores/auth-modal.store";
+import SpecializationService, {
+  type Specialization,
+} from "@/services/specializations-services";
+import { type ApiResponse } from "@/services/api/httpClient";
+import { toast } from "@/components/ui/sonner";
 
 const LawyerSearchPage = () => {
   return (
@@ -70,6 +81,8 @@ const HeroSection = () => {
   const [userIntent, setUserIntent] = useState<UserIntent>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { openRegister } = useAuthModalStore();
 
   const currentContent = userIntent
     ? heroContent[userIntent]
@@ -77,9 +90,46 @@ const HeroSection = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery) params.set("search", searchQuery);
-    if (userIntent) params.set("intent", userIntent);
+    if (searchQuery.trim()) {
+      navigate(`/find-lawyers/results?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate("/find-lawyers/results");
+    }
+  };
+
+  const handleWorkClick = () => {
+    if (userIntent === "work") {
+      setUserIntent(null);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      openRegister();
+      // Still set intent so the UI expands behind the modal
+      setUserIntent("work");
+      return;
+    }
+
+    if (user?.userType === "Client") {
+      toast("هذا الخيار مخصص للمحامين", {
+        description: "إذا كنت محاميًا، يرجى التسجيل بحساب محامي",
+      });
+      setUserIntent("work");
+      return;
+    }
+
+    if (user?.userType === "Lawyer") {
+      if (user.status === "Unfinished") {
+        navigate("/lawyer-onboarding");
+        return;
+      }
+      if (user.status === "SubmittedAndApproved") {
+        navigate(`/lawyer/${user.id}`);
+        return;
+      }
+      // If SubmittedAndNotApproved or other states
+      setUserIntent("work");
+    }
   };
 
   return (
@@ -146,9 +196,7 @@ const HeroSection = () => {
               size="lg"
               variant={userIntent === "work" ? "cta" : "outline"}
               className={`text-lg px-8 ${userIntent === "work" ? "" : "bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"}`}
-              onClick={() =>
-                setUserIntent(userIntent === "work" ? null : "work")
-              }
+              onClick={handleWorkClick}
             >
               <GraduationCap className="w-5 h-5 ml-2" />
               أريد العمل
@@ -187,16 +235,78 @@ const HeroSection = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.4 }}
+                className="space-y-4"
               >
-                <Button
-                  size="lg"
-                  variant="cta"
-                  className="text-lg px-10"
-                  onClick={() => navigate("/verify/lawyer")}
-                >
-                  سجّل كمحامي الآن
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
+                {/* Not authenticated */}
+                {!isAuthenticated && (
+                  <Button
+                    size="lg"
+                    variant="cta"
+                    className="text-lg px-10"
+                    onClick={() => openRegister()}
+                  >
+                    سجّل كمحامي الآن
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                )}
+
+                {/* Authenticated as Client */}
+                {isAuthenticated && user?.userType === "Client" && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-md mx-auto text-center space-y-3">
+                    <p className="text-white text-lg font-semibold">
+                      هذا الخيار مخصص للمحامين
+                    </p>
+                    <p className="text-blue-100/80 text-sm">
+                      إذا كنت محاميًا، يرجى التسجيل بحساب محامي
+                    </p>
+                  </div>
+                )}
+
+                {/* Lawyer — Unfinished */}
+                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "Unfinished" && (
+                  <Button
+                    size="lg"
+                    variant="cta"
+                    className="text-lg px-10"
+                    onClick={() => navigate("/lawyer-onboarding")}
+                  >
+                    أكمل تسجيلك
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                )}
+
+                {/* Lawyer — SubmittedAndNotApproved */}
+                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "SubmittedAndNotApproved" && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-md mx-auto text-center space-y-3">
+                    <div className="w-14 h-14 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto">
+                      <Clock className="w-7 h-7 text-amber-300" />
+                    </div>
+                    <p className="text-white text-lg font-semibold">
+                      طلبك قيد المراجعة
+                    </p>
+                    <p className="text-blue-100/80 text-sm">
+                      سيتم مراجعة بياناتك من قبل فريق الإدارة. ستتلقى إشعاراً عند اكتمال التحقق.
+                    </p>
+                    <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                      <p className="text-xs text-amber-200">
+                        عادة ما تستغرق عملية المراجعة 24-48 ساعة عمل
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lawyer — SubmittedAndApproved */}
+                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "SubmittedAndApproved" && (
+                  <Button
+                    size="lg"
+                    variant="cta"
+                    className="text-lg px-10"
+                    onClick={() => navigate(`/lawyer/${user.id}`)}
+                  >
+                    الذهاب لملفك الشخصي
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -402,6 +512,12 @@ const fallbackCounts = [48, 35, 42, 31, 27, 19, 38, 22, 45, 29, 33, 17];
 
 const CategoriesSection = () => {
   const navigate = useNavigate();
+  const { data: fetchedSpecializations = [] } =
+    useQuery<ApiResponse<Specialization[]>, Error, Specialization[]>({
+      queryKey: ["specializations"],
+      queryFn: () => SpecializationService.getSpecializations(),
+      select: (response) => response.data ?? [],
+    });
 
   return (
     <section className="py-20 px-4 bg-muted/30">
@@ -425,8 +541,12 @@ const CategoriesSection = () => {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 items-stretch">
-          {specializations.map((spec, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
+          {fetchedSpecializations.length === 0 ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-[300px] rounded-[2rem] bg-muted/40 animate-pulse border border-border/30" />
+            ))
+          ) : fetchedSpecializations.map((spec, index) => {
             const name = spec.name || "تخصص قانوني";
             const description = spec.description || "استشارات قانونية متخصصة.";
             const Icon =
@@ -437,45 +557,43 @@ const CategoriesSection = () => {
             return (
               <motion.div
                 key={spec.id}
-                initial={{ opacity: 0, y: 20, scale: 0.96 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() =>
-                  navigate(`/lawyers?specialty=${encodeURIComponent(name)}`)
+                  navigate(`/find-lawyers/results?specialty=${encodeURIComponent(name)}`)
                 }
-                className="group cursor-pointer relative"
+                className="group cursor-pointer block h-full"
               >
-                <div className="absolute inset-0 rounded-3xl bg-primary/10 opacity-0 group-hover:opacity-100 blur-2xl transition duration-500" />
-
-                <Card className="relative h-[250px] sm:h-[260px] rounded-3xl border border-border/50 bg-card/80 backdrop-blur-md shadow-sm group-hover:shadow-2xl group-hover:border-primary/30 transition-all duration-500 overflow-hidden">
-                  <CardContent className="p-7 h-full flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                <Card className="relative h-[280px] rounded-[2.5rem] border-0 bg-linear-to-b from-card/80 to-card/30 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 overflow-hidden ring-1 ring-border/30 hover:ring-primary/20">
+                  <div className="absolute inset-0 bg-linear-to-tr from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  
+                  {/* Oversized background icon */}
+                  <Icon className="absolute -left-8 -bottom-8 w-48 h-48 text-primary/[0.03] group-hover:text-primary/[0.08] group-hover:-rotate-12 transition-all duration-700 pointer-events-none" />
+                  
+                  <CardContent className="p-8 h-full flex flex-col relative z-20">
+                    <div className="flex items-start justify-between">
+                      <div className="w-14 h-14 rounded-[1rem] bg-background/80 shadow-sm flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 ring-1 ring-border/50">
                         <Icon className="w-6 h-6" />
                       </div>
-
-                      <div className="text-muted-foreground opacity-0 group-hover:opacity-100 transition text-xs">
-                        عرض →
-                      </div>
+                      <Badge variant="secondary" className="px-3 py-1 bg-background/60 backdrop-blur-md border-0 uppercase tracking-widest text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
+                        {count} خبير
+                      </Badge>
                     </div>
 
-                    <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.75rem] leading-5">
-                      {name}
-                    </h3>
+                    <div className="mt-auto space-y-3">
+                      <h3 className="text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                        {name}
+                      </h3>
+                      <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed line-clamp-2">
+                        {description}
+                      </p>
+                    </div>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2 min-h-9 opacity-80 group-hover:opacity-100 transition">
-                      {description}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-2 mt-auto">
-                      <span className="text-[11px] text-muted-foreground bg-muted/60 px-3 py-1 rounded-full">
-                        {count}+ محامي
-                      </span>
-
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition">
-                        <ChevronLeft className="w-3 h-3" />
+                    <div className="absolute right-8 bottom-8 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                      <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-xl ring-1 ring-border/50 group-hover:rotate-45 transition-transform duration-500">
+                        <ArrowUpRight className="w-5 h-5 text-primary" />
                       </div>
                     </div>
                   </CardContent>
@@ -595,70 +713,76 @@ const FeaturedLawyers = () => {
         </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {lawyers.slice(0, 6).map((lawyer, index) => (
             <motion.div
               key={lawyer.id}
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ y: -8 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="group"
             >
-              <Card className="relative overflow-hidden border border-border/50 bg-card/80 backdrop-blur-md shadow-sm hover:shadow-2xl transition-all duration-500 rounded-2xl h-full flex flex-col">
-                {/* header strip */}
-                <div className="h-20 bg-linear-to-r from-primary/80 via-primary to-primary" />
-
-                <CardContent className="p-5 pt-0 -mt-10 flex flex-col flex-1 gap-4">
-                  {/* avatar */}
-                  <div className="relative w-20 h-20">
-                    <img
-                      src={lawyer.image}
-                      alt={lawyer.name}
-                      className="w-20 h-20 rounded-2xl object-cover border shadow-md bg-background"
-                    />
-                    <span className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full ring-2 ring-background" />
+              <Card className="relative overflow-hidden border-0 bg-card rounded-[2.5rem] h-[480px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_30px_60px_rgb(0,0,0,0.12)] transition-all duration-700 flex flex-col group block ring-1 ring-border/20 hover:ring-primary/20">
+                {/* Image Section - Takes up top 55% */}
+                <div className="relative h-[55%] w-full overflow-hidden bg-muted">
+                  <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <img
+                    src={lawyer.image}
+                    alt={lawyer.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-1000 ease-out"
+                  />
+                  {/* Elegant Gradient to blend with content */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent z-20" />
+                  
+                  {/* Floating Badges */}
+                  <div className="absolute top-5 right-5 z-30 flex flex-col gap-2">
+                    <Badge className="bg-background/90 text-foreground backdrop-blur-md shadow-sm rounded-full px-3 py-1.5 border-0 font-bold tracking-widest text-xs flex items-center gap-1.5">
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      {lawyer.rating}
+                    </Badge>
                   </div>
+                  <div className="absolute top-5 left-5 z-30">
+                    <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.6)] ring-2 ring-background/80" />
+                  </div>
+                </div>
 
-                  {/* name */}
-                  <div>
-                    <h3 className="font-bold text-foreground group-hover:text-primary transition">
+                {/* Content Section - Bottom 45% */}
+                <CardContent className="relative flex-1 p-8 pt-2 flex flex-col justify-end z-30 bg-card rounded-b-[2.5rem]">
+                  <div className="space-y-1.5 mb-6">
+                    <h3 className="text-2xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors">
                       {lawyer.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-primary font-bold text-sm tracking-wide opacity-90">
                       {lawyer.specialty}
                     </p>
                   </div>
 
-                  {/* stats */}
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-                      {lawyer.rating}
-                    </span>
-                    <span>•</span>
-                    <span>{lawyer.yearsExperience} سنة خبرة</span>
-                    <span>•</span>
-                    <span>{lawyer.reviewCount} تقييم</span>
+                  <div className="flex items-center gap-5 text-sm font-medium text-muted-foreground mb-8">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-primary/70" />
+                      <span>{lawyer.yearsExperience} سنوات</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary/70" />
+                      <span>{lawyer.reviewCount} استشارة</span>
+                    </div>
                   </div>
 
-                  {/* push buttons down */}
-                  <div className="mt-auto flex gap-2 pt-3">
+                  <div className="flex gap-3 w-full">
                     <Button
-                      variant="hero"
-                      onClick={() => navigate(`/lawyers/${lawyer.id}`)}
-                      className="flex-1"
-                    >
-                      الملف الشخصي
-                    </Button>
-
-                    <Button
-                      variant="outline"
+                      variant="default"
                       onClick={() => navigate(`/hire/${lawyer.id}`)}
-                      className="flex-1"
+                      className="flex-1 rounded-[1rem] py-6 font-bold text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
                     >
                       توظيف
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate(`/lawyers/${lawyer.id}`)}
+                      className="w-14 rounded-[1rem] flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors py-6"
+                    >
+                      <ArrowUpRight className="w-6 h-6" />
                     </Button>
                   </div>
                 </CardContent>
@@ -690,39 +814,43 @@ function TestimonialCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      className="h-full"
     >
-      <Card className="h-full border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-elegant transition-all duration-500 hover:-translate-y-1">
-        <CardContent className="p-6 space-y-4">
-          <Quote className="w-8 h-8 text-secondary/40" />
-          <p className="text-foreground leading-relaxed text-base">
-            {testimonial.quote}
+      <Card className="h-full border-0 bg-card/40 backdrop-blur-3xl hover:bg-card/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-2 rounded-[2rem] ring-1 ring-border/40">
+        <CardContent className="p-8 h-full flex flex-col">
+          <Quote className="w-10 h-10 text-primary/20 mb-6" />
+          <p className="text-foreground flex-1 font-medium leading-loose text-lg tracking-wide">
+            "{testimonial.quote}"
           </p>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: testimonial.rating }).map((_, i) => (
-              <Star key={i} className="w-4 h-4 text-secondary fill-secondary" />
-            ))}
-          </div>
-          <div className="flex items-center gap-3 pt-2 border-t border-border/50">
+          
+          <div className="flex items-center gap-4 mt-8 pt-6 border-t border-border/40">
             <img
               src={testimonial.avatar}
               alt={testimonial.name}
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-14 h-14 rounded-[1rem] object-cover ring-2 ring-background shadow-md"
             />
-            <div>
-              <p className="font-semibold text-foreground text-sm">
+            <div className="flex-1">
+              <p className="font-bold text-foreground text-base">
                 {testimonial.name}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs font-semibold text-primary">
                 {testimonial.role}
               </p>
             </div>
-            <Badge variant="outline" className="mr-auto text-xs">
-              {testimonial.caseType}
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: testimonial.rating }).map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                ))}
+              </div>
+              <Badge variant="secondary" className="text-[10px] bg-background/60 shadow-sm border-0 font-bold">
+                {testimonial.caseType}
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -862,6 +990,38 @@ const PricingSection = () => {
 
 const CtaSection = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { openRegister } = useAuthModalStore();
+
+  const handleWorkClick = () => {
+    if (!isAuthenticated) {
+      openRegister();
+      return;
+    }
+
+    if (user?.userType === "Client") {
+      toast("هذا الخيار مخصص للمحامين", {
+        description: "إذا كنت محاميًا، يرجى التسجيل بحساب محامي",
+      });
+      return;
+    }
+
+    if (user?.userType === "Lawyer") {
+      if (user.status === "Unfinished") {
+        navigate("/lawyer-onboarding");
+        return;
+      }
+      if (user.status === "SubmittedAndApproved") {
+        navigate(`/lawyer/${user.id}`);
+        return;
+      }
+      // If SubmittedAndNotApproved or other states
+      toast.info("طلبك قيد المراجعة", {
+        description: "سيتم إشعارك عند اكتمال عملية التحقق",
+      });
+    }
+  };
+
   return (
     <section
       className="relative overflow-hidden"
@@ -917,16 +1077,16 @@ const CtaSection = () => {
           >
             <Button
               size="lg"
-              className="w-full sm:w-auto px-10 text-lg bg-white text-blue-900 hover:bg-gray-100"
-              onClick={() => navigate("/lawyers")}
+              className="w-full sm:w-auto px-10 text-lg bg-white text-blue-900 hover:bg-gray-100 cursor-pointer"
+              onClick={() => navigate("/find-lawyers/results")}
             >
               تصفح المحامين
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="w-full sm:w-auto px-10 text-lg bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
-              onClick={() => navigate("/verify/lawyer")}
+              className="w-full sm:w-auto px-10 text-lg bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white cursor-pointer"
+              onClick={handleWorkClick}
             >
               سجل كمحامي
             </Button>
