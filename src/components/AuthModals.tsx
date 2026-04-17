@@ -264,7 +264,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
     },
   ];
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog modal={false} open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center sm:text-center items-center">
           <HeaderBand />
