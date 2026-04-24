@@ -46,7 +46,9 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
-import lawyerService, { type LawyerCard as ApiLawyerCard } from "@/services/lawyerSearch-services";
+import lawyerService, {
+  type LawyerCard as ApiLawyerCard,
+} from "@/services/lawyerSearch-services";
 import favoritesService from "@/services/favorites-services";
 import { useAuth } from "@/stores/auth.store";
 
@@ -86,7 +88,10 @@ function mapApiLawyer(api: ApiLawyerCard): Lawyer {
     phoneSessionPrice: api.phoneSessionPrice,
     officeSessionPrice: api.inOfficeSessionPrice,
     joiningDate: api.joinedDate
-      ? new Date(api.joinedDate).toLocaleDateString("ar-EG", { month: "long", year: "numeric" })
+      ? new Date(api.joinedDate).toLocaleDateString("ar-EG", {
+          month: "long",
+          year: "numeric",
+        })
       : "",
     profileImage: api.profileImage ?? null,
   };
@@ -101,55 +106,6 @@ import { type ApiResponse } from "@/services/api/httpClient";
 import { CITIES_BY_COUNTRY } from "@/data/onboarding";
 
 const ITEMS_PER_PAGE = 8;
-
-// Scroll to Top Button Component
-const ScrollToTopButton = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > 400);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const handleClick = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          onClick={handleClick}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-          aria-label="Scroll to top"
-        >
-          <motion.svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7-7m0 0L5 14m7-7v12"
-            />
-          </motion.svg>
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
-};
 
 export default function LawyerSearch() {
   const [searchParams] = useSearchParams();
@@ -167,7 +123,9 @@ export default function LawyerSearch() {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [minRating, setMinRating] = useState(0);
   const [sessionTypes, setSessionTypes] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState<
+    "rating" | "reviews" | "price-low" | "price-high"
+  >("rating");
   const [showFilters, setShowFilters] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -202,12 +160,15 @@ export default function LawyerSearch() {
   });
 
   // Fetch specializations from API
-  const { data: specializations = [] } =
-    useQuery<ApiResponse<Specialization[]>, Error, Specialization[]>({
-      queryKey: ["specializations"],
-      queryFn: () => SpecializationService.getSpecializations(),
-      select: (response) => response.data ?? [],
-    });
+  const { data: specializations = [] } = useQuery<
+    ApiResponse<Specialization[]>,
+    Error,
+    Specialization[]
+  >({
+    queryKey: ["specializations"],
+    queryFn: () => SpecializationService.getSpecializations(),
+    select: (response) => response.data ?? [],
+  });
 
   // Only Egyptian cities for the location filter
   const allCities = CITIES_BY_COUNTRY["مصر"] || [];
@@ -216,27 +177,33 @@ export default function LawyerSearch() {
   const selectedSpec = specializations.find((s) => s.name === selectedArea);
   const specializationId = selectedSpec ? Number(selectedSpec.id) : undefined;
 
-  // Translate UI sort state to accurate DB fields and directions
-  let apiSortBy = "averageRating";
-  let apiSortOrder = "desc";
+  // Translate UI sort state to API enum values
+  // 0 -> average rating, 1 -> price, 2 -> number of ratings
+  let apiSortBy: 0 | 1 | 2 = 0;
+  let apiSortOrder: "asc" | "desc" = "desc";
   if (sortBy === "price-low") {
-    apiSortBy = "price";
+    apiSortBy = 1;
     apiSortOrder = "asc";
   } else if (sortBy === "price-high") {
-    apiSortBy = "price";
+    apiSortBy = 1;
     apiSortOrder = "desc";
   } else if (sortBy === "reviews") {
-    apiSortBy = "numberOfRatings";
+    apiSortBy = 2;
     apiSortOrder = "desc";
   }
 
   // Translate Session Types
-  const apiSessionTypes = sessionTypes.length > 0
-    ? sessionTypes.map((t) => (t === "مكتب" ? 0 : 1))
-    : undefined;
+  const apiSessionTypes =
+    sessionTypes.length > 0
+      ? sessionTypes.map((t) => (t === "مكتب" ? 0 : 1))
+      : undefined;
 
   // Use React Query for lawyers search
-  const { data: searchData, isLoading, isError } = useQuery({
+  const {
+    data: searchData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: [
       "lawyers",
       currentPage,
@@ -262,7 +229,7 @@ export default function LawyerSearch() {
         minRating > 0 ? minRating : undefined,
         apiSessionTypes,
         apiSortBy,
-        apiSortOrder
+        apiSortOrder,
       ),
     enabled: selectedArea === "all" || specializations.length > 0,
   });
@@ -279,13 +246,13 @@ export default function LawyerSearch() {
   const toggleFavorite = (lawyerId: string) => {
     if (!isAuthenticated || user?.userType !== "Client") {
       toast.error("هذه الخاصية متاحة للعملاء فقط", {
-        description: "يرجى تسجيل الدخول كعميل لإضافة المحامين إلى المفضلة"
+        description: "يرجى تسجيل الدخول كعميل لإضافة المحامين إلى المفضلة",
       });
       return;
     }
 
     const isFavorite = favorites.includes(lawyerId);
-    
+
     if (isFavorite) {
       removeFavoriteMutation.mutate(lawyerId);
     } else {
@@ -562,10 +529,11 @@ export default function LawyerSearch() {
                         {[4, 3, 2, 1].map((rating) => (
                           <label
                             key={rating}
-                            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${minRating === rating
+                            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                              minRating === rating
                                 ? "bg-primary/10"
                                 : "hover:bg-muted"
-                              }`}
+                            }`}
                             onClick={() => {
                               setMinRating(minRating === rating ? 0 : rating);
                               setCurrentPage(1);
@@ -637,7 +605,9 @@ export default function LawyerSearch() {
               <Select
                 value={sortBy}
                 onValueChange={(value) => {
-                  setSortBy(value);
+                  setSortBy(
+                    value as "rating" | "reviews" | "price-low" | "price-high",
+                  );
                   setCurrentPage(1);
                 }}
               >
@@ -681,7 +651,11 @@ export default function LawyerSearch() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{
+                          delay: index * 0.1,
+                          duration: 0.6,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
                       >
                         <Card
                           className="group relative overflow-hidden border border-border/40 bg-card/60 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] transition-all duration-[800ms] ease-out hover:-translate-y-2 hover:border-primary/40 cursor-pointer flex flex-col sm:flex-row items-stretch overflow-hidden"
@@ -708,10 +682,11 @@ export default function LawyerSearch() {
                               className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-background/30 backdrop-blur-xl border border-white/20 shadow-lg text-white hover:bg-white hover:text-red-500 transition-all duration-500 hover:scale-110 active:scale-95 z-10"
                             >
                               <Heart
-                                className={`w-4 h-4 transition-all duration-300 ${favorites.includes(lawyer.id)
+                                className={`w-4 h-4 transition-all duration-300 ${
+                                  favorites.includes(lawyer.id)
                                     ? "text-red-500 fill-red-500"
                                     : ""
-                                  }`}
+                                }`}
                               />
                             </button>
 
@@ -721,7 +696,9 @@ export default function LawyerSearch() {
                                 <Badge className="bg-white/20 text-white backdrop-blur-md border border-white/30 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xl">
                                   <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                                   {lawyer.rating}
-                                  <span className="opacity-70 font-normal">({lawyer.reviewCount})</span>
+                                  <span className="opacity-70 font-normal">
+                                    ({lawyer.reviewCount})
+                                  </span>
                                 </Badge>
                               </div>
                               <div className="bg-primary p-2 rounded-full shadow-lg border border-white/20 transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-100">
@@ -732,7 +709,6 @@ export default function LawyerSearch() {
 
                           {/* Content Section — Left Side in RTL */}
                           <CardContent className="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-4">
-
                             {/* Header Block */}
                             <div className="space-y-2.5">
                               <div className="flex items-start justify-between gap-3">
@@ -750,25 +726,32 @@ export default function LawyerSearch() {
                                     <span className="w-1 h-1 rounded-full bg-border" />
                                     <div className="flex items-center gap-1">
                                       <Calendar className="w-3.5 h-3.5 text-primary/70" />
-                                      <span>انضم {lawyer.joiningDate || "يناير 2023"}</span>
+                                      <span>
+                                        انضم{" "}
+                                        {lawyer.joiningDate || "يناير 2023"}
+                                      </span>
                                     </div>
                                     <span className="w-1 h-1 rounded-full bg-border" />
-                                    <span className="text-secondary-foreground font-bold">{lawyer.yearsOfExperience} سنوات خبرة</span>
+                                    <span className="text-secondary-foreground font-bold">
+                                      {lawyer.yearsOfExperience} سنوات خبرة
+                                    </span>
                                   </div>
                                 </div>
                               </div>
 
                               {/* Categories */}
                               <div className="flex flex-wrap gap-1.5">
-                                {(lawyer.specialties || [lawyer.specialty]).map((cat, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant="secondary"
-                                    className="bg-muted hover:bg-primary/10 transition-colors duration-300 text-foreground border-border/50 font-bold px-2 py-0.5 rounded-lg text-[10px]"
-                                  >
-                                    {cat}
-                                  </Badge>
-                                ))}
+                                {(lawyer.specialties || [lawyer.specialty]).map(
+                                  (cat, idx) => (
+                                    <Badge
+                                      key={idx}
+                                      variant="secondary"
+                                      className="bg-muted hover:bg-primary/10 transition-colors duration-300 text-foreground border-border/50 font-bold px-2 py-0.5 rounded-lg text-[10px]"
+                                    >
+                                      {cat}
+                                    </Badge>
+                                  ),
+                                )}
                               </div>
                             </div>
 
@@ -779,9 +762,15 @@ export default function LawyerSearch() {
                                   <Phone className="w-4 h-4" />
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">استشارة هاتفية</span>
+                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                                    استشارة هاتفية
+                                  </span>
                                   <span className="font-extrabold text-foreground text-sm">
-                                    {lawyer.phoneSessionPrice || lawyer.hourlyRate} <span className="text-[10px] text-muted-foreground font-normal">ج.م</span>
+                                    {lawyer.phoneSessionPrice ||
+                                      lawyer.hourlyRate}{" "}
+                                    <span className="text-[10px] text-muted-foreground font-normal">
+                                      ج.م
+                                    </span>
                                   </span>
                                 </div>
                               </div>
@@ -791,9 +780,15 @@ export default function LawyerSearch() {
                                   <Building2 className="w-4 h-4" />
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">استشارة مكتبية</span>
+                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                                    استشارة مكتبية
+                                  </span>
                                   <span className="font-extrabold text-foreground text-sm">
-                                    {lawyer.officeSessionPrice || (lawyer.hourlyRate + 200)} <span className="text-[10px] text-muted-foreground font-normal">ج.م</span>
+                                    {lawyer.officeSessionPrice ||
+                                      lawyer.hourlyRate + 200}{" "}
+                                    <span className="text-[10px] text-muted-foreground font-normal">
+                                      ج.م
+                                    </span>
                                   </span>
                                 </div>
                               </div>
@@ -883,7 +878,6 @@ export default function LawyerSearch() {
           </div>
         </div>
       </div>
-      <ScrollToTopButton />
     </div>
   );
 }

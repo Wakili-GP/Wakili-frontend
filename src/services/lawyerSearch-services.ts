@@ -8,7 +8,7 @@ export interface LawyerCardSpecialization {
 
 export interface LawyerCard {
   id: string;
-  profileImage?: string | null;
+  profileImage: string;
   firstName: string;
   lastName: string;
   joinedDate: string;
@@ -43,24 +43,28 @@ const lawyerService = {
     maxPrice?: number,
     minRating?: number,
     sessionTypes?: number[],
-    sortBy?: string, // avgRating or Price
-    sortOrder?: string,
+    // 0 -> avgRating, 1 -> Price, 2 -> numberOfRatings
+    sortBy?: 0 | 1 | 2,
+    sortOrder?: "asc" | "desc",
   ): Promise<ResponseLawyerCard> {
-    const response = await httpClient.get<ResponseLawyerCard>("/Lawyers/approved", {
-      params: {
-        page,
-        pageSize,
-        specializationId,
-        city,
-        minRating,
-        minPrice,
-        maxPrice,
-        sortBy, // Price or Rating
-        sortOrder, // Asc
-        sessionTypes,
-        searchQuery,
+    const response = await httpClient.get<ResponseLawyerCard>(
+      "/Lawyers/approved",
+      {
+        params: {
+          page,
+          pageSize,
+          specializationId,
+          city,
+          minRating,
+          minPrice,
+          maxPrice,
+          sortBy, // Price or Rating
+          sortOrder, // Asc
+          sessionTypes,
+          searchQuery,
+        },
       },
-    });
+    );
     console.log("Lawyer Cards Response Data: ", response.data);
     return response.data;
   },

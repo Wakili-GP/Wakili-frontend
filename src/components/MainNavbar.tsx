@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, LogOut, Scale, User } from "lucide-react";
+import { Bell, ChevronDown, LayoutDashboard, LogOut, Scale, User } from "lucide-react";
 import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
@@ -183,6 +183,17 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
+                    {user?.userType === "Lawyer" &&
+                      user?.status === "SubmittedAndApproved" && (
+                        <DropdownMenuItem
+                          dir="rtl"
+                          onClick={() => navigate("/lawyer/dashboard")}
+                          className="cursor-pointer flex items-center space-x-2 space-x-reverse"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>لوحة التحكم</span>
+                        </DropdownMenuItem>
+                      )}
                     <DropdownMenuItem
                       dir="rtl"
                       onClick={() => {

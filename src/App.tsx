@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import IndexPage from "./pages/IndexPage";
 import LawyerOnboarding from "./pages/LawyerOnboarding";
 import LawyerProfile from "./pages/LawyerProfile";
+import LawyerDashboard from "./pages/LawyerDashboard";
 import NotFound from "./pages/NotFound";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,6 +37,14 @@ const App = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<IndexPage />} />
+          <Route
+            path="/lawyer/dashboard"
+            element={
+              <ProtectedRoute requiredUserType="Lawyer">
+                <LawyerDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/lawyer/:id" element={<LawyerProfile />} />
           <Route
             path="/profile"

@@ -1,237 +1,308 @@
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
 import {
-  Calendar,
   Clock,
-  User,
   Phone,
-  Video,
   Building,
-  CheckCircle,
-  XCircle,
+  Plus,
+  Trash2,
+  Loader2,
+  CalendarIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import appointmentSlotsServices, {
+  type SlotInterface,
+  type CreateSlotPayload,
+} from "@/services/appointmentSlots-services";
 
-interface Appointment {
-  id: string;
-  clientName: string;
-  clientImage?: string;
-  date: string;
-  time: string;
-  type: "phone" | "office" | "video";
-  status: "upcoming" | "completed" | "cancelled";
-  notes?: string;
-}
+// ---------------------------------------------------------------------------
+// Zod schema
+// ---------------------------------------------------------------------------
+const createSlotSchema = z
+  .object({
+    startTime: z.string().min(1, "وقت البدء مطلوب"),
+    endTime: z.string().min(1, "وقت الانتهاء مطلوب"),
+    sessionType: z.enum(["0", "1"]),
+  })
+  .refine((data) => data.startTime < data.endTime, {
+    message: "يجب أن يكون وقت البدء قبل وقت الانتهاء",
+    path: ["endTime"],
+  });
 
-interface AppointmentsTabProps {
-  appointments: Appointment[];
-  onMarkComplete: (id: string) => void;
-  onCancel: (id: string) => void;
-}
+type CreateSlotFormValues = z.infer<typeof createSlotSchema>;
 
-const AppointmentsTab: React.FC<AppointmentsTabProps> = ({
-  appointments,
-  onMarkComplete,
-  onCancel,
-}) => {
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "phone":
-        return <Phone className="w-4 h-4" />;
-      case "video":
-        return <Video className="w-4 h-4" />;
-      case "office":
-        return <Building className="w-4 h-4" />;
-      default:
-        return <Phone className="w-4 h-4" />;
-    }
-  };
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const toISO = (d: Date) => d.toISOString().split("T")[0];
 
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case "phone":
-        return "استشارة هاتفية";
-      case "video":
-        return "استشارة فيديو";
-      case "office":
-        return "استشارة مكتبية";
-      default:
-        return type;
-    }
-  };
+const sessionTypeLabel = (type: 0 | 1) =>
+  type === 0 ? "استشارة هاتفية" : "استشارة مكتبية";
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "upcoming":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            قادم
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            مكتمل
-          </Badge>
-        );
-      case "cancelled":
-        return <Badge variant="destructive">ملغي</Badge>;
-      default:
-        return null;
-    }
-  };
+const formatArabicDate = (date: Date) =>
+  date.toLocaleDateString("ar-EG", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
-  const upcomingAppointments = appointments.filter(
-    (a) => a.status === "upcoming",
+const SessionTypeIcon = ({ type }: { type: 0 | 1 }) =>
+  type === 0 ? (
+    <Phone className="w-4 h-4 text-blue-500" />
+  ) : (
+    <Building className="w-4 h-4 text-amber-600" />
   );
-  const pastAppointments = appointments.filter((a) => a.status !== "upcoming");
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+const AppointmentsTab: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const selectedDate = toISO(selectedDay);
+
+  // ── Fetch slots ────────────────────────────────────────────────────────
+  const {
+    data: slotsResponse,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["appointmentSlots", selectedDate],
+    queryFn: () => appointmentSlotsServices.getSlotsByDate(selectedDate),
+    enabled: !!selectedDate,
+  });
+
+  const slots: SlotInterface[] = slotsResponse?.data ?? [];
+
+  // ── Create ─────────────────────────────────────────────────────────────
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateSlotPayload) =>
+      appointmentSlotsServices.createSlot(payload),
+    onSuccess: () => {
+      toast.success("تم إضافة الموعد بنجاح");
+      queryClient.invalidateQueries({
+        queryKey: ["appointmentSlots", selectedDate],
+      });
+      reset();
+    },
+    onError: () => {
+      toast.error("حدث خطأ أثناء إضافة الموعد");
+    },
+  });
+
+  // ── Delete ─────────────────────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => appointmentSlotsServices.deleteSlot(id),
+    onSuccess: () => {
+      toast.success("تم حذف الموعد");
+      queryClient.invalidateQueries({
+        queryKey: ["appointmentSlots", selectedDate],
+      });
+    },
+    onError: () => {
+      toast.error("حدث خطأ أثناء حذف الموعد");
+    },
+  });
+
+  // ── Form ───────────────────────────────────────────────────────────────
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateSlotFormValues>({
+    resolver: zodResolver(createSlotSchema),
+    defaultValues: { sessionType: "0" },
+  });
+
+  const onSubmit = (values: CreateSlotFormValues) => {
+    const payload: CreateSlotPayload = {
+      date: selectedDate,
+      startTime: values.startTime,
+      endTime: values.endTime,
+      sessionType: Number(values.sessionType) as 0 | 1,
+    };
+    createMutation.mutate(payload);
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <Clock className="w-6 h-6" />
-        <span>مواعيدي</span>
-      </h2>
+    <div dir="rtl" className="space-y-6">
+      {/* ── Page title ── */}
+      <div className="flex items-center gap-2">
+        <Clock className="w-6 h-6 text-primary" />
+        <h2 className="text-2xl font-bold">مواعيدي</h2>
+      </div>
 
-      {/* Upcoming Appointments */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">المواعيد القادمة</h3>
-        {upcomingAppointments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border rounded-lg">
-            <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>لا توجد مواعيد قادمة</p>
+      {/* ── Two-column: Form (right ~70%) + Calendar (left ~30%) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_30%] gap-6">
+        {/* ── Add Slot Form (right in RTL) ── */}
+        <Card className="p-5 flex flex-col gap-5">
+          <p className="flex items-center gap-2 font-semibold text-base">
+            <Plus className="w-4 h-4 text-primary" />
+            إضافة موعد جديد
+          </p>
+
+          {/* Selected date display */}
+          <div className="flex items-center gap-2 bg-muted/40 rounded-lg px-4 py-3 text-sm text-muted-foreground">
+            <CalendarIcon className="w-4 h-4 shrink-0" />
+            <span>{formatArabicDate(selectedDay)}</span>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Session Type */}
+            <div className="space-y-1.5">
+              <Label htmlFor="session-type">نوع الجلسة</Label>
+              <select
+                id="session-type"
+                {...register("sessionType")}
+                className="w-full border rounded-md h-10 px-3 text-sm bg-background text-right"
+              >
+                <option value="0">📞 استشارة هاتفية</option>
+                <option value="1">🏢 استشارة مكتبية</option>
+              </select>
+            </div>
+
+            {/* Times row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="start-time">وقت البدء</Label>
+                <Input
+                  id="start-time"
+                  type="time"
+                  {...register("startTime")}
+                  className="text-center"
+                />
+                {errors.startTime && (
+                  <p className="text-xs text-red-500">
+                    {errors.startTime.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="end-time">وقت الانتهاء</Label>
+                <Input
+                  id="end-time"
+                  type="time"
+                  {...register("endTime")}
+                  className="text-center"
+                />
+                {errors.endTime && (
+                  <p className="text-xs text-red-500">
+                    {errors.endTime.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? (
+                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 ml-2" />
+              )}
+              إضافة الموعد
+            </Button>
+          </form>
+        </Card>
+
+        {/* ── Calendar (left in RTL, ~30%) ── */}
+        <Card className="p-4 flex flex-col gap-3">
+          <p className="flex items-center gap-2 font-semibold text-base">
+            <CalendarIcon className="w-4 h-4 text-primary" />
+            اختر تاريخ الموعد
+          </p>
+          <Calendar
+            mode="single"
+            selected={selectedDay}
+            onSelect={(day) => day && setSelectedDay(day)}
+            dir="rtl"
+            className="rounded-md w-full"
+          />
+        </Card>
+      </div>
+
+      {/* ── Slots for selected date ── */}
+      <Card className="p-5 space-y-4">
+        <div className="flex items-center gap-2 border-b pb-3">
+          <CalendarIcon className="w-4 h-4 text-primary" />
+          <span className="font-semibold">
+            المواعيد المتاحة – {formatArabicDate(selectedDay)}
+          </span>
+          {!isLoading && !isError && (
+            <Badge variant="secondary" className="mr-auto">
+              {slots.length} موعد
+            </Badge>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>جاري التحميل...</span>
+          </div>
+        ) : isError ? (
+          <div className="text-center py-10 text-red-500 text-sm">
+            حدث خطأ أثناء تحميل المواعيد. يرجى المحاولة مرة أخرى.
+          </div>
+        ) : slots.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-3">
+            <CalendarIcon className="w-10 h-10 opacity-30" />
+            <p className="text-sm">لا توجد مواعيد متاحة في هذا اليوم</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {upcomingAppointments.map((appointment) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {slots.map((slot) => (
               <div
-                key={appointment.id}
-                className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow"
+                key={slot.id}
+                className="flex items-center justify-between border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow bg-muted/20"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    {appointment.clientImage ? (
-                      <img
-                        src={appointment.clientImage}
-                        alt={appointment.clientName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-6 h-6 text-primary" />
-                    )}
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <SessionTypeIcon type={slot.sessionType} />
                   </div>
-                  <div>
-                    <p className="font-bold">{appointment.clientName}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {appointment.date}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {appointment.time}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="flex items-center gap-1 text-sm">
-                        {getTypeIcon(appointment.type)}
-                        {getTypeLabel(appointment.type)}
-                      </span>
-                      {getStatusBadge(appointment.status)}
-                    </div>
-                    {appointment.notes && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {appointment.notes}
-                      </p>
-                    )}
+                  <div className="space-y-0.5">
+                    <Badge variant="outline" className="text-xs">
+                      {sessionTypeLabel(slot.sessionType)}
+                    </Badge>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {slot.startTime} – {slot.endTime}
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-4 md:mt-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-green-600 border-green-600 hover:bg-green-50"
-                    onClick={() => {
-                      onMarkComplete(appointment.id);
-                      toast.success("تم تحديد الموعد كمكتمل");
-                    }}
-                  >
-                    <CheckCircle className="w-4 h-4 ml-1" />
-                    مكتمل
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 border-red-600 hover:bg-red-50"
-                    onClick={() => {
-                      onCancel(appointment.id);
-                      toast.success("تم إلغاء الموعد");
-                    }}
-                  >
-                    <XCircle className="w-4 h-4 ml-1" />
-                    إلغاء
-                  </Button>
-                </div>
+
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-red-400 hover:text-red-600 hover:bg-red-50 shrink-0"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => deleteMutation.mutate(slot.id)}
+                  title="حذف الموعد"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      {/* Past Appointments */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">المواعيد السابقة</h3>
-        {pastAppointments.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground border rounded-lg">
-            <p>لا توجد مواعيد سابقة</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {pastAppointments.map((appointment) => (
-              <div
-                key={appointment.id}
-                className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg opacity-75"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                    {appointment.clientImage ? (
-                      <img
-                        src={appointment.clientImage}
-                        alt={appointment.clientName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-6 h-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-bold">{appointment.clientName}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {appointment.date}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {appointment.time}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="flex items-center gap-1 text-sm">
-                        {getTypeIcon(appointment.type)}
-                        {getTypeLabel(appointment.type)}
-                      </span>
-                      {getStatusBadge(appointment.status)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
