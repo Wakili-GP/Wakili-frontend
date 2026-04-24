@@ -28,15 +28,12 @@ import {
 import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  slotSchema,
-  type SlotFormValues,
-} from "@/schemas/appointment-slots.schema";
-import appointmentSlotsServices, {
+import { slotSchema, type SlotFormValues } from "@/schemas/time-slots.schema";
+import timeSlotsServices, {
   type SlotInterface,
   type CreateSlotPayload,
   type UpdateSlotPayload,
-} from "@/services/appointmentSlots-services";
+} from "@/services/timeSlots-services";
 
 const toISO = (d: Date) => d.toISOString().split("T")[0];
 
@@ -278,8 +275,8 @@ const AppointmentsTab: React.FC = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["appointmentSlots", selectedDate],
-    queryFn: () => appointmentSlotsServices.getSlotsByDate(selectedDate),
+    queryKey: ["timeSlots", selectedDate],
+    queryFn: () => timeSlotsServices.getSlotsByDate(selectedDate),
     enabled: !!selectedDate,
   });
 
@@ -289,11 +286,11 @@ const AppointmentsTab: React.FC = () => {
   // Create Slot
   const createMutation = useMutation({
     mutationFn: (payload: CreateSlotPayload) =>
-      appointmentSlotsServices.createSlot(payload),
+      timeSlotsServices.createSlot(payload),
     onSuccess: () => {
       toast.success("تم إضافة الموعد بنجاح");
       queryClient.invalidateQueries({
-        queryKey: ["appointmentSlots", selectedDate],
+        queryKey: ["timeSlots", selectedDate],
       });
       reset();
     },
@@ -303,11 +300,11 @@ const AppointmentsTab: React.FC = () => {
   // Update Mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSlotPayload }) =>
-      appointmentSlotsServices.updateSlot(id, payload),
+      timeSlotsServices.updateSlot(id, payload),
     onSuccess: () => {
       toast.success("تم تعديل الموعد بنجاح");
       queryClient.invalidateQueries({
-        queryKey: ["appointmentSlots", selectedDate],
+        queryKey: ["timeSlots", selectedDate],
       });
       setEditingId(null);
     },
@@ -316,11 +313,11 @@ const AppointmentsTab: React.FC = () => {
 
   // Delete Mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => appointmentSlotsServices.deleteSlot(id),
+    mutationFn: (id: string) => timeSlotsServices.deleteSlot(id),
     onSuccess: () => {
       toast.success("تم حذف الموعد");
       queryClient.invalidateQueries({
-        queryKey: ["appointmentSlots", selectedDate],
+        queryKey: ["timeSlots", selectedDate],
       });
     },
     onError: () => toast.error("حدث خطأ أثناء حذف الموعد"),

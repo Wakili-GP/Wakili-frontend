@@ -24,7 +24,7 @@ export interface UpdateSlotPayload {
   sessionType?: 0 | 1;
 }
 
-const appointmentSlotsServices = {
+const timeSlotsServices = {
   async getSlotsByDate(date: string): Promise<ApiResponse<SlotInterface[]>> {
     const response = await httpClient.get<ApiResponse<SlotInterface[]>>(
       "/TimeSlots",
@@ -62,4 +62,4 @@ const appointmentSlotsServices = {
   },
 };
 
-export default appointmentSlotsServices;
+export default timeSlotsServices;

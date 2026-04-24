@@ -13,19 +13,15 @@ import {
   LogOut,
   MessageCircle,
   Plus,
-  RotateCcw,
   Scale,
   Search,
   Settings,
   Star,
-  Trash2,
   TrendingUp,
   Users,
-  XCircle,
   Menu,
   X,
   Flag,
-  ChevronLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,7 +37,6 @@ import {
 } from "@/components/ui/select";
 import { arSA } from "date-fns/locale";
 import { useAuth } from "@/stores/auth.store";
-import LawyerProfileSettingsTab from "@/components/lawyer/LawyerProfileSettingsTab";
 import { DEGREE_TYPES } from "@/data/onboarding";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +50,8 @@ import {
 import { Upload, Camera } from "lucide-react";
 
 import AvailibilityTab from "@/components/LawyerDashboard/AvailibilityTab";
+import AppointmentsRequestsTab from "@/components/LawyerDashboard/AppointmentsRequestsTab";
+import ProfileSettingsTab from "@/components/LawyerDashboard/ProfileSettingsTab";
 
 // ─── Types ───────────────────────────────────────────────────────
 type AppointmentRequest = {
@@ -204,7 +201,6 @@ const sidebarItems = [
   { id: "availability", label: "المواعيد المتاحة", icon: Clock },
   { id: "reviews", label: "التقييمات", icon: Star },
   { id: "settings", label: "إعدادات الملف", icon: Settings },
-  // { id: "preview", label: "معاينة الملف", icon: Eye },
 ];
 
 // ─── Helper Functions ────────────────────────────────────────────
@@ -1040,124 +1036,7 @@ const LawyerDashboard = () => {
                 </div>
               )}
 
-              {/* ────────── REQUESTS ────────── */}
-              {activeSection === "requests" && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    {requestStatCards.map((card) => (
-                      <button
-                        key={card.key}
-                        type="button"
-                        onClick={() => setRequestFilter(card.key)}
-                        className={`rounded-xl p-4 text-right border transition-all cursor-pointer ${card.className} ${requestFilter === card.key ? "ring-2 ring-secondary" : "opacity-90 hover:opacity-100"}`}
-                      >
-                        <p className="text-2xl font-bold">{card.count}</p>
-                        <p className="text-xs mt-1">{card.label}</p>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="space-y-3">
-                    {filteredRequests.length === 0 ? (
-                      <Card className="p-10 text-center">
-                        <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          لا توجد طلبات تطابق الفلتر المختار
-                        </p>
-                      </Card>
-                    ) : (
-                      filteredRequests.map((request) => (
-                        <Card key={request.id} className="p-4">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div className="flex gap-3 items-start">
-                              <img
-                                src={request.clientImage}
-                                alt={request.clientName}
-                                className="w-12 h-12 rounded-full object-cover"
-                              />
-                              <div>
-                                <p className="font-semibold">
-                                  {request.clientName}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {formatDateAr(request.date)} - {request.time}
-                                </p>
-                                {request.notes && (
-                                  <p className="text-xs text-muted-foreground mt-1 italic">
-                                    {request.notes}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-2 items-center">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs ${slotTypeBadgeClass(request.type)}`}
-                              >
-                                {slotTypeLabel(request.type)}
-                              </Badge>
-                              {request.status === "pending" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    className="bg-emerald-600 hover:bg-emerald-700"
-                                    onClick={() =>
-                                      updateRequestStatus(
-                                        request.id,
-                                        "approved",
-                                      )
-                                    }
-                                  >
-                                    <CheckCircle className="w-4 h-4 ml-1" />{" "}
-                                    قبول
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="border-red-600 text-red-600"
-                                    onClick={() =>
-                                      updateRequestStatus(
-                                        request.id,
-                                        "rejected",
-                                      )
-                                    }
-                                  >
-                                    <XCircle className="w-4 h-4 ml-1" /> رفض
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() =>
-                                      updateRequestStatus(
-                                        request.id,
-                                        "rescheduled",
-                                      )
-                                    }
-                                  >
-                                    <RotateCcw className="w-4 h-4 ml-1" /> إعادة
-                                  </Button>
-                                </>
-                              )}
-                              {request.status !== "pending" && (
-                                <span
-                                  className={`text-xs px-3 py-1 rounded-full font-medium ${request.status === "approved" ? "bg-emerald-100 text-emerald-700" : request.status === "rejected" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}
-                                >
-                                  {request.status === "approved"
-                                    ? "مقبول"
-                                    : request.status === "rejected"
-                                      ? "مرفوض"
-                                      : "أُعيد جدولته"}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ────────── AVAILABILITY ────────── */}
+              {activeSection === "requests" && <AppointmentsRequestsTab />}
               {activeSection === "availability" && <AvailibilityTab />}
 
               {/* ────────── REVIEWS ────────── */}
@@ -1348,7 +1227,7 @@ const LawyerDashboard = () => {
 
               {/* ────────── SETTINGS ────────── */}
               {activeSection === "settings" && (
-                <LawyerProfileSettingsTab
+                <ProfileSettingsTab
                   isEditingSettings={isEditingSettings}
                   setIsEditingSettings={setIsEditingSettings}
                   ownerSettings={ownerSettings}
