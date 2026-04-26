@@ -91,7 +91,9 @@ const HeroSection = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/find-lawyers/results?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(
+        `/find-lawyers/results?search=${encodeURIComponent(searchQuery.trim())}`,
+      );
     } else {
       navigate("/find-lawyers/results");
     }
@@ -263,50 +265,57 @@ const HeroSection = () => {
                 )}
 
                 {/* Lawyer — Unfinished */}
-                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "Unfinished" && (
-                  <Button
-                    size="lg"
-                    variant="cta"
-                    className="text-lg px-10"
-                    onClick={() => navigate("/lawyer-onboarding")}
-                  >
-                    أكمل تسجيلك
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                )}
+                {isAuthenticated &&
+                  user?.userType === "Lawyer" &&
+                  user?.status === "Unfinished" && (
+                    <Button
+                      size="lg"
+                      variant="cta"
+                      className="text-lg px-10"
+                      onClick={() => navigate("/lawyer-onboarding")}
+                    >
+                      أكمل تسجيلك
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                  )}
 
                 {/* Lawyer — SubmittedAndNotApproved */}
-                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "SubmittedAndNotApproved" && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-md mx-auto text-center space-y-3">
-                    <div className="w-14 h-14 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto">
-                      <Clock className="w-7 h-7 text-amber-300" />
-                    </div>
-                    <p className="text-white text-lg font-semibold">
-                      طلبك قيد المراجعة
-                    </p>
-                    <p className="text-blue-100/80 text-sm">
-                      سيتم مراجعة بياناتك من قبل فريق الإدارة. ستتلقى إشعاراً عند اكتمال التحقق.
-                    </p>
-                    <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                      <p className="text-xs text-amber-200">
-                        عادة ما تستغرق عملية المراجعة 24-48 ساعة عمل
+                {isAuthenticated &&
+                  user?.userType === "Lawyer" &&
+                  user?.status === "SubmittedAndNotApproved" && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-md mx-auto text-center space-y-3">
+                      <div className="w-14 h-14 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto">
+                        <Clock className="w-7 h-7 text-amber-300" />
+                      </div>
+                      <p className="text-white text-lg font-semibold">
+                        طلبك قيد المراجعة
                       </p>
+                      <p className="text-blue-100/80 text-sm">
+                        سيتم مراجعة بياناتك من قبل فريق الإدارة. ستتلقى إشعاراً
+                        عند اكتمال التحقق.
+                      </p>
+                      <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <p className="text-xs text-amber-200">
+                          عادة ما تستغرق عملية المراجعة 24-48 ساعة عمل
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Lawyer — SubmittedAndApproved */}
-                {isAuthenticated && user?.userType === "Lawyer" && user?.status === "SubmittedAndApproved" && (
-                  <Button
-                    size="lg"
-                    variant="cta"
-                    className="text-lg px-10"
-                    onClick={() => navigate(`/lawyer/${user.id}`)}
-                  >
-                    الذهاب لملفك الشخصي
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                )}
+                {isAuthenticated &&
+                  user?.userType === "Lawyer" &&
+                  user?.status === "SubmittedAndApproved" && (
+                    <Button
+                      size="lg"
+                      variant="cta"
+                      className="text-lg px-10"
+                      onClick={() => navigate(`/lawyer/${user.id}`)}
+                    >
+                      الذهاب لملفك الشخصي
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                  )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -512,12 +521,15 @@ const fallbackCounts = [48, 35, 42, 31, 27, 19, 38, 22, 45, 29, 33, 17];
 
 const CategoriesSection = () => {
   const navigate = useNavigate();
-  const { data: fetchedSpecializations = [] } =
-    useQuery<ApiResponse<Specialization[]>, Error, Specialization[]>({
-      queryKey: ["specializations"],
-      queryFn: () => SpecializationService.getSpecializations(),
-      select: (response) => response.data ?? [],
-    });
+  const { data: fetchedSpecializations = [] } = useQuery<
+    ApiResponse<Specialization[]>,
+    Error,
+    Specialization[]
+  >({
+    queryKey: ["specializations"],
+    queryFn: () => SpecializationService.getSpecializations(),
+    select: (response) => response.data ?? [],
+  });
 
   return (
     <section className="py-20 px-4 bg-muted/30">
@@ -542,65 +554,78 @@ const CategoriesSection = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
-          {fetchedSpecializations.length === 0 ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-[300px] rounded-[2rem] bg-muted/40 animate-pulse border border-border/30" />
-            ))
-          ) : fetchedSpecializations.map((spec, index) => {
-            const name = spec.name || "تخصص قانوني";
-            const description = spec.description || "استشارات قانونية متخصصة.";
-            const Icon =
-              specIcons[spec.id as keyof typeof specIcons] ??
-              fallbackIcons[index % fallbackIcons.length];
-            const count = fallbackCounts[index % fallbackCounts.length];
+          {fetchedSpecializations.length === 0
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-[300px] rounded-[2rem] bg-muted/40 animate-pulse border border-border/30"
+                />
+              ))
+            : fetchedSpecializations.map((spec, index) => {
+                const name = spec.name || "تخصص قانوني";
+                const description =
+                  spec.description || "استشارات قانونية متخصصة.";
+                const Icon =
+                  specIcons[spec.id as keyof typeof specIcons] ??
+                  fallbackIcons[index % fallbackIcons.length];
+                const count = fallbackCounts[index % fallbackCounts.length];
 
-            return (
-              <motion.div
-                key={spec.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() =>
-                  navigate(`/find-lawyers/results?specialty=${encodeURIComponent(name)}`)
-                }
-                className="group cursor-pointer block h-full"
-              >
-                <Card className="relative h-[280px] rounded-[2.5rem] border-0 bg-linear-to-b from-card/80 to-card/30 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 overflow-hidden ring-1 ring-border/30 hover:ring-primary/20">
-                  <div className="absolute inset-0 bg-linear-to-tr from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  
-                  {/* Oversized background icon */}
-                  <Icon className="absolute -left-8 -bottom-8 w-48 h-48 text-primary/[0.03] group-hover:text-primary/[0.08] group-hover:-rotate-12 transition-all duration-700 pointer-events-none" />
-                  
-                  <CardContent className="p-8 h-full flex flex-col relative z-20">
-                    <div className="flex items-start justify-between">
-                      <div className="w-14 h-14 rounded-[1rem] bg-background/80 shadow-sm flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 ring-1 ring-border/50">
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <Badge variant="secondary" className="px-3 py-1 bg-background/60 backdrop-blur-md border-0 uppercase tracking-widest text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">
-                        {count} خبير
-                      </Badge>
-                    </div>
+                return (
+                  <motion.div
+                    key={spec.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{
+                      duration: 0.6,
+                      delay: index * 0.05,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    onClick={() =>
+                      navigate(
+                        `/find-lawyers/results?specialty=${encodeURIComponent(name)}`,
+                      )
+                    }
+                    className="group cursor-pointer block h-full"
+                  >
+                    <Card className="relative h-[280px] rounded-[2.5rem] border-0 bg-linear-to-b from-card/80 to-card/30 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-700 overflow-hidden ring-1 ring-border/30 hover:ring-primary/20">
+                      <div className="absolute inset-0 bg-linear-to-tr from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                    <div className="mt-auto space-y-3">
-                      <h3 className="text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                        {name}
-                      </h3>
-                      <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed line-clamp-2">
-                        {description}
-                      </p>
-                    </div>
+                      {/* Oversized background icon */}
+                      <Icon className="absolute -left-8 -bottom-8 w-48 h-48 text-primary/[0.03] group-hover:text-primary/[0.08] group-hover:-rotate-12 transition-all duration-700 pointer-events-none" />
 
-                    <div className="absolute right-8 bottom-8 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
-                      <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-xl ring-1 ring-border/50 group-hover:rotate-45 transition-transform duration-500">
-                        <ArrowUpRight className="w-5 h-5 text-primary" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
+                      <CardContent className="p-8 h-full flex flex-col relative z-20">
+                        <div className="flex items-start justify-between">
+                          <div className="w-14 h-14 rounded-[1rem] bg-background/80 shadow-sm flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 ring-1 ring-border/50">
+                            <Icon className="w-6 h-6" />
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="px-3 py-1 bg-background/60 backdrop-blur-md border-0 uppercase tracking-widest text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors"
+                          >
+                            {count} خبير
+                          </Badge>
+                        </div>
+
+                        <div className="mt-auto space-y-3">
+                          <h3 className="text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                            {name}
+                          </h3>
+                          <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed line-clamp-2">
+                            {description}
+                          </p>
+                        </div>
+
+                        <div className="absolute right-8 bottom-8 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                          <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-xl ring-1 ring-border/50 group-hover:rotate-45 transition-transform duration-500">
+                            <ArrowUpRight className="w-5 h-5 text-primary" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
         </div>
       </div>
     </section>
@@ -720,7 +745,11 @@ const FeaturedLawyers = () => {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: 0.7,
+                delay: index * 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="group"
             >
               <Card className="relative overflow-hidden border-0 bg-card rounded-[2.5rem] h-[480px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_30px_60px_rgb(0,0,0,0.12)] transition-all duration-700 flex flex-col group block ring-1 ring-border/20 hover:ring-primary/20">
@@ -734,7 +763,7 @@ const FeaturedLawyers = () => {
                   />
                   {/* Elegant Gradient to blend with content */}
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent z-20" />
-                  
+
                   {/* Floating Badges */}
                   <div className="absolute top-5 right-5 z-30 flex flex-col gap-2">
                     <Badge className="bg-background/90 text-foreground backdrop-blur-md shadow-sm rounded-full px-3 py-1.5 border-0 font-bold tracking-widest text-xs flex items-center gap-1.5">
@@ -794,7 +823,7 @@ const FeaturedLawyers = () => {
         {/* VIEW MORE */}
         <div className="text-center pt-4">
           <button
-            onClick={() => navigate("/lawyers")}
+            onClick={() => navigate("/find-lawyers/results")}
             className="cursor-pointer text-lg text-muted-foreground hover:text-primary transition"
           >
             عرض جميع المحامين →
@@ -817,7 +846,11 @@ function TestimonialCard({
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       className="h-full"
     >
       <Card className="h-full border-0 bg-card/40 backdrop-blur-3xl hover:bg-card/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-2 rounded-[2rem] ring-1 ring-border/40">
@@ -826,7 +859,7 @@ function TestimonialCard({
           <p className="text-foreground flex-1 font-medium leading-loose text-lg tracking-wide">
             "{testimonial.quote}"
           </p>
-          
+
           <div className="flex items-center gap-4 mt-8 pt-6 border-t border-border/40">
             <img
               src={testimonial.avatar}
@@ -844,10 +877,16 @@ function TestimonialCard({
             <div className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                  <Star
+                    key={i}
+                    className="w-3.5 h-3.5 text-amber-500 fill-amber-500"
+                  />
                 ))}
               </div>
-              <Badge variant="secondary" className="text-[10px] bg-background/60 shadow-sm border-0 font-bold">
+              <Badge
+                variant="secondary"
+                className="text-[10px] bg-background/60 shadow-sm border-0 font-bold"
+              >
                 {testimonial.caseType}
               </Badge>
             </div>

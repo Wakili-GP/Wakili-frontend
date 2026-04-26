@@ -51,13 +51,24 @@ export interface Certification {
   issuingOrganization: string;
   yearObtained: string;
 }
-
+export interface Client {
+  firstName: string;
+  lastName: string;
+  profileImageUrl: string;
+}
+export interface Review {
+  rating: number;
+  comment: string;
+  date: string;
+  client: Client;
+}
 export interface LawyerProfileResponse {
   profile: LawyerProfileCore;
   pricing: LawyerSessionPricing;
   workHistory: WorkExperience[];
   education: Education[];
   certifications: Certification[];
+  topReviews: Review[];
 }
 
 export const lawyerProfileServices = {

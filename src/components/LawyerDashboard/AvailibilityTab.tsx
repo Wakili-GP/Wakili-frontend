@@ -6,13 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Clock,
   Building,
   Plus,
@@ -24,6 +17,7 @@ import {
   Phone,
   X,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
@@ -34,7 +28,6 @@ import timeSlotsServices, {
   type CreateSlotPayload,
   type UpdateSlotPayload,
 } from "@/services/timeSlots-services";
-
 const toISO = (d: Date) => d.toISOString().split("T")[0];
 
 const isPastDate = (date: Date) => {
@@ -46,24 +39,6 @@ const isPastDate = (date: Date) => {
 const toInputTime = (value: string) => value.slice(0, 5);
 
 const toApiTime = (value: string) => `${value.slice(0, 5)}:00`;
-
-const padTime = (n: number) => String(n).padStart(2, "0");
-
-const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
-  const hour = Math.floor(i / 4);
-  const minute = (i % 4) * 15;
-  const value = `${padTime(hour)}:${padTime(minute)}`;
-  return { value, label: value };
-});
-
-const dropdownTriggerClass =
-  "h-9 rounded-lg border-border bg-background text-right shadow-sm";
-
-const dropdownContentClass =
-  "rounded-xl border border-border bg-background p-1.5 shadow-lg";
-
-const dropdownItemClass =
-  "cursor-pointer justify-end rounded-lg text-sm data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground";
 
 const sessionTypeLabel = (type: 0 | 1) =>
   type === 0 ? "استشارة هاتفية" : "استشارة مكتبية";
@@ -85,6 +60,7 @@ const SessionTypeIcon = ({ type }: { type: 0 | 1 }) =>
 
 interface EditRowProps {
   slot: SlotInterface;
+  selectedDate: string;
   onCancel: () => void;
   onSave: (payload: UpdateSlotPayload) => void;
   isSaving: boolean;
@@ -92,6 +68,7 @@ interface EditRowProps {
 
 const EditRow: React.FC<EditRowProps> = ({
   slot,
+  selectedDate,
   onCancel,
   onSave,
   isSaving,
@@ -111,10 +88,11 @@ const EditRow: React.FC<EditRowProps> = ({
 
   const onSubmit = (values: SlotFormValues) => {
     onSave({
+      date: (slot as any).date || selectedDate,
       startTime: toApiTime(values.startTime),
       endTime: toApiTime(values.endTime),
       sessionType: Number(values.sessionType) as 0 | 1,
-    });
+    } as any);
   };
 
   return (
@@ -123,42 +101,47 @@ const EditRow: React.FC<EditRowProps> = ({
       className="border border-primary/30 rounded-xl px-4 py-3 bg-primary/5 space-y-3"
     >
       <p className="text-xs font-medium text-primary">تعديل الموعد</p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+      <div className="grid grid-cols-1 gap-3">
         {/* Session type */}
-        <div className="space-y-1">
+        <div className="space-y-2">
           <Label className="text-xs">نوع الجلسة</Label>
           <Controller
             control={control}
             name="sessionType"
             render={({ field }) => (
-              <Select
-                dir="rtl"
-                value={field.value}
-                onValueChange={field.onChange}
-              >
-                <SelectTrigger className={`${dropdownTriggerClass} text-xs`}>
-                  <SelectValue placeholder="نوع الجلسة" />
-                </SelectTrigger>
-                <SelectContent className={dropdownContentClass}>
-                  <SelectItem value="0" className={dropdownItemClass}>
-                    <span className="flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-blue-500" />
-                      هاتفية
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="1" className={dropdownItemClass}>
-                    <span className="flex items-center gap-2">
-                      <Building className="w-3.5 h-3.5 text-amber-600" />
-                      مكتبية
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-4 border rounded-lg p-2 bg-background w-fit">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    className="accent-primary"
+                    value="0"
+                    checked={field.value === "0"}
+                    onChange={field.onChange}
+                  />
+                  <span className="text-xs flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-blue-500" />
+                    هاتفية
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer border-r pr-4 border-border">
+                  <input
+                    type="radio"
+                    className="accent-primary"
+                    value="1"
+                    checked={field.value === "1"}
+                    onChange={field.onChange}
+                  />
+                  <span className="text-xs flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-amber-600" />
+                    مكتبية
+                  </span>
+                </label>
+              </div>
             )}
           />
         </div>
 
-        <div className="sm:col-span-2 grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {/* Start */}
           <div className="space-y-1">
             <Label className="text-xs">وقت البدء</Label>
@@ -166,26 +149,12 @@ const EditRow: React.FC<EditRowProps> = ({
               control={control}
               name="startTime"
               render={({ field }) => (
-                <Select
-                  dir="rtl"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger className={`${dropdownTriggerClass} text-xs`}>
-                    <SelectValue placeholder="اختر وقت البدء" />
-                  </SelectTrigger>
-                  <SelectContent className={`${dropdownContentClass} max-h-64`}>
-                    {TIME_OPTIONS.map((time) => (
-                      <SelectItem
-                        key={`edit-start-${time.value}`}
-                        value={time.value}
-                        className={dropdownItemClass}
-                      >
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  type="time"
+                  className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  dir="ltr"
+                  {...field}
+                />
               )}
             />
             {errors.startTime && (
@@ -202,26 +171,12 @@ const EditRow: React.FC<EditRowProps> = ({
               control={control}
               name="endTime"
               render={({ field }) => (
-                <Select
-                  dir="rtl"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger className={`${dropdownTriggerClass} text-xs`}>
-                    <SelectValue placeholder="اختر وقت الانتهاء" />
-                  </SelectTrigger>
-                  <SelectContent className={`${dropdownContentClass} max-h-64`}>
-                    {TIME_OPTIONS.map((time) => (
-                      <SelectItem
-                        key={`edit-end-${time.value}`}
-                        value={time.value}
-                        className={dropdownItemClass}
-                      >
-                        {time.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  type="time"
+                  className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  dir="ltr"
+                  {...field}
+                />
               )}
             />
             {errors.endTime && (
@@ -278,6 +233,7 @@ const AppointmentsTab: React.FC = () => {
     queryKey: ["timeSlots", selectedDate],
     queryFn: () => timeSlotsServices.getSlotsByDate(selectedDate),
     enabled: !!selectedDate,
+    refetchOnWindowFocus: true,
   });
 
   // Have to separate because there is no onSuccess callbak in useQuery
@@ -294,7 +250,8 @@ const AppointmentsTab: React.FC = () => {
       });
       reset();
     },
-    onError: () => toast.error("حدث خطأ أثناء إضافة الموعد"),
+    onError: (err: Error) =>
+      toast.error(err.message || "حدث خطأ أثناء إضافة الموعد"),
   });
 
   // Update Mutation
@@ -331,7 +288,7 @@ const AppointmentsTab: React.FC = () => {
     formState: { errors },
   } = useForm<SlotFormValues>({
     resolver: zodResolver(slotSchema),
-    defaultValues: { sessionType: "0" },
+    defaultValues: { sessionType: "0", startTime: "09:00", endTime: "09:30" },
   });
 
   const onSubmit = (values: SlotFormValues) => {
@@ -366,45 +323,48 @@ const AppointmentsTab: React.FC = () => {
             {formatArabicDate(selectedDay)}
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
               {/* Session type */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label className="text-xs">نوع الجلسة</Label>
                 <Controller
                   control={control}
                   name="sessionType"
                   render={({ field }) => (
-                    <Select
-                      dir="rtl"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        className={`${dropdownTriggerClass} text-sm cursor-pointer`}
-                      >
-                        <SelectValue placeholder="نوع الجلسة" />
-                      </SelectTrigger>
-                      <SelectContent className={dropdownContentClass}>
-                        <SelectItem value="0" className={dropdownItemClass}>
-                          <span className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-blue-500" />
-                            هاتفية
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="1" className={dropdownItemClass}>
-                          <span className="flex items-center gap-2">
-                            <Building className="w-4 h-4 text-amber-600" />
-                            مكتبية
-                          </span>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-4 border rounded-lg p-2.5 bg-background w-fit">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          className="accent-primary w-4 h-4"
+                          value="0"
+                          checked={field.value === "0"}
+                          onChange={field.onChange}
+                        />
+                        <span className="text-sm flex items-center gap-1.5">
+                          <Phone className="w-4 h-4 text-blue-500" />
+                          هاتفية
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer border-r pr-4 border-border">
+                        <input
+                          type="radio"
+                          className="accent-primary w-4 h-4"
+                          value="1"
+                          checked={field.value === "1"}
+                          onChange={field.onChange}
+                        />
+                        <span className="text-sm flex items-center gap-1.5">
+                          <Building className="w-4 h-4 text-amber-600" />
+                          مكتبية
+                        </span>
+                      </label>
+                    </div>
                   )}
                 />
               </div>
 
-              <div className="md:col-span-2 grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 {/* Start time */}
                 <div className="space-y-1.5">
                   <Label className="text-xs">وقت البدء</Label>
@@ -412,30 +372,12 @@ const AppointmentsTab: React.FC = () => {
                     control={control}
                     name="startTime"
                     render={({ field }) => (
-                      <Select
-                        dir="rtl"
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger
-                          className={`${dropdownTriggerClass} text-sm cursor-pointer`}
-                        >
-                          <SelectValue placeholder="اختر وقت البدء" />
-                        </SelectTrigger>
-                        <SelectContent
-                          className={`${dropdownContentClass} max-h-64`}
-                        >
-                          {TIME_OPTIONS.map((time) => (
-                            <SelectItem
-                              key={`create-start-${time.value}`}
-                              value={time.value}
-                              className={dropdownItemClass}
-                            >
-                              {time.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        type="time"
+                        className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        dir="ltr"
+                        {...field}
+                      />
                     )}
                   />
                   {errors.startTime && (
@@ -452,30 +394,12 @@ const AppointmentsTab: React.FC = () => {
                     control={control}
                     name="endTime"
                     render={({ field }) => (
-                      <Select
-                        dir="rtl"
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger
-                          className={`${dropdownTriggerClass} text-sm cursor-pointer`}
-                        >
-                          <SelectValue placeholder="اختر وقت الانتهاء" />
-                        </SelectTrigger>
-                        <SelectContent
-                          className={`${dropdownContentClass} max-h-64`}
-                        >
-                          {TIME_OPTIONS.map((time) => (
-                            <SelectItem
-                              key={`create-end-${time.value}`}
-                              value={time.value}
-                              className={dropdownItemClass}
-                            >
-                              {time.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        type="time"
+                        className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                        dir="ltr"
+                        {...field}
+                      />
                     )}
                   />
                   {errors.endTime && (
@@ -558,6 +482,7 @@ const AppointmentsTab: React.FC = () => {
                 <EditRow
                   key={slot.id}
                   slot={slot}
+                  selectedDate={selectedDate}
                   onCancel={() => setEditingId(null)}
                   onSave={(payload) =>
                     updateMutation.mutate({ id: slot.id, payload })

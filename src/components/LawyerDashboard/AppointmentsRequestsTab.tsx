@@ -7,9 +7,6 @@ import {
   XCircle,
   Users,
   Search,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
   Loader2,
   Phone,
   Building,
@@ -23,6 +20,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import appointmentServices, {
   type AppointmentInterface,
@@ -372,45 +376,42 @@ const AppointmentsRequestsTab = () => {
       </div>
 
       {/* ── Search Bar + Sort Control ── */}
-      <Card className="p-4">
-        <form
-          onSubmit={handleSubmit(onSearch)}
-          className="flex flex-col sm:flex-row gap-3"
+      <form
+        onSubmit={handleSubmit(onSearch)}
+        className="flex flex-wrap gap-3 items-center bg-background border rounded-xl px-4 py-3"
+      >
+        {/* Search input */}
+        <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 flex-1 min-w-40">
+          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+          <Input
+            {...register("searchTerm")}
+            placeholder="ابحث بالاسم..."
+            className="text-xs bg-transparent outline-none flex-1 text-right border-0 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
+
+        {/* Sort dropdown */}
+        <Select
+          dir="rtl"
+          value={sortDescending ? "newest" : "oldest"}
+          onValueChange={(value) => {
+            setSortDescending(value === "newest");
+            setCurrentPage(1);
+          }}
         >
-          {/* Search input */}
-          <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              {...register("searchTerm")}
-              placeholder="ابحث بالاسم..."
-              className="pr-9 h-10"
-            />
-          </div>
-
-          {/* Search button */}
-          <Button type="submit" size="sm" className="h-10 px-5">
-            <Search className="w-4 h-4 ml-1" />
-            بحث
-          </Button>
-
-          {/* Sort toggle */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-10 px-4 gap-1.5"
-            onClick={toggleSort}
-          >
-            {sortDescending ? (
-              <ArrowDown className="w-4 h-4" />
-            ) : (
-              <ArrowUp className="w-4 h-4" />
-            )}
-            {sortDescending ? "الأحدث أولاً" : "الأقدم أولاً"}
-            <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
-          </Button>
-        </form>
-      </Card>
+          <SelectTrigger className="cursor-pointer w-36 h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem className="cursor-pointer justify-end" value="newest">
+              الأحدث أولاً
+            </SelectItem>
+            <SelectItem className="cursor-pointer justify-end" value="oldest">
+              الأقدم أولاً
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </form>
 
       {/* ── Appointments List ── */}
       <div className="space-y-3">

@@ -40,6 +40,9 @@ const timeSlotsServices = {
       "/TimeSlots",
       payload,
     );
+    if (!response.data.success)
+      throw new Error(response.data.error || "Failed to create slot");
+    console.log("Create Slot Response.data:", response.data);
     return response.data;
   },
 
@@ -51,6 +54,8 @@ const timeSlotsServices = {
       `/TimeSlots/${id}`,
       payload,
     );
+    console.log("Update Slot Response.data:", response.data);
+    console.log("Update Slot Response.data.data:", response.data.data);
     return response.data;
   },
 
@@ -58,6 +63,7 @@ const timeSlotsServices = {
     const response = await httpClient.delete<ApiResponse<string>>(
       `/TimeSlots/${id}`,
     );
+    console.log("Delete Slot Response.data:", response.data);
     return response.data;
   },
 };

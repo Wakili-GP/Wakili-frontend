@@ -494,3 +494,89 @@ export const mockFavoriteLawyers = [
     yearsExperience: 12,
   },
 ];
+
+// Mock Appointments
+export const LawyerDashboardAppointmentRequests = [
+  {
+    id: "r1",
+    clientName: "محمد أحمد",
+    clientImage:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    date: "2026-04-14",
+    time: "10:00",
+    type: "office",
+    status: "pending",
+    notes: "استشارة بخصوص عقد شراكة",
+  },
+  {
+    id: "r2",
+    clientName: "سارة محمود",
+    clientImage:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    date: "2026-04-14",
+    time: "12:00",
+    type: "video",
+    status: "approved",
+  },
+  {
+    id: "r3",
+    clientName: "أحمد خالد",
+    clientImage:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    date: "2026-04-15",
+    time: "09:30",
+    type: "phone",
+    status: "pending",
+  },
+];
+export const ownerUpcomingBookings = [...LawyerDashboardAppointmentRequests]
+  .filter((a) => ["pending", "approved", "rescheduled"].includes(a.status))
+  .sort(
+    (a, b) =>
+      new Date(`${a.date}T${a.time}`).getTime() -
+      new Date(`${b.date}T${b.time}`).getTime(),
+  )
+  .slice(0, 6);
+
+export const LawyerDashboardReviews = [
+  {
+    name: "محمد أحمد",
+    role: "المدير التنفيذي، شركة اللوجستيات",
+    date: "2023-10-24",
+    rating: 5,
+    comment:
+      "قدم د. أحمد سليمان توجيهاً استثنائياً خلال إعادة هيكلة شركتنا. خبرته في قانون التجارة البحرية وفرت علينا أشهراً من التقاضي المحتمل.",
+    image:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+  },
+  {
+    name: "سارة محمود",
+    role: "مديرة هيئة الميناء",
+    date: "2023-09-12",
+    rating: 5,
+    comment:
+      "دقيق وسريع الاستجابة. جعل الأطر التنظيمية المعقدة سهلة الفهم لمجلس إدارتنا.",
+    image:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+  },
+  {
+    name: "خالد العمري",
+    role: "رئيس مجلس الإدارة، مجموعة النخبة",
+    date: "2023-07-05",
+    rating: 4,
+    comment:
+      "خبرة واسعة ومهنية عالية. أنصح بالتواصل معه للقضايا التجارية الكبرى.",
+    image:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+  },
+  {
+    name: "نورا السعيد",
+    role: "محامية، شركة الفجر للاستشارات",
+    date: "2023-05-20",
+    rating: 3,
+    comment:
+      "استجابة جيدة وخبرة مقبولة، لكن كنت أتمنى مزيداً من التفصيل في بعض النقاط.",
+    image:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+  },
+];

@@ -44,6 +44,7 @@ import {
 import { arEG } from "date-fns/locale";
 import MainNavbar from "@/components/MainNavbar";
 import BlueFooter from "@/components/BlueFooter";
+import ReviewsTab from "@/components/LawyerDashboard/ReviewsTab";
 
 const LawyerProfile = () => {
   // Fetching the ID from the URL to fetch the profile
@@ -105,6 +106,7 @@ const LawyerProfile = () => {
   const tabs = [
     { id: "bio", label: "السيرة والخبرات" },
     { id: "education", label: "التعليم" },
+    { id: "reviews", label: "التقييمات" },
   ];
 
   // To make sure that the lawyerProfile inside the JSX below is not undefined
@@ -156,7 +158,7 @@ const LawyerProfile = () => {
                   {
                     value:
                       lawyerProfile.profile.stats.numOfAppointmentsCompleted,
-                    label: "قضية تم التعامل معها",
+                    label: "جلسة مكتملة",
                   },
                   {
                     value: lawyerProfile.profile.stats.yearsOfExperience,
@@ -255,6 +257,78 @@ const LawyerProfile = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Rating Breakdown and Featured Reviews */}
+                  <div className="pt-12 border-t mt-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Rating Breakdown */}
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground mb-6 uppercase tracking-wide">
+                          رضا العملاء
+                        </h2>
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className="text-5xl font-bold text-foreground">
+                            {lawyerProfile.profile.stats.clientRatingAverage}
+                          </span>
+                          <div>
+                            <div className="flex gap-0.5">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  className={`w-5 h-5 ${s <= Math.round(lawyerProfile.profile.stats.clientRatingAverage) ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 uppercase">
+                              بناءً على{" "}
+                              {lawyerProfile.profile.stats.reviewsTotal} تقييم
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Featured Reviews */}
+                      {lawyerProfile.topReviews.length > 0 && (
+                        <div className="space-y-4">
+                          {lawyerProfile.topReviews.map((review, i) => (
+                            <Card key={i} className="p-5">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <img
+                                    src={review.client.profileImageUrl}
+                                    alt={`${review.client.firstName} ${review.client.lastName}`}
+                                    className="w-10 h-10 rounded-full object-cover"
+                                  />
+                                  <div>
+                                    <h4 className="font-bold text-sm">
+                                      {review.client.firstName}{" "}
+                                      {review.client.lastName}
+                                    </h4>
+                                  </div>
+                                </div>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {new Date(review.date).toLocaleDateString(
+                                    "ar-EG",
+                                  )}
+                                </span>
+                              </div>
+                              <div className="flex gap-0.5 mb-2">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star
+                                    key={s}
+                                    className={`w-3.5 h-3.5 ${s <= review.rating ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
+                                  />
+                                ))}
+                              </div>
+                              <p className="text-sm text-muted-foreground italic leading-relaxed">
+                                "{review.comment}"
+                              </p>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -321,6 +395,13 @@ const LawyerProfile = () => {
                   </div>
                 </div>
               )}
+
+              {/* REVIEWS */}
+              {activeTab === "reviews" && (
+                <div className="mt-2">
+                  <ReviewsTab lawyerId={id ?? ""} reportButton={false} />
+                </div>
+              )}
             </motion.div>
           </div>
 
@@ -361,6 +442,9 @@ const LawyerProfile = () => {
                       setSelectedDate(date);
                       setSelectedTime(null);
                     }}
+                    disabled={(date) =>
+                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                    }
                     locale={arEG}
                     dir="rtl"
                     className="rounded-lg border w-full"
@@ -469,170 +553,7 @@ const LawyerProfile = () => {
             </div>
           </div>
         </div>
-
-        {activeTab === "bio" && (
-          <section className="max-w-6xl mx-auto py-12 mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Rating Breakdown */}
-              <div>
-                <h2 className="text-xl font-bold text-foreground mb-6 uppercase tracking-wide">
-                  رضا العملاء
-                </h2>
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-5xl font-bold text-foreground">
-                    {lawyerProfile.profile.stats.clientRatingAverage}
-                  </span>
-                  <div>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-5 h-5 ${s <= Math.round(lawyerProfile.profile.stats.clientRatingAverage) ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 uppercase">
-                      بناءً على {lawyerProfile.profile.stats.reviewsTotal} تقييم
-                    </p>
-                  </div>
-                </div>
-                {/* <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <div key={rating} className="flex items-center gap-3">
-                      <span className="text-sm font-medium w-4">{rating}</span>
-                      <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-secondary rounded-full"
-                          style={{
-                            width: `${lawyerData.reviews.breakdown[rating as keyof typeof lawyerData.reviews.breakdown]}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs text-muted-foreground w-8">
-                        {
-                          lawyerData.reviews.breakdown[
-                            rating as keyof typeof lawyerData.reviews.breakdown
-                          ]
-                        }
-                        %
-                      </span>
-                    </div>
-                  ))}
-                </div> */}
-              </div>
-
-              {/* Featured Reviews */}
-              {/* <div className="space-y-4">
-                {lawyerData.reviews.items.slice(0, 2).map((review, i) => (
-                  <Card key={i} className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={review.image}
-                          alt={review.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        <div>
-                          <h4 className="font-bold text-sm">{review.name}</h4>
-                          <p className="text-[11px] text-secondary uppercase tracking-wide">
-                            {review.role}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[11px] text-muted-foreground">
-                        {review.date}
-                      </span>
-                    </div>
-                    <div className="flex gap-0.5 mb-2">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3.5 h-3.5 ${s <= review.rating ? "fill-secondary text-secondary" : "text-muted-foreground/30"}`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground italic leading-relaxed">
-                      "{review.comment}"
-                    </p>
-                  </Card>
-                ))}
-              </div> */}
-            </div>
-          </section>
-        )}
       </div>
-
-      {/* ── Report Review Modal [I will add those modal later] ── */}
-      {/* <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
-        <DialogContent dir="rtl" className="max-w-md">
-          <DialogHeader className="mt-5 text-center">
-            <DialogTitle className="flex justify-center items-center gap-2 text-red-600">
-              <Flag className="w-5 h-5" />
-              الإبلاغ عن تقييم
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              {reportingReview
-                ? `الإبلاغ عن تقييم بقلم "${reportingReview.name}" — سيتم مراجعته من قِبل الفريق المختص`
-                : ""}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-4">
-              <label className="text-sm font-medium">
-                سبب البلاغ <span className="text-red-500">*</span>
-              </label>
-              <div className="space-y-2">
-                {REPORT_REASONS.map((reason) => (
-                  <button
-                    key={reason}
-                    type="button"
-                    onClick={() => setReportReason(reason)}
-                    className={`cursor-pointer w-full text-right px-4 py-3 rounded-lg border text-sm transition-all ${reportReason === reason ? "border-red-400 bg-red-50 text-red-700 font-medium" : "border-border hover:border-muted-foreground/40 hover:bg-muted/40 text-foreground"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${reportReason === reason ? "border-red-500 bg-red-500" : "border-muted-foreground/40"}`}
-                      >
-                        {reportReason === reason && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                      {reason}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm mb-4 font-medium">
-                تفاصيل إضافية (اختياري)
-              </label>
-              <Textarea
-                value={reportDetails}
-                onChange={(e) => setReportDetails(e.target.value)}
-                placeholder="أضف أي تفاصيل تساعد في مراجعة البلاغ..."
-                rows={3}
-                className="resize-none text-sm"
-              />
-            </div>
-            <div className="flex gap-3 pt-1">
-              <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                onClick={handleSubmitReport}
-              >
-                <Flag className="w-4 h-4 ml-1" /> إرسال البلاغ
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setReportModalOpen(false)}
-              >
-                إلغاء
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
 
       {/* ── Send Message Modal [I will add those modal later] ── */}
       {/* <Dialog open={messageModalOpen} onOpenChange={setMessageModalOpen}>

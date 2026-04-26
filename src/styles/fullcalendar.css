@@ -1,0 +1,307 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FullCalendar – Wakili Legal Platform Theme Overrides
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Base container ──────────────────────────────────────────── */
+.fc {
+  direction: rtl;
+  font-family: "Cairo", sans-serif;
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: hsl(var(--muted));
+  --fc-today-bg-color: hsl(218 85% 25% / 0.04);
+  --fc-event-border-color: transparent;
+  --fc-small-font-size: 0.8rem;
+}
+
+/* ─── Toolbar (header) ────────────────────────────────────────── */
+.fc .fc-toolbar {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem !important;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.15rem !important;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.01em;
+}
+
+/* ─── Toolbar buttons ─────────────────────────────────────────── */
+.fc .fc-button {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0.625rem !important;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.fc .fc-button:hover {
+  background: hsl(var(--accent)) !important;
+  border-color: hsl(var(--primary) / 0.3) !important;
+}
+
+.fc .fc-button:focus {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2) !important;
+}
+
+.fc .fc-button-active,
+.fc .fc-button.fc-button-active {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+.fc .fc-button-active:hover,
+.fc .fc-button.fc-button-active:hover {
+  background: hsl(var(--primary-hover)) !important;
+}
+
+/* Prev / Next arrow buttons */
+.fc .fc-prev-button,
+.fc .fc-next-button {
+  padding: 0.35rem 0.55rem;
+}
+
+/* Button group border radius */
+.fc .fc-button-group > .fc-button:first-child {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 0.625rem !important;
+  border-bottom-right-radius: 0.625rem !important;
+}
+
+.fc .fc-button-group > .fc-button:last-child {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 0.625rem !important;
+  border-bottom-left-radius: 0.625rem !important;
+}
+
+.fc .fc-button-group > .fc-button:not(:first-child):not(:last-child) {
+  border-radius: 0 !important;
+}
+
+/* ─── Column / day headers ────────────────────────────────────── */
+.fc .fc-col-header-cell {
+  padding: 0.65rem 0;
+  background: hsl(var(--muted));
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+  text-transform: capitalize;
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+.fc .fc-col-header-cell-cushion {
+  padding: 0.3rem 0.5rem;
+}
+
+/* ─── Day cells ───────────────────────────────────────────────── */
+.fc .fc-daygrid-day {
+  transition: background 0.2s ease;
+}
+
+.fc .fc-daygrid-day:hover {
+  background: hsl(var(--accent) / 0.5);
+}
+
+.fc .fc-daygrid-day-number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.6rem;
+  color: hsl(var(--foreground));
+}
+
+/* Today highlight */
+.fc .fc-day-today {
+  background: hsl(218 85% 25% / 0.04) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+}
+
+/* Other month days */
+.fc .fc-day-other .fc-daygrid-day-number {
+  opacity: 0.35;
+}
+
+/* ─── Events ──────────────────────────────────────────────────── */
+.fc .fc-event {
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: none !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  line-height: 1.5;
+}
+
+.fc .fc-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.12);
+}
+
+.fc .fc-daygrid-event-dot {
+  display: none;
+}
+
+/* Event in time grid */
+.fc .fc-timegrid-event {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  border-right: 3px solid var(--fc-event-bg-color, hsl(var(--primary))) !important;
+  border-left: none !important;
+}
+
+/* ─── Time grid slots ─────────────────────────────────────────── */
+.fc .fc-timegrid-slot {
+  height: 3rem;
+  border-bottom: 1px dashed hsl(var(--border) / 0.5);
+}
+
+.fc .fc-timegrid-slot-label {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.fc .fc-timegrid-axis-cushion {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ─── List view ───────────────────────────────────────────────── */
+.fc .fc-list {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.fc .fc-list-day-cushion {
+  background: hsl(var(--muted)) !important;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: hsl(var(--foreground));
+}
+
+.fc .fc-list-event {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.fc .fc-list-event:hover td {
+  background: hsl(var(--accent) / 0.5) !important;
+}
+
+.fc .fc-list-event-time {
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: hsl(var(--primary));
+  white-space: nowrap;
+}
+
+.fc .fc-list-event-title {
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.fc .fc-list-event-dot {
+  border-radius: 50%;
+}
+
+/* ─── Scrollbar (timegrid) ────────────────────────────────────── */
+.fc .fc-scroller::-webkit-scrollbar {
+  width: 5px;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+}
+
+/* ─── Popover ("+N more") ─────────────────────────────────────── */
+.fc .fc-popover {
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 8px 30px -8px hsl(218 85% 25% / 0.15);
+  overflow: hidden;
+}
+
+.fc .fc-popover-header {
+  background: hsl(var(--muted));
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+}
+
+/* ─── More link ───────────────────────────────────────────────── */
+.fc .fc-daygrid-more-link {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  margin-top: 0.15rem;
+}
+
+.fc .fc-daygrid-more-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Remove all internal borders' double lines ───────────────── */
+.fc td,
+.fc th {
+  border-color: hsl(var(--border));
+}
+
+.fc .fc-scrollgrid {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* ─── Responsive tweaks ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1rem !important;
+    text-align: center;
+  }
+
+  .fc .fc-button {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
