@@ -10,7 +10,6 @@ import {
   Phone,
   Building,
   User,
-  CreditCard,
   Clock,
   Calendar,
   X,
@@ -21,6 +20,12 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import calendarServices, {
   type CalendarAppointment,
@@ -87,114 +92,106 @@ const AppointmentDetail = ({
   onClose,
 }: AppointmentDetailProps) => {
   const typeInfo = APPOINTMENT_TYPE_MAP[appointment.appointmentType];
-  const fullName = `${appointment.clientFirstName} ${appointment.clientLastName}`;
 
   return (
-    <Card className="absolute left-4 top-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] shadow-elegant animate-scale-in overflow-hidden">
-      {/* Header gradient */}
-      <div className="bg-gradient-primary px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-primary-foreground">
-          <CalendarDays className="w-5 h-5" />
-          <h3 className="font-bold text-sm">تفاصيل الموعد</h3>
-        </div>
-        <button
-          onClick={onClose}
-          className="text-primary-foreground/70 hover:text-primary-foreground transition-colors cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="p-5 space-y-4">
-        {/* Client info */}
-        <div className="flex items-center gap-3">
-          {appointment.clientProfileImage ? (
-            <img
-              src={appointment.clientProfileImage}
-              alt={fullName}
-              className="w-12 h-12 rounded-full object-cover border-2 border-muted shrink-0"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <User className="w-5 h-5 text-primary" />
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[340px] p-0 overflow-hidden border-0 shadow-elegant [&>button]:hidden gap-0" dir="rtl">
+        <DialogHeader className="bg-gradient-primary px-5 py-4 m-0 space-y-0">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2 text-primary-foreground">
+              <CalendarDays className="w-5 h-5" />
+              <DialogTitle className="text-sm font-bold m-0 text-primary-foreground">تفاصيل الموعد</DialogTitle>
             </div>
-          )}
-          <div className="min-w-0">
-            <p className="font-bold text-sm truncate">{fullName}</p>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-              <Phone className="w-3 h-3" />
-              <span dir="ltr">{appointment.clientPhoneNumber}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Info grid */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* Appointment ID */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Hash className="w-3 h-3" />
-              رقم الموعد
-            </p>
-            <p className="text-xs font-semibold truncate" dir="ltr">
-              {appointment.appointmentId.slice(0, 8)}...
-            </p>
-          </div>
-
-          {/* Type */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium">
-              نوع الجلسة
-            </p>
-            <Badge
-              variant="outline"
-              className={`text-[10px] ${typeInfo.bgClass}`}
+            <button
+              onClick={onClose}
+              className="text-primary-foreground/70 hover:text-primary-foreground transition-colors cursor-pointer"
             >
-              {appointment.appointmentType === 0 ? (
-                <Phone className="w-3 h-3 ml-1" />
-              ) : (
-                <Building className="w-3 h-3 ml-1" />
-              )}
-              {typeInfo.label}
-            </Badge>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </DialogHeader>
+
+        <div className="p-5 space-y-4">
+          {/* Client info */}
+          <div className="flex items-center gap-3">
+            {appointment.clientProfileImage ? (
+              <img
+                src={appointment.clientProfileImage}
+                alt={`${appointment.clientFirstName} ${appointment.clientLastName}`}
+                className="w-12 h-12 rounded-full object-cover border-2 border-muted shrink-0"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="font-bold text-sm truncate">{appointment.clientFirstName} {appointment.clientLastName}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                <Phone className="w-3 h-3" />
+                <span dir="ltr">{appointment.clientPhoneNumber}</span>
+              </p>
+            </div>
           </div>
 
-          {/* Date */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              التاريخ
-            </p>
-            <p className="text-xs font-semibold">
-              {formatDateAr(appointment.startDate)}
-            </p>
-          </div>
+          {/* Info grid */}
+          <div className="grid grid-cols-2 gap-2.5">
 
-          {/* Time */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              الوقت
-            </p>
-            <p className="text-xs font-semibold">
-              {formatTimeAr(appointment.startDate)} –{" "}
-              {formatTimeAr(appointment.endDate)}
-            </p>
-          </div>
+            {/* Type */}
+            <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
+              <p className="text-[10px] text-muted-foreground font-medium">
+                نوع الجلسة
+              </p>
+              <Badge
+                variant="outline"
+                className={`text-[10px] ${typeInfo.bgClass}`}
+              >
+                {appointment.appointmentType === 0 ? (
+                  <Phone className="w-3 h-3 ml-1" />
+                ) : (
+                  <Building className="w-3 h-3 ml-1" />
+                )}
+                {typeInfo.label}
+              </Badge>
+            </div>
 
-          {/* Price */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <Banknote className="w-3 h-3" />
-              سعر الجلسة
-            </p>
-            <p className="text-xs font-bold text-emerald-600">
-              {appointment.sessionPrice.toLocaleString("ar-EG")} ج.م
-            </p>
+            {/* Date */}
+            <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
+              <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                التاريخ
+              </p>
+              <p className="text-xs font-semibold">
+                {formatDateAr(appointment.startDate)}
+              </p>
+            </div>
+
+            {/* Time */}
+            <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
+              <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                الوقت
+              </p>
+              <p className="text-xs font-semibold">
+                {formatTimeAr(appointment.startDate)} –{" "}
+                {formatTimeAr(appointment.endDate)}
+              </p>
+            </div>
+
+            {/* Price */}
+            <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
+              <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                <Banknote className="w-3 h-3" />
+                سعر الجلسة
+              </p>
+              <p className="text-xs font-bold text-emerald-600">
+                {appointment.sessionPrice.toLocaleString("ar-EG")} ج.م
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 };
 

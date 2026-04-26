@@ -39,7 +39,6 @@ import {
   LawyerDashboardReviews,
 } from "@/data/data.ts";
 
-// ─── Sidebar Items ───────────────────────────────────────────────
 const sidebarItems = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
   { id: "calendar", label: "التقويم", icon: CalendarIcon },
@@ -180,8 +179,8 @@ const LawyerDashboard = () => {
                   setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${isActive
-                    ? "bg-secondary text-secondary-foreground shadow-md"
-                    : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  ? "bg-secondary text-secondary-foreground shadow-md"
+                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                   }`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
