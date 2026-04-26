@@ -362,7 +362,12 @@ const LawyerProfile = () => {
             </motion.div>
           </div>
           <PaymentCalendar
-            lawyerId={id ?? ""}
+            lawyer={{
+              lawyerId: id ?? "",
+              laweryFirstName: lawyerProfile.profile.firstName,
+              lawyerLastName: lawyerProfile.profile.lastName,
+              lawyerProfileImage: lawyerProfile.profile.profileImage || "",
+            }}
             phonePrice={lawyerProfile?.pricing.phonePrice || 0}
             officePrice={lawyerProfile?.pricing.officePrice || 0}
           />

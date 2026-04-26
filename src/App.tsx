@@ -18,6 +18,7 @@ import AiLegalReviewPage from "./pages/AiLegalReviewPage";
 import ForumPage from "./pages/ForumPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import { useAuthStore } from "@/stores/auth.store";
+import PaymentSuccessfulPage from "./pages/PaymentSuccessfulPage";
 
 const SharedLayout = ({ children }: { children: ReactNode }) => (
   <HomeLayout>{children}</HomeLayout>
@@ -105,6 +106,8 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          {/* https://wakiliy.com/payment/success */}
+          <Route path="/payment/success" element={<PaymentSuccessfulPage />} />
           {/* Access Denied */}
           <Route path="/forbidden" element={<NotFound />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

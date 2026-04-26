@@ -25,8 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import calendarServices, {
   type CalendarAppointment,
   type CalendarView,
-  APPOINTMENT_TYPE_MAP,
-  PAYMENT_METHOD_MAP,
 } from "@/services/calendar-services";
 import "@/styles/fullcalendar.css";
 
@@ -62,6 +60,22 @@ const formatTimeAr = (dateStr: string) =>
     minute: "2-digit",
     hour12: true,
   });
+
+const APPOINTMENT_TYPE_MAP: Record<
+  0 | 1,
+  { label: string; color: string; bgClass: string }
+> = {
+  0: {
+    label: "هاتفية",
+    color: "#3b82f6",
+    bgClass: "bg-blue-500/10 text-blue-700 border-blue-200",
+  },
+  1: {
+    label: "مكتبية",
+    color: "#10b981",
+    bgClass: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
+  },
+};
 
 interface AppointmentDetailProps {
   appointment: CalendarAppointment;
@@ -178,17 +192,6 @@ const AppointmentDetail = ({
               {appointment.sessionPrice.toLocaleString("ar-EG")} ج.م
             </p>
           </div>
-
-          {/* Payment */}
-          <div className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-            <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-              <CreditCard className="w-3 h-3" />
-              طريقة الدفع
-            </p>
-            <p className="text-xs font-semibold">
-              {PAYMENT_METHOD_MAP[appointment.paymentMethod]}
-            </p>
-          </div>
         </div>
       </div>
     </Card>
@@ -204,10 +207,7 @@ const CalendarTab = () => {
 
   // Fetch appointments using the current view & date range
   const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      "calendarAppointments",
-      currentView,
-    ],
+    queryKey: ["calendarAppointments", currentView],
     queryFn: () =>
       calendarServices.getCalendarAppointments({
         viewType: currentView,
