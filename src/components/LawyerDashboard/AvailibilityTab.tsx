@@ -28,7 +28,12 @@ import timeSlotsServices, {
   type CreateSlotPayload,
   type UpdateSlotPayload,
 } from "@/services/timeSlots-services";
-const toISO = (d: Date) => d.toISOString().split("T")[0];
+const toISO = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const isPastDate = (date: Date) => {
   const today = new Date();
