@@ -6,7 +6,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, DatesSetArg } from "@fullcalendar/core";
-
 import {
   Phone,
   Building,
@@ -31,7 +30,6 @@ import calendarServices, {
 } from "@/services/calendar-services";
 import "@/styles/fullcalendar.css";
 
-// ─── Arabic locale object (inline – no extra dependency) ─────────
 const arLocale = {
   code: "ar",
   direction: "rtl" as const,
@@ -50,7 +48,6 @@ const arLocale = {
   noEventsText: "لا توجد مواعيد للعرض",
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────
 const formatDateAr = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("ar-EG", {
     weekday: "long",
@@ -66,7 +63,6 @@ const formatTimeAr = (dateStr: string) =>
     hour12: true,
   });
 
-// ─── Appointment Detail Card (sidebar popup) ─────────────────────
 interface AppointmentDetailProps {
   appointment: CalendarAppointment;
   onClose: () => void;
@@ -203,10 +199,6 @@ const CalendarTab = () => {
   const calendarRef = useRef<FullCalendar>(null);
 
   const [currentView, setCurrentView] = useState<CalendarView>("dayGridMonth");
-  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
-    start: "",
-    end: "",
-  });
   const [selectedAppointment, setSelectedAppointment] =
     useState<CalendarAppointment | null>(null);
 
@@ -215,16 +207,11 @@ const CalendarTab = () => {
     queryKey: [
       "calendarAppointments",
       currentView,
-      dateRange.start,
-      dateRange.end,
     ],
     queryFn: () =>
       calendarServices.getCalendarAppointments({
-        View: currentView,
-        Start: dateRange.start,
-        End: dateRange.end,
+        viewType: currentView,
       }),
-    enabled: !!dateRange.start && !!dateRange.end,
   });
 
   const appointments: CalendarAppointment[] = data?.data ?? [];
@@ -247,10 +234,6 @@ const CalendarTab = () => {
   const handleDatesSet = useCallback((arg: DatesSetArg) => {
     const viewType = arg.view.type as CalendarView;
     setCurrentView(viewType);
-    setDateRange({
-      start: arg.startStr,
-      end: arg.endStr,
-    });
     setSelectedAppointment(null);
   }, []);
 

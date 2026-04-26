@@ -1,77 +1,24 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import lawyerProfileServices, {
-  type LawyerProfileResponse,
-} from "@/services/lawyerProfile-services";
-import {
-  Award,
-  Calendar as CalendarIcon,
-  CheckCircle,
-  Clock,
-  FileText,
-  Flag,
-  MapPin,
-  MessageCircle,
-  MessageSquare,
-  Search,
-  Send,
-  Star,
-  Loader2,
-} from "lucide-react";
+import lawyerProfileServices from "@/services/lawyerProfile-services";
+import { Award, CheckCircle, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { arEG } from "date-fns/locale";
 import MainNavbar from "@/components/MainNavbar";
 import BlueFooter from "@/components/BlueFooter";
 import ReviewsTab from "@/components/LawyerDashboard/ReviewsTab";
+import PaymentCalendar from "@/components/PaymentCalendar";
+import { getAvatarColor, getInitials } from "@/lib/avatarHelpers";
 
 const LawyerProfile = () => {
   // Fetching the ID from the URL to fetch the profile
   const { id } = useParams<{ id: string }>();
 
   // Local state for the active tab
-  const [activeTab, setActiveTab] = useState("bio");
-
-  // States for the booking form. Later, I will connect these states to the backend to fetch available times and book sessions. Not now
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedSessionType, setSelectedSessionType] = useState<
-    "phone" | "office"
-  >("office");
-  // Just a Mock Data, I will delete later once I connect to the backend
-  const availableTimes = useMemo(() => {
-    if (!selectedDate) return [];
-    // Mock logic to generate available times based on the selected date and session type
-    const times = [];
-    const baseHour = selectedSessionType === "phone" ? 9 : 10; // Phone sessions start at 9 AM, office sessions start at 10 AM
-    for (let i = 0; i < 8; i++) {
-      const hour = baseHour + i;
-      times.push(`${hour}:00`);
-      times.push(`${hour}:30`);
-    }
-    return times;
-  }, [selectedDate, selectedSessionType]);
+  const [activeTab, setActiveTab] = useState("summary");
 
   // Fetching Profile Data
   const {
@@ -104,7 +51,7 @@ const LawyerProfile = () => {
   }
 
   const tabs = [
-    { id: "bio", label: "السيرة والخبرات" },
+    { id: "summary", label: "السيرة والخبرات" },
     { id: "education", label: "التعليم" },
     { id: "reviews", label: "التقييمات" },
   ];
@@ -121,16 +68,29 @@ const LawyerProfile = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start gap-6">
             <div className="relative shrink-0">
-              <img
-                // In here, if the lawyer profile image is null, use an avatar image using @lib/avatar Helpers with lawyer first and last name
-                src={lawyerProfile.profile.profileImage}
-                alt={
-                  lawyerProfile.profile.firstName +
-                  " " +
-                  lawyerProfile.profile.lastName
-                }
-                className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-secondary/40 object-cover shadow-lg"
-              />
+              {lawyerProfile.profile.profileImage ? (
+                <img
+                  src={lawyerProfile.profile.profileImage}
+                  alt={
+                    lawyerProfile.profile.firstName +
+                    " " +
+                    lawyerProfile.profile.lastName
+                  }
+                  className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-secondary/40 object-cover shadow-lg"
+                />
+              ) : (
+                <div
+                  className={`w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-secondary/40 shadow-lg flex items-center justify-center text-xl md:text-2xl font-bold ${getAvatarColor(
+                    `${lawyerProfile.profile.firstName} ${lawyerProfile.profile.lastName}`,
+                  )}`}
+                  aria-label={`${lawyerProfile.profile.firstName} ${lawyerProfile.profile.lastName}`}
+                >
+                  {getInitials(
+                    lawyerProfile.profile.firstName,
+                    lawyerProfile.profile.lastName,
+                  )}
+                </div>
+              )}
               <div className="absolute bottom-1 right-1 w-7 h-7 bg-secondary rounded-full flex items-center justify-center border-2 border-primary">
                 <CheckCircle className="w-4 h-4 text-secondary-foreground" />
               </div>
@@ -218,8 +178,8 @@ const LawyerProfile = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
-              {/* BIO */}
-              {activeTab === "bio" && (
+              {/* Summary */}
+              {activeTab === "summary" && (
                 <div className="space-y-10">
                   <div>
                     <h2 className="text-xl font-bold text-foreground mb-4">
@@ -333,7 +293,6 @@ const LawyerProfile = () => {
               )}
 
               {/* EDUCATION */}
-              {/* In here, you put the fetched lawyer education and certifications */}
               {activeTab === "education" && (
                 <div className="space-y-10">
                   <div>
@@ -395,8 +354,6 @@ const LawyerProfile = () => {
                   </div>
                 </div>
               )}
-
-              {/* REVIEWS */}
               {activeTab === "reviews" && (
                 <div className="mt-2">
                   <ReviewsTab lawyerId={id ?? ""} reportButton={false} />
@@ -404,210 +361,13 @@ const LawyerProfile = () => {
               )}
             </motion.div>
           </div>
-
-          {/* Booking sidebar */}
-          {/* In here just include the price for phone and office. Later, I will connect endpoints for it */}
-          <div className="lg:w-[360px] shrink-0">
-            <div className="lg:sticky lg:top-24 space-y-6">
-              <Card className="p-6 shadow-md">
-                <div className="mb-6">
-                  <h4 className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-3">
-                    أسعار الجلسات
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-lg border p-3 bg-muted/20">
-                      <p className="text-xs text-muted-foreground">هاتفية</p>
-                      <p className="text-lg font-bold text-foreground">
-                        ${lawyerProfile.pricing.phonePrice}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">/ساعة</p>
-                    </div>
-                    <div className="rounded-lg border p-3 bg-muted/20">
-                      <p className="text-xs text-muted-foreground">مكتبية</p>
-                      <p className="text-lg font-bold text-foreground">
-                        ${lawyerProfile.pricing.officePrice}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">/ساعة</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground mb-3">
-                    المواعيد المتاحة
-                  </h4>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setSelectedTime(null);
-                    }}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    locale={arEG}
-                    dir="rtl"
-                    className="rounded-lg border w-full"
-                  />
-                </div>
-                {selectedDate && (
-                  <div className="mb-4">
-                    <div className="mb-4 rounded-lg border bg-muted/20 p-3">
-                      <p className="text-xs text-muted-foreground mb-2">
-                        التاريخ المختار
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {selectedDate.toLocaleDateString("ar-EG", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                      <div className="mt-3">
-                        <p className="text-xs text-muted-foreground mb-2">
-                          نوع الجلسة
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <label className="flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer">
-                            <div>
-                              <p className="text-sm font-medium">هاتفية</p>
-                              <p className="text-[11px] text-muted-foreground">
-                                ${lawyerProfile?.pricing.phonePrice} / ساعة
-                              </p>
-                            </div>
-                            <input
-                              type="radio"
-                              name="sessionType"
-                              checked={selectedSessionType === "phone"}
-                              onChange={() => setSelectedSessionType("phone")}
-                            />
-                          </label>
-                          <label className="flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer">
-                            <div>
-                              <p className="text-sm font-medium">مكتبية</p>
-                              <p className="text-[11px] text-muted-foreground">
-                                ${lawyerProfile.pricing.officePrice} / ساعة
-                              </p>
-                            </div>
-                            <input
-                              type="radio"
-                              name="sessionType"
-                              checked={selectedSessionType === "office"}
-                              onChange={() => setSelectedSessionType("office")}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                    <h4 className="font-semibold text-foreground mb-3">
-                      الأوقات المتاحة
-                    </h4>
-                    {availableTimes.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {availableTimes.map((time) => (
-                          <Button
-                            key={time}
-                            type="button"
-                            variant={
-                              selectedTime === time ? "default" : "outline"
-                            }
-                            className="h-9 cursor-pointer text-xs"
-                            onClick={() => setSelectedTime(time)}
-                          >
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
-                        لا توجد مواعيد متاحة في هذا اليوم.
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="space-y-3">
-                  <Button
-                    className="w-full cursor-pointer bg-primary text-primary-foreground hover:bg-primary-hover font-semibold h-12 text-base"
-                    // I will fix this later to connect it to the booking flow. Not now
-                  >
-                    <CalendarIcon className="w-5 h-5 ml-2" /> احجز جلسة
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full cursor-pointer border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold h-12 text-base"
-                    // I will fix this later to connect it to the messaging flow. Not now
-                  >
-                    <MessageSquare className="w-5 h-5 ml-2" /> أرسل رسالة
-                  </Button>
-                </div>
-                <div className="mt-4 text-center space-y-1">
-                  <p className="text-xs text-muted-foreground">
-                    وقت الاستجابة: عادةً خلال ساعتين
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    الإلغاء يتطلب إشعاراً مسبقاً بـ 24 ساعة
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </div>
+          <PaymentCalendar
+            lawyerId={id ?? ""}
+            phonePrice={lawyerProfile?.pricing.phonePrice || 0}
+            officePrice={lawyerProfile?.pricing.officePrice || 0}
+          />
         </div>
       </div>
-
-      {/* ── Send Message Modal [I will add those modal later] ── */}
-      {/* <Dialog open={messageModalOpen} onOpenChange={setMessageModalOpen}>
-        <DialogContent dir="rtl" className="max-w-md">
-          <DialogHeader className="mt-4">
-            <DialogTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-secondary" />
-              إرسال رسالة إلى {lawyerData.name}
-            </DialogTitle>
-            <DialogDescription>
-              سيتلقى المحامي رسالتك ويرد عليها في أقرب وقت ممكن
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                الموضوع <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={messageSubject}
-                onChange={(e) => setMessageSubject(e.target.value)}
-                placeholder="مثال: استفسار حول قضية تجارية"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                نص الرسالة <span className="text-red-500">*</span>
-              </label>
-              <Textarea
-                value={messageBody}
-                onChange={(e) => setMessageBody(e.target.value)}
-                placeholder="اكتب رسالتك هنا..."
-                rows={5}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground text-left">
-                {messageBody.length} حرف
-              </p>
-            </div>
-            <div className="flex gap-3 pt-1">
-              <Button className="flex-1" onClick={handleSendMessage}>
-                <Send className="w-4 h-4 ml-1" /> إرسال الرسالة
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setMessageModalOpen(false)}
-              >
-                إلغاء
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
 
       <BlueFooter />
     </div>

@@ -127,6 +127,15 @@ const AppointmentCard = ({
     badgeClass: "bg-gray-100 text-gray-600 border-gray-200",
   };
   const fullName = `${appointment.clientFirstName} ${appointment.clientLastName}`;
+  const handleConfirm = async () => {
+    try {
+      await appointmentServices.completeAppointment(appointment.id);
+      toast.info("تم الضغط على زر التأكيد");
+    } catch (error: Error | any) {
+      toast.error("حدث خطأ أثناء تأكيد الموعد");
+      return;
+    }
+  };
 
   return (
     <Card className="p-5 hover:shadow-md transition-shadow">
@@ -244,6 +253,7 @@ const AppointmentCard = ({
           </Button>
         </div>
       )}
+      <Button onClick={handleConfirm}>Confirm</Button>
     </Card>
   );
 };

@@ -27,12 +27,9 @@ export interface CalendarAppointment {
 }
 
 export interface GetCalendarAppointmentsParams {
-  View?: CalendarView;
-  Start?: string; // ISO date
-  End?: string; // ISO date
+  viewType?: CalendarView;
 }
 
-// Label Helper for Me (Ignore it)
 export const APPOINTMENT_TYPE_MAP: Record<
   AppointmentType,
   { label: string; color: string; bgClass: string }
@@ -56,25 +53,21 @@ export const PAYMENT_METHOD_MAP: Record<PaymentMethod, string> = {
 };
 
 const calendarServices = {
-  /** Fetch upcoming appointments for the calendar view */
   async getCalendarAppointments(
     params: GetCalendarAppointmentsParams = {},
   ): Promise<ApiResponse<CalendarAppointment[]>> {
-    // Map FullCalendar view names to simpler backend param values
-    const viewMap: Record<CalendarView, string> = {
-      dayGridMonth: "month",
-      timeGridWeek: "week",
-      timeGridDay: "day",
-      listWeek: "list",
+      const viewMap: Record<CalendarView, string> = {
+      dayGridMonth: "1",
+      timeGridWeek: "2",
+      timeGridDay: "3",
+      listWeek: "2",
     };
 
     const queryParams: Record<string, string> = {};
-    if (params.View) queryParams.View = viewMap[params.View];
-    if (params.Start) queryParams.Start = params.Start;
-    if (params.End) queryParams.End = params.End;
+    if (params.viewType) queryParams.viewType = viewMap[params.viewType];
 
     const response = await httpClient.get<ApiResponse<CalendarAppointment[]>>(
-      "/Appointments/Upcoming",
+      "/Appointments/approved",
       { params: queryParams },
     );
 

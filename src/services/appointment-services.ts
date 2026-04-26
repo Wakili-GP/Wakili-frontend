@@ -52,7 +52,7 @@ const appointmentServices = {
 
   /** Confirm a pending appointment */
   async confirmAppointment(id: string): Promise<ApiResponse<void>> {
-    const response = await httpClient.post<ApiResponse<void>>(
+    const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Confirm`,
     );
     console.log("Confirm Appointment Response:", response.data);
@@ -61,7 +61,7 @@ const appointmentServices = {
 
   /** Reject a pending appointment */
   async rejectAppointment(id: string): Promise<ApiResponse<void>> {
-    const response = await httpClient.post<ApiResponse<void>>(
+    const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Reject`,
     );
     console.log("Reject Appointment Response:", response.data);
@@ -70,7 +70,7 @@ const appointmentServices = {
 
   /** Mark an appointment as completed */
   async completeAppointment(id: string): Promise<ApiResponse<void>> {
-    const response = await httpClient.post<ApiResponse<void>>(
+    const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Complete`,
     );
     console.log("Complete Appointment Response:", response.data);

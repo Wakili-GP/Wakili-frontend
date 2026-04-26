@@ -54,7 +54,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/lawyer/:id/review" element={<LawyerReview />} />
+          <Route path="/appointments/:id/review" element={<LawyerReview />} />
           {/* Main Routes */}
           <Route path="/ai-chat" element={<AiChatPage />} />
           <Route
