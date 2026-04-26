@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import HeroSection from "../components/contract-review/HeroSection";
-import HowItWorks from "../components/contract-review/HowItWorks";
-import ProductDemo from "../components/contract-review/ProductDemo";
-import UploadSection from "../components/contract-review/UploadSection";
-import type { ContractAnalysis } from "../components/contract-review/UploadSection";
-import AnalysisResults from "../components/contract-review/AnalysisResults";
-import FollowUpChat from "../components/contract-review/FollowUpChat";
-import PlatformStats from "../components/contract-review/PlatformStats";
-import RecentContracts from "../components/contract-review/RecentContracts";
-import SatisfactionRating from "../components/contract-review/StatisfactionRating";
+import HeroSection from "../components/ContractReview/HeroSection";
+import HowItWorks from "../components/ContractReview/HowItWorks";
+import ProductDemo from "../components/ContractReview/ProductDemo";
+import UploadSection from "../components/ContractReview/UploadSection";
+import type { ContractAnalysis } from "../components/ContractReview/UploadSection";
+import AnalysisResults from "../components/ContractReview/AnalysisResults";
+import FollowUpChat from "../components/ContractReview/FollowUpChat";
+import PlatformStats from "../components/ContractReview/PlatformStats";
+import RecentContracts from "../components/ContractReview/RecentContracts";
+import SatisfactionRating from "../components/ContractReview/StatisfactionRating";
 
 const ContractReview = () => {
   const [analysis, setAnalysis] = useState<ContractAnalysis | null>(null);

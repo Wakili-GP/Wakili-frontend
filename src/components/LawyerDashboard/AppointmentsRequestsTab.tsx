@@ -49,16 +49,16 @@ const STATUS_MAP: Record<number, { label: string; class: string }> = {
 };
 
 const SESSION_TYPE_MAP: Record<number, { label: string; badgeClass: string }> =
-  {
-    0: {
-      label: "هاتفية",
-      badgeClass: "bg-blue-500/10 text-blue-700 border-blue-200",
-    },
-    1: {
-      label: "مكتبية",
-      badgeClass: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
-    },
-  };
+{
+  0: {
+    label: "هاتفية",
+    badgeClass: "bg-blue-500/10 text-blue-700 border-blue-200",
+  },
+  1: {
+    label: "مكتبية",
+    badgeClass: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
+  },
+};
 
 const formatDateAr = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("ar-EG", {
@@ -96,9 +96,8 @@ const StatCard = ({
   <button
     type="button"
     onClick={onClick}
-    className={`rounded-xl p-4 text-right border transition-all cursor-pointer ${className} ${
-      isActive ? "ring-2 ring-secondary" : "opacity-90 hover:opacity-100"
-    }`}
+    className={`rounded-xl p-4 text-right border transition-all cursor-pointer ${className} ${isActive ? "ring-2 ring-secondary" : "opacity-90 hover:opacity-100"
+      }`}
   >
     <p className="text-2xl font-bold">{count}</p>
     <p className="text-xs mt-1">{label}</p>
@@ -110,16 +109,20 @@ interface AppointmentCardProps {
   appointment: AppointmentInterface;
   onConfirm: (id: string) => void;
   onReject: (id: string) => void;
+  onComplete: (id: string) => void;
   isConfirming: boolean;
   isRejecting: boolean;
+  isCompleting: boolean;
 }
 
 const AppointmentCard = ({
   appointment,
   onConfirm,
   onReject,
+  onComplete,
   isConfirming,
   isRejecting,
+  isCompleting,
 }: AppointmentCardProps) => {
   const status = STATUS_MAP[appointment.status];
   const sessionType = SESSION_TYPE_MAP[appointment.sessionType] ?? {
@@ -127,15 +130,6 @@ const AppointmentCard = ({
     badgeClass: "bg-gray-100 text-gray-600 border-gray-200",
   };
   const fullName = `${appointment.clientFirstName} ${appointment.clientLastName}`;
-  const handleConfirm = async () => {
-    try {
-      await appointmentServices.completeAppointment(appointment.id);
-      toast.info("تم الضغط على زر التأكيد");
-    } catch (error: Error | any) {
-      toast.error("حدث خطأ أثناء تأكيد الموعد");
-      return;
-    }
-  };
 
   return (
     <Card className="p-5 hover:shadow-md transition-shadow">
@@ -253,7 +247,25 @@ const AppointmentCard = ({
           </Button>
         </div>
       )}
-      <Button onClick={handleConfirm}>Confirm</Button>
+
+      {/* Action button for confirmed status */}
+      {appointment.status === 1 && (
+        <div className="flex gap-2 mt-4 pt-3 border-t border-border/50">
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-sm transition-all hover:shadow-md group"
+            disabled={isCompleting}
+            onClick={() => onComplete(appointment.id)}
+          >
+            {isCompleting ? (
+              <Loader2 className="w-4 h-4 ml-1 animate-spin" />
+            ) : (
+              <CheckCircle className="w-4 h-4 ml-1 group-hover:scale-110 transition-transform" />
+            )}
+            تأكيد اكتمال الجلسة
+          </Button>
+        </div>
+      )}
     </Card>
   );
 };
@@ -263,7 +275,7 @@ const AppointmentsRequestsTab = () => {
   const queryClient = useQueryClient();
 
   // Local UI state
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(0);
   const [sortDescending, setSortDescending] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeSearchTerm, setActiveSearchTerm] = useState("");
@@ -296,8 +308,9 @@ const AppointmentsRequestsTab = () => {
   });
 
   const appointments: AppointmentInterface[] = data?.data?.items ?? [];
-  const totalCount = data?.data?.totalCount ?? 0;
   const totalPages = data?.data?.totalPages ?? 1;
+  const meta = data?.data?.meta;
+
 
   // Confirm mutation
   const confirmMutation = useMutation({
@@ -323,38 +336,56 @@ const AppointmentsRequestsTab = () => {
     onSettled: () => setMutatingId(null),
   });
 
+  // Complete mutation
+  const completeMutation = useMutation({
+    mutationFn: (id: string) => appointmentServices.completeAppointment(id),
+    onMutate: (id) => setMutatingId(id),
+    onSuccess: () => {
+      toast.success("تم تسجيل الموعد كمكتمل");
+      queryClient.invalidateQueries({ queryKey: ["receivedAppointments"] });
+    },
+    onError: () => toast.error("حدث خطأ أثناء إكمال الموعد"),
+    onSettled: () => setMutatingId(null),
+  });
+
   // Stat cards config
   const statCards: {
     key: StatusFilter;
     label: string;
     className: string;
+    value: number | undefined;
   }[] = [
-    {
-      key: "all",
-      label: "الكل",
-      className: "bg-muted text-foreground",
-    },
-    {
-      key: 0,
-      label: "قيد الانتظار",
-      className: "bg-amber-500/10 text-amber-700",
-    },
-    {
-      key: 1,
-      label: "مُؤكد",
-      className: "bg-emerald-500/10 text-emerald-700",
-    },
-    {
-      key: 2,
-      label: "ملغي",
-      className: "bg-red-500/10 text-red-700",
-    },
-    {
-      key: 3,
-      label: "مكتمل",
-      className: "bg-blue-500/10 text-blue-700",
-    },
-  ];
+      {
+        key: "all",
+        label: "الكل",
+        className: "bg-muted text-foreground",
+        value: meta?.total,
+      },
+      {
+        key: 0,
+        label: "قيد الانتظار",
+        className: "bg-amber-500/10 text-amber-700",
+        value: meta?.pending,
+      },
+      {
+        key: 1,
+        label: "مُؤكد",
+        className: "bg-emerald-500/10 text-emerald-700",
+        value: meta?.confirmed,
+      },
+      {
+        key: 2,
+        label: "ملغي",
+        className: "bg-red-500/10 text-red-700",
+        value: meta?.cancelled,
+      },
+      {
+        key: 3,
+        label: "مكتمل",
+        className: "bg-blue-500/10 text-blue-700",
+        value: meta?.completed,
+      },
+    ];
 
   // Handlers
   const handleFilterChange = (key: StatusFilter) => {
@@ -362,10 +393,6 @@ const AppointmentsRequestsTab = () => {
     setCurrentPage(1);
   };
 
-  const toggleSort = () => {
-    setSortDescending((prev) => !prev);
-    setCurrentPage(1);
-  };
 
   return (
     <div className="space-y-6">
@@ -375,9 +402,7 @@ const AppointmentsRequestsTab = () => {
           <StatCard
             key={String(card.key)}
             label={card.label}
-            count={
-              card.key === "all" ? totalCount : 0 // Server-side count; "all" shows total
-            }
+            count={card.value || 0}
             className={card.className}
             isActive={statusFilter === card.key}
             onClick={() => handleFilterChange(card.key)}
@@ -452,11 +477,15 @@ const AppointmentsRequestsTab = () => {
               appointment={appointment}
               onConfirm={(id) => confirmMutation.mutate(id)}
               onReject={(id) => rejectMutation.mutate(id)}
+              onComplete={(id) => completeMutation.mutate(id)}
               isConfirming={
                 confirmMutation.isPending && mutatingId === appointment.id
               }
               isRejecting={
                 rejectMutation.isPending && mutatingId === appointment.id
+              }
+              isCompleting={
+                completeMutation.isPending && mutatingId === appointment.id
               }
             />
           ))

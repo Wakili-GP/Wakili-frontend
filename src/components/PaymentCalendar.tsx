@@ -2,7 +2,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { arEG } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, MessageSquare, Loader2, CreditCard, Clock, Video, CheckCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  MessageSquare,
+  Loader2,
+  CreditCard,
+  Clock,
+  Video,
+  CheckCircle,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import paymentServices from "@/services/payment-services";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth.store";
-
+import type { AxiosError } from "axios";
 
 interface LawyerInfo {
   lawyerId: string;
@@ -57,16 +65,25 @@ const PaymentCalendar = ({
 
     setIsRedirecting(true);
     try {
-      const url = await paymentServices.getPaymentLink(slot.id, lawyer.lawyerId);
+      const url = await paymentServices.getPaymentLink(
+        slot.id,
+        lawyer.lawyerId,
+      );
       window.open(url, "_blank");
-    } catch (error) {
+    } catch (error: unknown) {
+      console.log("Error during payment process:", error);
       toast.error("حدث خطأ أثناء إعداد عملية الدفع. يرجى المحاولة مرة أخرى.");
       setIsRedirecting(false);
     }
   };
 
   const { data: availableTimes, isLoading } = useQuery({
-    queryKey: ["availableSlots", lawyer.lawyerId, selectedDate, selectedSessionType],
+    queryKey: [
+      "availableSlots",
+      lawyer.lawyerId,
+      selectedDate,
+      selectedSessionType,
+    ],
     queryFn: () =>
       paymentServices.getAvailableSlots(
         lawyer.lawyerId,
@@ -241,7 +258,9 @@ const PaymentCalendar = ({
       <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader className="mt-4">
-            <DialogTitle className="text-xl text-center">تأكيد حجز الجلسة</DialogTitle>
+            <DialogTitle className="text-xl text-center">
+              تأكيد حجز الجلسة
+            </DialogTitle>
             <DialogDescription className="text-center">
               راجع تفاصيل الموعد قبل المتابعة إلى الدفع.
             </DialogDescription>
@@ -261,7 +280,9 @@ const PaymentCalendar = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground truncate">{lawyer.laweryFirstName} {lawyer.lawyerLastName}</p>
+              <p className="font-semibold text-foreground truncate">
+                {lawyer.laweryFirstName} {lawyer.lawyerLastName}
+              </p>
               <p className="text-xs text-muted-foreground truncate">محامي</p>
             </div>
             <CheckCircle className="w-5 h-5 text-secondary flex-shrink-0" />
@@ -275,7 +296,11 @@ const PaymentCalendar = ({
                 التاريخ
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {selectedDate?.toLocaleDateString("ar-EG", { weekday: "long", day: "numeric", month: "long" })}
+                {selectedDate?.toLocaleDateString("ar-EG", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
               </p>
             </div>
             <div className="p-3 rounded-lg border bg-background">
@@ -284,7 +309,12 @@ const PaymentCalendar = ({
                 الوقت
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {selectedTime ? selectedTime.slice(0, 5) : ""} - {selectedTime ? availableTimes?.find(s => s.startTime === selectedTime)?.endTime.slice(0, 5) : ""}
+                {selectedTime ? selectedTime.slice(0, 5) : ""} -{" "}
+                {selectedTime
+                  ? availableTimes
+                      ?.find((s) => s.startTime === selectedTime)
+                      ?.endTime.slice(0, 5)
+                  : ""}
               </p>
             </div>
             <div className="p-3 rounded-lg border bg-background">
@@ -293,7 +323,9 @@ const PaymentCalendar = ({
                 نوع الجلسة
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {selectedSessionType === 0 ? "استشارة هاتفية" : "استشارة مكتبية"}
+                {selectedSessionType === 0
+                  ? "استشارة هاتفية"
+                  : "استشارة مكتبية"}
               </p>
             </div>
             <div className="p-3 rounded-lg border bg-primary/5 border-primary/20">
@@ -303,14 +335,18 @@ const PaymentCalendar = ({
               </div>
               <p className="text-sm font-bold text-primary">
                 ${selectedSessionType === 0 ? phonePrice : officePrice}{" "}
-                <span className="text-xs font-normal text-muted-foreground">/ساعة</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  /ساعة
+                </span>
               </p>
             </div>
           </div>
 
           {/* Total */}
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/10 border border-secondary/30">
-            <span className="text-sm font-semibold text-foreground">الإجمالي</span>
+            <span className="text-sm font-semibold text-foreground">
+              الإجمالي
+            </span>
             <span className="text-lg font-bold text-foreground">
               ${selectedSessionType === 0 ? phonePrice : officePrice}
             </span>
@@ -336,7 +372,11 @@ const PaymentCalendar = ({
                 <CreditCard className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform" />
               )}
               <span>{isRedirecting ? "جاري التحويل..." : "ادفع عبر"}</span>
-              {!isRedirecting && <span className="font-extrabold tracking-tight ml-1">Paymob</span>}
+              {!isRedirecting && (
+                <span className="font-extrabold tracking-tight ml-1">
+                  Paymob
+                </span>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,5 @@
 import httpClient, { type ApiResponse } from "./api/httpClient";
 
-// ─── Types ───────────────────────────────────────────────────────
 export interface AppointmentInterface {
   id: string;
   // 0: Pending, 1: Confirmed, 2: Cancelled, 3: Completed
@@ -20,12 +19,21 @@ export interface AppointmentInterface {
   clientPhone: string;
 }
 
+export interface AppointmentsMeta {
+  total: number;
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+  completed: number;
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   totalCount: number;
   page: number;
   pageSize: number;
   totalPages: number;
+  meta?: AppointmentsMeta;
 }
 
 export interface GetAppointmentsParams {
@@ -36,9 +44,7 @@ export interface GetAppointmentsParams {
   SortDescending?: boolean;
 }
 
-// ─── Service ─────────────────────────────────────────────────────
 const appointmentServices = {
-  /** Fetch paginated received appointments with optional filters */
   async getAllReceivedAppointments(
     params: GetAppointmentsParams = {},
   ): Promise<ApiResponse<PaginatedResponse<AppointmentInterface>>> {
@@ -50,7 +56,6 @@ const appointmentServices = {
     return response.data;
   },
 
-  /** Confirm a pending appointment */
   async confirmAppointment(id: string): Promise<ApiResponse<void>> {
     const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Confirm`,
@@ -59,7 +64,6 @@ const appointmentServices = {
     return response.data;
   },
 
-  /** Reject a pending appointment */
   async rejectAppointment(id: string): Promise<ApiResponse<void>> {
     const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Reject`,
@@ -68,7 +72,6 @@ const appointmentServices = {
     return response.data;
   },
 
-  /** Mark an appointment as completed */
   async completeAppointment(id: string): Promise<ApiResponse<void>> {
     const response = await httpClient.put<ApiResponse<void>>(
       `/Appointments/${id}/Complete`,

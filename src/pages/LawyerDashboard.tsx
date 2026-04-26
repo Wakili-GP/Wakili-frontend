@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth.store";
 import { getInitials, getAvatarColor } from "@/lib/avatarHelpers";
+import { useQuery } from "@tanstack/react-query";
+import appointmentServices from "@/services/appointment-services";
 
 import AvailibilityTab from "@/components/LawyerDashboard/AvailibilityTab";
 import AppointmentsRequestsTab from "@/components/LawyerDashboard/AppointmentsRequestsTab";
@@ -33,7 +35,6 @@ import ReviewsTab from "@/components/LawyerDashboard/ReviewsTab";
 import ProfileSettingsTab from "@/components/LawyerDashboard/ProfileSettingsTab";
 import CalendarTab from "@/components/LawyerDashboard/CalendarTab";
 import {
-  LawyerDashboardAppointmentRequests,
   ownerUpcomingBookings,
   LawyerDashboardReviews,
 } from "@/data/data.ts";
@@ -72,6 +73,21 @@ const LawyerDashboard = () => {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const pendingQueryParams = {
+    Page: 1,
+    PageSize: 6,
+    Status: 0,
+    SortDescending: true,
+  };
+
+  const { data: pendingRequestsData } = useQuery({
+    queryKey: ["receivedAppointments", pendingQueryParams],
+    queryFn: () =>
+      appointmentServices.getAllReceivedAppointments(pendingQueryParams),
+  });
+
+  const pendingCount = pendingRequestsData?.data?.totalCount ?? 0;
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -102,9 +118,8 @@ const LawyerDashboard = () => {
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed lg:sticky top-0 right-0 h-screen w-72 bg-primary text-primary-foreground flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:sticky top-0 right-0 h-screen w-72 bg-primary text-primary-foreground flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+          }`}
       >
         {/* Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-primary-foreground/10">
@@ -164,26 +179,18 @@ const LawyerDashboard = () => {
                   setActiveSection(item.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  isActive
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${isActive
                     ? "bg-secondary text-secondary-foreground shadow-md"
                     : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 <span>{item.label}</span>
-                {item.id === "requests" &&
-                  LawyerDashboardAppointmentRequests.filter(
-                    (a) => a.status === "pending",
-                  ).length > 0 && (
-                    <span className="mr-auto bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                      {
-                        LawyerDashboardAppointmentRequests.filter(
-                          (a) => a.status === "pending",
-                        ).length
-                      }
-                    </span>
-                  )}
+                {item.id === "requests" && pendingCount > 0 && (
+                  <span className="mr-auto bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
               </button>
             );
           })}

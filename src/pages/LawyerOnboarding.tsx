@@ -4,12 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scale, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
-import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
-import EducationStep from "@/components/onboarding/EducationStep";
-import ExperienceStep from "@/components/onboarding/ExperienceStep";
-import VerificationStep from "@/components/onboarding/VerificationStep";
-import ReviewStep from "@/components/onboarding/ReviewStep";
+import OnboardingStepper from "@/components/Onboarding/OnboardingStepper";
+import BasicInfoStep from "@/components/Onboarding/BasicInfoStep";
+import EducationStep from "@/components/Onboarding/EducationStep";
+import ExperienceStep from "@/components/Onboarding/ExperienceStep";
+import VerificationStep from "@/components/Onboarding/VerificationStep";
+import ReviewStep from "@/components/Onboarding/ReviewStep";
 import { onboardingService } from "@/services/onboarding-services";
 import { useAuth } from "@/stores/auth.store";
 
