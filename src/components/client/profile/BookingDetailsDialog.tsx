@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { getAvatarColor } from "@/lib/avatarHelpers";
 import { getTimeRemaining } from "@/lib/utils";
-import BookingStatusBadge from "@/components/client/profile/BookingStatusBadge";
+import BookingStatusBadge from "@/components/client/Profile/BookingStatusBadge";
 import type { ClientBookingInterface } from "@/services/clientProfile-services";
 
 interface BookingDetailsDialogProps {
@@ -140,21 +140,21 @@ const BookingDetailsDialog = ({
 
                 {(selectedBooking.status === "قيد الانتظار" ||
                   selectedBooking.status === "مؤكد") && (
-                  <div className="bg-muted/40 p-3 rounded-lg flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-semibold text-muted-foreground">
-                        الوقت المتبقي
+                    <div className="bg-muted/40 p-3 rounded-lg flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-semibold text-muted-foreground">
+                          الوقت المتبقي
+                        </div>
+                        <div className="text-sm font-bold mt-1 text-secondary">
+                          {getTimeRemaining(
+                            selectedBooking.sessionDate,
+                            selectedBooking.startTime,
+                          )}
+                        </div>
                       </div>
-                      <div className="text-sm font-bold mt-1 text-secondary">
-                        {getTimeRemaining(
-                          selectedBooking.sessionDate,
-                          selectedBooking.startTime,
-                        )}
-                      </div>
+                      <Clock className="w-6 h-6 text-muted-foreground/30" />
                     </div>
-                    <Clock className="w-6 h-6 text-muted-foreground/30" />
-                  </div>
-                )}
+                  )}
               </div>
             );
           })()}

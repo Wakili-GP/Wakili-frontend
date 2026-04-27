@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { getAvatarColor } from "@/lib/avatarHelpers";
 import { getTimeRemaining } from "@/lib/utils";
-import BookingStatusBadge from "@/components/client/profile/BookingStatusBadge";
+import BookingStatusBadge from "@/components/client/Profile/BookingStatusBadge";
 import type { ClientBookingInterface } from "@/services/clientProfile-services";
 
 interface BookingsTabProps {

@@ -24,7 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import paymentServices from "@/services/payment-services";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth.store";
-import type { AxiosError } from "axios";
 
 interface LawyerInfo {
   lawyerId: string;
