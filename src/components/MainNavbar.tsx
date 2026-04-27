@@ -16,7 +16,6 @@ import { Bell, ChevronDown, LayoutDashboard, LogOut, Scale, User } from "lucide-
 import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
-
 interface MainNavbarProps {
   fixed?: boolean;
   onLoginClick?: () => void;
@@ -57,6 +56,9 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
   const { logout, user, isAuthenticated } = useAuth();
   const openLogin = useAuthModalStore((state) => state.openLogin);
 
+  const currentLocation = useLocation();
+  console.log("currentLocation from Inside Navbar", currentLocation)
+
   const handleNavClick = (path: string) => {
     if (path === location.pathname) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -75,7 +77,9 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
       toast.success("تم تسجيل الخروج بنجاح", {
         description: "نراك قريباً",
       });
-      navigate("/");
+      if (currentLocation.pathname.startsWith("/dashboard") || currentLocation.pathname.startsWith("/profile")) {
+        navigate("/");
+      }
     } catch {
       toast.error("خطأ في تسجيل الخروج");
     }
@@ -83,9 +87,8 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
 
   return (
     <nav
-      className={`border-b bg-white backdrop-blur supports-backdrop-filter:bg-white z-50 ${
-        fixed ? "fixed top-0 w-full shadow-card" : "sticky top-0"
-      }`}
+      className={`border-b bg-white backdrop-blur supports-backdrop-filter:bg-white z-50 ${fixed ? "fixed top-0 w-full shadow-card" : "sticky top-0"
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="relative flex items-center justify-between h-16">
@@ -101,11 +104,10 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
               <button
                 key={tab.path}
                 onClick={() => handleNavClick(tab.path)}
-                className={`cursor-pointer py-2 px-5 rounded-xl transition-all duration-300 font-medium ${
-                  location.pathname === tab.path
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
+                className={`cursor-pointer py-2 px-5 rounded-xl transition-all duration-300 font-medium ${location.pathname === tab.path
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
               >
                 {tab.label}
               </button>
