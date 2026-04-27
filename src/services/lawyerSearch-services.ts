@@ -1,10 +1,4 @@
-import httpClient from "./api/httpClient";
-
-export interface LawyerCardSpecialization {
-  id: number;
-  name: string;
-  description: string;
-}
+import httpClient, {type ApiResponse} from "./api/httpClient";
 
 export interface LawyerCard {
   id: string;
@@ -15,7 +9,7 @@ export interface LawyerCard {
   city: string;
   country: string;
   yearsOfExperience: number;
-  specializations: LawyerCardSpecialization[];
+  specializations: string[];
   // 0: InOffice, 1: Phone
   sessionTypes: number[];
   phoneSessionPrice: number;
@@ -30,6 +24,7 @@ export interface ResponseLawyerCard {
   pageSize: number;
   totalCount: number;
   totalPages: number;
+  meta: null;
 }
 
 const lawyerService = {
@@ -47,7 +42,7 @@ const lawyerService = {
     sortBy?: 0 | 1 | 2,
     sortOrder?: "asc" | "desc",
   ): Promise<ResponseLawyerCard> {
-    const response = await httpClient.get<ResponseLawyerCard>(
+    const response = await httpClient.get<ApiResponse<ResponseLawyerCard>>(
       "/Lawyers/approved",
       {
         params: {
@@ -65,8 +60,11 @@ const lawyerService = {
         },
       },
     );
-    console.log("Lawyer Cards Response Data: ", response.data);
-    return response.data;
+    if (!response.data.success) {
+      throw new Error("Failed to fetch lawyers");
+    }
+    console.log("Lawyer Cards.data.data.items ", response.data.data);
+    return response.data?.data ?? {items: [], page: 0, pageSize: 0, totalCount: 0, totalPages: 0, meta: null};
   },
 };
 

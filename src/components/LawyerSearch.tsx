@@ -10,9 +10,7 @@ import {
   Scale,
   Heart,
   ChevronDown,
-  ChevronLeft,
   X,
-  Users,
   ArrowRight,
   Calendar,
   BadgeCheck,
@@ -46,56 +44,9 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
-import lawyerService, {
-  type LawyerCard as ApiLawyerCard,
-} from "@/services/lawyerSearch-services";
+import lawyerService from "@/services/lawyerSearch-services";
 import favoritesService from "@/services/favorites-services";
 import { useAuth } from "@/stores/auth.store";
-
-// Internal Lawyer interface aligned to the API response
-export interface Lawyer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  specialty: string;
-  specialties: string[];
-  city: string;
-  country: string;
-  rating: number;
-  reviewCount: number;
-  sessionTypes: number[];
-  yearsOfExperience: number;
-  phoneSessionPrice: number;
-  officeSessionPrice: number;
-  joiningDate: string;
-  profileImage: string | null;
-}
-
-// Helper: map API LawyerCard to internal Lawyer
-function mapApiLawyer(api: ApiLawyerCard): Lawyer {
-  return {
-    id: api.id,
-    firstName: api.firstName,
-    lastName: api.lastName,
-    specialty: api.specializations?.[0]?.name ?? "",
-    specialties: api.specializations?.map((s) => s.name) ?? [],
-    city: api.city,
-    country: api.country,
-    rating: api.averageRating,
-    reviewCount: api.numberOfRatings,
-    sessionTypes: api.sessionTypes,
-    yearsOfExperience: api.yearsOfExperience,
-    phoneSessionPrice: api.phoneSessionPrice,
-    officeSessionPrice: api.inOfficeSessionPrice,
-    joiningDate: api.joinedDate
-      ? new Date(api.joinedDate).toLocaleDateString("ar-EG", {
-          month: "long",
-          year: "numeric",
-        })
-      : "",
-    profileImage: api.profileImage ?? null,
-  };
-}
 import { LawyerCardSkeleton } from "@/components/ui/skeletons";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -103,14 +54,16 @@ import SpecializationService, {
   type Specialization,
 } from "@/services/specializations-services";
 import { type ApiResponse } from "@/services/api/httpClient";
-import { CITIES_BY_COUNTRY } from "@/data/onboarding";
+import { CITIES_BY_COUNTRY, COUNTRIES } from "@/data/onboarding";
+import { getMonthYearInArabic } from "@/lib/utils"
+
 
 const ITEMS_PER_PAGE = 8;
 
 export default function LawyerSearch() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const initialSearch = searchParams.get("search") || "";
   const initialSpecialty = searchParams.get("specialty") || "";
@@ -234,7 +187,8 @@ export default function LawyerSearch() {
     enabled: selectedArea === "all" || specializations.length > 0,
   });
 
-  const searchResults = searchData?.items?.map(mapApiLawyer) || [];
+  const lawyersResults = searchData?.items || [];
+  console.log("Lawyer from inside Lawyer Search", lawyersResults)
   const totalItems = searchData?.totalCount || 0;
 
   useEffect(() => {
@@ -529,11 +483,10 @@ export default function LawyerSearch() {
                         {[4, 3, 2, 1].map((rating) => (
                           <label
                             key={rating}
-                            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                              minRating === rating
-                                ? "bg-primary/10"
-                                : "hover:bg-muted"
-                            }`}
+                            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${minRating === rating
+                              ? "bg-primary/10"
+                              : "hover:bg-muted"
+                              }`}
                             onClick={() => {
                               setMinRating(minRating === rating ? 0 : rating);
                               setCurrentPage(1);
@@ -645,7 +598,7 @@ export default function LawyerSearch() {
               <>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
                   <AnimatePresence mode="wait">
-                    {searchResults.map((lawyer, index) => (
+                    {lawyersResults?.map((lawyer, index) => (
                       <motion.div
                         key={lawyer.id}
                         initial={{ opacity: 0, y: 30 }}
@@ -659,7 +612,7 @@ export default function LawyerSearch() {
                       >
                         <Card
                           className="group relative overflow-hidden border border-border/40 bg-card/60 backdrop-blur-2xl rounded-[2rem] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06)] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] transition-all duration-[800ms] ease-out hover:-translate-y-2 hover:border-primary/40 cursor-pointer flex flex-col sm:flex-row items-stretch overflow-hidden"
-                          onClick={() => navigate(`/lawyers/${lawyer.id}`)}
+                          onClick={() => navigate(`/lawyer/${lawyer.id}`)}
                         >
                           {/* Image Section — Right Side in RTL */}
                           <div className="relative w-full sm:w-48 xl:w-52 h-56 sm:h-auto shrink-0 overflow-hidden border-b sm:border-b-0 sm:border-l border-border/20">
@@ -682,11 +635,10 @@ export default function LawyerSearch() {
                               className="absolute top-4 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-background/30 backdrop-blur-xl border border-white/20 shadow-lg text-white hover:bg-white hover:text-red-500 transition-all duration-500 hover:scale-110 active:scale-95 z-10"
                             >
                               <Heart
-                                className={`w-4 h-4 transition-all duration-300 ${
-                                  favorites.includes(lawyer.id)
-                                    ? "text-red-500 fill-red-500"
-                                    : ""
-                                }`}
+                                className={`w-4 h-4 transition-all duration-300 ${favorites.includes(lawyer.id)
+                                  ? "text-red-500 fill-red-500"
+                                  : ""
+                                  }`}
                               />
                             </button>
 
@@ -695,9 +647,9 @@ export default function LawyerSearch() {
                               <div className="flex gap-2">
                                 <Badge className="bg-white/20 text-white backdrop-blur-md border border-white/30 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xl">
                                   <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                                  {lawyer.rating}
+                                  {lawyer.averageRating}
                                   <span className="opacity-70 font-normal">
-                                    ({lawyer.reviewCount})
+                                    ({lawyer.numberOfRatings})
                                   </span>
                                 </Badge>
                               </div>
@@ -728,7 +680,7 @@ export default function LawyerSearch() {
                                       <Calendar className="w-3.5 h-3.5 text-primary/70" />
                                       <span>
                                         انضم{" "}
-                                        {lawyer.joiningDate || "يناير 2023"}
+                                        {getMonthYearInArabic(new Date(lawyer.joinedDate))}
                                       </span>
                                     </div>
                                     <span className="w-1 h-1 rounded-full bg-border" />
@@ -741,14 +693,14 @@ export default function LawyerSearch() {
 
                               {/* Categories */}
                               <div className="flex flex-wrap gap-1.5">
-                                {(lawyer.specialties || [lawyer.specialty]).map(
-                                  (cat, idx) => (
+                                {(lawyer.specializations || []).map(
+                                  (spec, idx) => (
                                     <Badge
                                       key={idx}
                                       variant="secondary"
                                       className="bg-muted hover:bg-primary/10 transition-colors duration-300 text-foreground border-border/50 font-bold px-2 py-0.5 rounded-lg text-[10px]"
                                     >
-                                      {cat}
+                                      {spec}
                                     </Badge>
                                   ),
                                 )}
@@ -766,9 +718,8 @@ export default function LawyerSearch() {
                                     استشارة هاتفية
                                   </span>
                                   <span className="font-extrabold text-foreground text-sm">
-                                    {lawyer.phoneSessionPrice ||
-                                      lawyer.hourlyRate}{" "}
-                                    <span className="text-[10px] text-muted-foreground font-normal">
+                                    {lawyer.phoneSessionPrice}
+                                    < span className="text-[10px] text-muted-foreground font-normal">
                                       ج.م
                                     </span>
                                   </span>
@@ -784,8 +735,7 @@ export default function LawyerSearch() {
                                     استشارة مكتبية
                                   </span>
                                   <span className="font-extrabold text-foreground text-sm">
-                                    {lawyer.officeSessionPrice ||
-                                      lawyer.hourlyRate + 200}{" "}
+                                    {lawyer.inOfficeSessionPrice}{" "}
                                     <span className="text-[10px] text-muted-foreground font-normal">
                                       ج.م
                                     </span>
@@ -801,7 +751,7 @@ export default function LawyerSearch() {
                 </div>
 
                 {/* Pagination */}
-                {!isLoading && searchResults.length > 0 && totalPages > 1 && (
+                {!isLoading && lawyersResults.length > 0 && totalPages > 1 && (
                   <div className="flex justify-center mt-8">
                     <Pagination>
                       <PaginationContent>
@@ -854,14 +804,14 @@ export default function LawyerSearch() {
                 )}
 
                 {/* Page Info */}
-                {!isLoading && searchResults.length > 0 && totalPages > 1 && (
+                {!isLoading && lawyersResults.length > 0 && totalPages > 1 && (
                   <p className="text-center text-sm text-muted-foreground">
                     صفحة {currentPage} من {totalPages}
                   </p>
                 )}
 
                 {/* No Results */}
-                {!isLoading && searchResults.length === 0 && (
+                {!isLoading && lawyersResults.length === 0 && (
                   <Card className="p-12 text-center">
                     <Scale className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-xl font-bold mb-2">لا توجد نتائج</h3>
@@ -878,6 +828,6 @@ export default function LawyerSearch() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
