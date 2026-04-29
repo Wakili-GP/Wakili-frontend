@@ -22,7 +22,6 @@ import clientProfileService, {
   type ClientProfileInterface,
   type ClientProfileUpdatePayload,
 } from "@/services/clientProfile-services";
-import favoritesService from "@/services/favorites-services";
 import BookingsTab from "@/components/client/Profile/BookingsTab";
 import FavoritesTab from "@/components/client/Profile/FavoritesTab";
 import DocumentsTab from "@/components/client/Profile/DocumentsTab";
@@ -32,6 +31,7 @@ import ProfileEditModal, {
   type ProfileData,
 } from "../components/client/Profile/ProfileEditModal";
 import AccountSettingsModal from "@/components/client/Profile/AccountSettingsModal";
+import favoritesService from "@/services/favorites-services";
 
 const TABS = [
   { id: "bookings", label: "حجوزاتي" },
@@ -42,7 +42,8 @@ const TABS = [
 
 const ClientProfile = () => {
   const queryClient = useQueryClient();
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
+  const userId = user?.id;
 
   const [activeTab, setActiveTab] =
     useState<(typeof TABS)[number]["id"]>("bookings");
@@ -57,6 +58,21 @@ const ClientProfile = () => {
     queryFn: () => clientProfileService.getClientBookings(),
   });
 
+  // Getting Favourites Length
+  const {
+    data: favoritesResponse,
+    isError: isFavoritesError,
+  } = useQuery({
+    queryKey: ["favorites", userId],
+    queryFn: () => favoritesService.getFavorites(),
+  });
+  useEffect(() => {
+    if (!isFavoritesError) return;
+    toast.error("خطأ في تحميل المفضلة");
+  }, [isFavoritesError]);
+
+  const favoritesLength = favoritesResponse?.data?.length ?? 0;
+
   const {
     data: profile,
     isLoading: isClientProfileLoading,
@@ -67,14 +83,6 @@ const ClientProfile = () => {
     select: (response): ClientProfileInterface | null => response.data ?? null,
   });
 
-  const {
-    data: favoritesResponse,
-    isLoading: isFavoritesLoading,
-    isError: isFavoritesError,
-  } = useQuery({
-    queryKey: ["favorites"],
-    queryFn: () => favoritesService.getFavorites(),
-  });
 
   useEffect(() => {
     if (!isError) return;
@@ -83,12 +91,7 @@ const ClientProfile = () => {
     });
   }, [isError]);
 
-  useEffect(() => {
-    if (!isFavoritesError) return;
-    toast.error("خطأ في تحميل المفضلة");
-  }, [isFavoritesError]);
 
-  const displayedFavorites = favoritesResponse?.data ?? [];
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: Partial<ClientProfileUpdatePayload>) =>
@@ -108,16 +111,7 @@ const ClientProfile = () => {
     }) => clientProfileService.ChangePassword(currentPassword, newPassword),
   });
 
-  const removeFavoriteMutation = useMutation({
-    mutationFn: (lawyerId: string) => favoritesService.removeFavorite(lawyerId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["favorites"] });
-      toast.success("تم إزالة المحامي من المفضلة بنجاح");
-    },
-    onError: () => {
-      toast.error("تعذر إزالة المحامي من المفضلة");
-    },
-  });
+
 
   const handleProfileSave = async (data: ProfileData) => {
     const response = await updateProfileMutation.mutateAsync(data);
@@ -223,7 +217,7 @@ const ClientProfile = () => {
     {
       icon: Heart,
       label: "المفضلة",
-      value: `${displayedFavorites.length}`,
+      value: `${favoritesLength}`,
     },
   ];
 
@@ -312,8 +306,8 @@ const ClientProfile = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`pb-3 text-sm font-medium transition-all relative cursor-pointer ${activeTab === tab.id
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {tab.label}
@@ -345,14 +339,7 @@ const ClientProfile = () => {
           )}
 
           {activeTab === "favorites" && (
-            <FavoritesTab
-              favorites={displayedFavorites}
-              isLoading={isFavoritesLoading}
-              onRemoveFavorite={(lawyerId) =>
-                removeFavoriteMutation.mutate(lawyerId)
-              }
-              isRemoving={removeFavoriteMutation.isPending}
-            />
+            <FavoritesTab />
           )}
 
           {activeTab === "documents" && <DocumentsTab />}

@@ -54,7 +54,7 @@ import SpecializationService, {
   type Specialization,
 } from "@/services/specializations-services";
 import { type ApiResponse } from "@/services/api/httpClient";
-import { CITIES_BY_COUNTRY, COUNTRIES } from "@/data/onboarding";
+import { CITIES_BY_COUNTRY } from "@/data/onboarding";
 import { getMonthYearInArabic } from "@/lib/utils"
 
 
@@ -84,7 +84,6 @@ export default function LawyerSearch() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  // Fetch favorites if user is authenticated client
   const { data: favoritesData } = useQuery({
     queryKey: ["favorites"],
     queryFn: () => favoritesService.getFavorites(),
@@ -680,7 +679,7 @@ export default function LawyerSearch() {
                                       <Calendar className="w-3.5 h-3.5 text-primary/70" />
                                       <span>
                                         انضم{" "}
-                                        {getMonthYearInArabic(new Date(lawyer.joinedDate))}
+                                        {getMonthYearInArabic(lawyer.joinedDate)}
                                       </span>
                                     </div>
                                     <span className="w-1 h-1 rounded-full bg-border" />

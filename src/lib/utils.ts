@@ -51,9 +51,10 @@ export const formatArabicMonthYear = (memberSince: string): string => {
 
 
 
-export const getMonthYearInArabic = (date: Date) => {
+export const getMonthYearInArabic = (date: string) => {
+  const dateObj = new Date(date);
   return new Intl.DateTimeFormat("ar-Eg", {
     month: "long",
     year: "numeric",
-  }).format(date);
+  }).format(dateObj);
 }

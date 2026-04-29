@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Building2, Heart, MapPin, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -6,21 +7,45 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getAvatarColor } from "@/lib/avatarHelpers";
 import type { FavoriteLawyer } from "@/services/favorites-services";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import favoritesService from "@/services/favorites-services";
+import { useQueryClient } from "@tanstack/react-query";
 
-interface FavoritesTabProps {
-  favorites: FavoriteLawyer[];
-  isLoading: boolean;
-  onRemoveFavorite: (lawyerId: string) => void;
-  isRemoving: boolean;
-}
+import { useAuth } from "@/stores/auth.store";
 
-const FavoritesTab = ({
-  favorites,
-  isLoading,
-  onRemoveFavorite,
-  isRemoving,
-}: FavoritesTabProps) => {
+const FavoritesTab = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
+
+  // Remove Favorite Mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: (lawyerId: string) => favoritesService.removeFavorite(lawyerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      toast.success("تم إزالة المحامي من المفضلة بنجاح");
+    },
+    onError: () => {
+      toast.error("تعذر إزالة المحامي من المفضلة");
+    },
+  });
+  // Fetching Favorites Data
+  const {
+    data: favorites,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["favorites", userId],
+    queryFn: () => favoritesService.getFavorites(),
+  });
+  useEffect(() => {
+    if (!isError) return;
+    toast.error("خطأ في تحميل المفضلة");
+  }, [isError]);
+
+  if (!favorites) return null;
 
   return (
     <div className="space-y-6">
@@ -51,8 +76,8 @@ const FavoritesTab = ({
                       {lawyer.fullName.charAt(0)}
                     </div>
                     <button
-                      onClick={() => onRemoveFavorite(lawyer.id)}
-                      disabled={isRemoving}
+                      onClick={() => removeFavoriteMutation.mutate(lawyer.id)}
+                      disabled={removeFavoriteMutation.isPending}
                       className="absolute -top-1 -right-1 p-1.5 rounded-full bg-background/90 hover:bg-destructive/10 transition-colors shadow-sm"
                     >
                       <Heart className="w-4 h-4 text-destructive fill-destructive" />

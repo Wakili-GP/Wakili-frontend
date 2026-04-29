@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   analyzeContractService,
   type HistoryEntry,
-} from "@/services/ai-review.service/ai-review-service";
+} from "@/services/ai-review-service";
 
 interface Message {
   id: number;
@@ -94,11 +94,10 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
                 className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === "ai"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "ai"
                       ? "bg-white border border-stone-300 text-slate-700"
                       : "bg-slate-900 text-slate-100"
-                  }`}
+                    }`}
                 >
                   {msg.role === "ai" ? (
                     <Bot className="w-4 h-4 text-amber-700" />
@@ -107,11 +106,10 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
                   )}
                 </div>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    msg.role === "ai"
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "ai"
                       ? "bg-white border border-stone-300/80 text-slate-800 rounded-tr-sm shadow-sm"
                       : "bg-slate-900 text-slate-100 rounded-tl-sm shadow-md"
-                  }`}
+                    }`}
                 >
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                 </div>

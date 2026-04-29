@@ -29,7 +29,6 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import AuthModals from "@/components/AuthModals";
 import Marquee from "react-fast-marquee";
 import lawyer_2 from "../assets/lawyer-2.png";
 import {
@@ -42,25 +41,26 @@ import Chatbot from "@/components/Chatbot";
 import { type FeatureStatistic, MOCK_STATISTICS } from "@/data/data.ts";
 import { MOCK_TOP_LAWYERS, type Lawyer as LawyerData } from "@/data/data.ts";
 import { type Testimonial, MOCK_TESTIMONIALS } from "@/data/data.ts";
-
+import { useNavigate } from "react-router";
+import { useAuth } from "@/stores/auth.store";
 const IndexPage = () => {
-  const authOpen = useAuthModalStore((state) => state.isOpen);
-  const authMode = useAuthModalStore((state) => state.mode);
-  const setAuthOpen = useAuthModalStore((state) => state.setOpen);
-  const setAuthMode = useAuthModalStore((state) => state.setMode);
+  const openLogin = useAuthModalStore((state) => state.openLogin);
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
 
   const openAiChatPage = () => {
-    window.open("/ai-chat", "_blank", "noopener,noreferrer");
+    if (isAuthenticated) {
+      navigate("/ai-chat");
+    } else {
+      openLogin();
+    }
   };
 
   return (
     <div className="min-h-screen bg-background font-cairo" dir="rtl">
       <MainNavbar
         fixed
-        onLoginClick={() => {
-          setAuthMode("login");
-          setAuthOpen(true);
-        }}
+        onLoginClick={openLogin}
       />
       <Hero onOpenAiChat={openAiChatPage} />
       <MobileApp />
@@ -70,12 +70,6 @@ const IndexPage = () => {
       <Features />
       <CTA onOpenAiChat={openAiChatPage} />
       <Footer />
-      <AuthModals
-        open={authOpen}
-        mode={authMode}
-        onOpenChange={setAuthOpen}
-        onSwitchMode={setAuthMode}
-      />
       <Chatbot />
     </div>
   );
@@ -533,11 +527,10 @@ const LawyerCard: FC<LawyerCardProps> = ({
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-4 h-4 transition ${
-                  i < Math.floor(ratingValue)
-                    ? "text-warning-amber fill-current scale-100"
-                    : "text-muted-foreground/30 scale-90"
-                }`}
+                className={`w-4 h-4 transition ${i < Math.floor(ratingValue)
+                  ? "text-warning-amber fill-current scale-100"
+                  : "text-muted-foreground/30 scale-90"
+                  }`}
               />
             ))}
           </div>
@@ -650,11 +643,10 @@ const Testimonials = () => {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${
-                              i < testimonial.rating
-                                ? "text-warning-amber fill-current"
-                                : "text-muted-foreground/30"
-                            }`}
+                            className={`w-4 h-4 ${i < testimonial.rating
+                              ? "text-warning-amber fill-current"
+                              : "text-muted-foreground/30"
+                              }`}
                           />
                         ))}
                       </div>

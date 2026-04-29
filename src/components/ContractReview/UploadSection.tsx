@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   analyzeContractService,
   type AnalysisResult,
-} from "@/services/ai-review.service/ai-review-service";
+} from "@/services/ai-review-service";
 import { isAxiosError } from "axios";
 import {
   ACCEPTED_CONTRACT_FILE_TYPES,
@@ -191,11 +191,10 @@ const UploadSection = ({
             onClick={() =>
               document.getElementById("contract-file-input")?.click()
             }
-            className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer p-12 text-center ${
-              isDragOver
+            className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer p-12 text-center ${isDragOver
                 ? "border-primary bg-primary/5 scale-[1.02]"
                 : "border-border hover:border-primary/40 hover:bg-muted/30"
-            }`}
+              }`}
           >
             <motion.div
               animate={isDragOver ? { y: -8 } : { y: 0 }}

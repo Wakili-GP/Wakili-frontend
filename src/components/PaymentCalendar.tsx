@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import paymentServices from "@/services/payment-services";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth.store";
+import { useAuthModalStore } from "@/stores/auth-modal.store";
 
 interface LawyerInfo {
   lawyerId: string;
@@ -50,7 +51,8 @@ const PaymentCalendar = ({
   phonePrice,
   officePrice,
 }: PaymentCalendarProps) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { openRegister } = useAuthModalStore();
   const isOwner = user?.id === lawyer.lawyerId;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -225,7 +227,14 @@ const PaymentCalendar = ({
               <Button
                 disabled={!selectedTime}
                 className="w-full cursor-pointer bg-primary text-primary-foreground hover:bg-primary-hover font-semibold h-12 text-base"
-                onClick={() => setBookingModalOpen(true)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    toast.info("يرجى تسجيل الدخول للحجز");
+                    openRegister();
+                    return;
+                  }
+                  setBookingModalOpen(true);
+                }}
               >
                 <CalendarIcon className="w-5 h-5 ml-2" /> احجز جلسة
               </Button>
@@ -311,8 +320,8 @@ const PaymentCalendar = ({
                 {selectedTime ? selectedTime.slice(0, 5) : ""} -{" "}
                 {selectedTime
                   ? availableTimes
-                      ?.find((s) => s.startTime === selectedTime)
-                      ?.endTime.slice(0, 5)
+                    ?.find((s) => s.startTime === selectedTime)
+                    ?.endTime.slice(0, 5)
                   : ""}
               </p>
             </div>

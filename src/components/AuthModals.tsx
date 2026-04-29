@@ -264,7 +264,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
     },
   ];
   return (
-    <Dialog modal={false} open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center sm:text-center items-center">
           <HeaderBand />
@@ -470,11 +470,10 @@ const AuthModals: React.FC<AuthModalProps> = ({
                             shouldValidate: true,
                           });
                         }}
-                        className={`relative rounded-lg border-2 p-4 text-center transition-all ${
-                          isDisabled
-                            ? "cursor-not-allowed opacity-60 border-border"
-                            : `cursor-pointer hover:shadow-md ${isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary-50"}`
-                        }`}
+                        className={`relative rounded-lg border-2 p-4 text-center transition-all ${isDisabled
+                          ? "cursor-not-allowed opacity-60 border-border"
+                          : `cursor-pointer hover:shadow-md ${isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary-50"}`
+                          }`}
                       >
                         {type.comingSoon && (
                           <span className="absolute -top-2 right-1/2 translate-x-1/2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
@@ -818,7 +817,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader className="text-center sm:text-center items-center">
           <div className="flex flex-col items-center text-center mb-4">

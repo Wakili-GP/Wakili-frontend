@@ -2,7 +2,6 @@ import { type ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import DarkFooter from "./DarkFooter.tsx";
 import MainNavbar from "./MainNavbar";
-import AuthModals from "./AuthModals.tsx";
 
 const HomeLayout = ({ children }: { children?: ReactNode }) => {
   const { pathname } = useLocation();
@@ -15,7 +14,6 @@ const HomeLayout = ({ children }: { children?: ReactNode }) => {
       <div className={isFullWidthPage ? "w-full" : "container mx-auto px-4"}>
         {children ?? <Outlet />}
       </div>
-      <AuthModals />
       <DarkFooter />
     </div>
   );

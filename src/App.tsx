@@ -23,6 +23,7 @@ import PaymentSuccessfulPage from "./pages/PaymentSuccessfulPage";
 const SharedLayout = ({ children }: { children: ReactNode }) => (
   <HomeLayout>{children}</HomeLayout>
 );
+import AuthModals from "./components/AuthModals";
 
 const App = () => {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
@@ -35,6 +36,7 @@ const App = () => {
     <TooltipProvider>
       <Sonner />
       <BrowserRouter>
+        <AuthModals />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<IndexPage />} />

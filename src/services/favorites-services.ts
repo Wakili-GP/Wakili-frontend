@@ -2,30 +2,32 @@ import httpClient, { type ApiResponse } from "@/services/api/httpClient";
 
 export interface FavoriteLawyer {
   id: string;
+  profileImage: string;
   fullName: string;
   email: string;
   phoneNumber: string;
-  address: string;
   country: string;
   city: string;
   licenseNumber: string;
   yearsOfExperience: number;
-  specializations: {
-    id: number;
-    name: string;
-    description: string;
-  }[];
-  sessionTypes: string[];
+  specializations: string[];
+  sessionTypes: number[];
   joinedDate: string;
   phoneSessionPrice: number;
   inOfficeSessionPrice: number;
+  averageRating: number;
+  numberOfRatings: number;
 }
 
 export const favoritesService = {
-  async getFavorites(): Promise<ApiResponse<FavoriteLawyer[]>> {
+  async getFavorites(): Promise<FavoriteLawyer[]> {
     const response =
       await httpClient.get<ApiResponse<FavoriteLawyer[]>>("/Favorites");
-    return response.data;
+    console.log("From Favourites --- response.data:", response.data);
+    if(!response.data.success){
+      throw new Error(response.data.error || "Failed to fetch favorites");
+    }
+    return response.data.data ?? [];
   },
 
   async addFavorite(lawyerId: string): Promise<ApiResponse<string>> {
