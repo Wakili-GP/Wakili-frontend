@@ -7,6 +7,7 @@ export const apiClient = axios.create({
   headers: {
     accept: "application/json",
   },
+  withCredentials: true,
 });
 
 export type RiskLevel = "low" | "medium" | "high";

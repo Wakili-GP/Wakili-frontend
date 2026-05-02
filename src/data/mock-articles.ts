@@ -1,0 +1,112 @@
+import type { Article } from "@/types/article.types";
+import { ARTICLE_CATEGORIES } from "@/types/article.types";
+
+const authors = [
+  { id: "l1", firstName: "أحمد", lastName: "المنصوري", profileImage: null, specialization: "قانون الأسرة", bio: "محامٍ متخصص في قضايا الأحوال الشخصية بخبرة تزيد عن 15 عاماً" },
+  { id: "l2", firstName: "فاطمة", lastName: "الزهراء", profileImage: null, specialization: "القانون الجنائي", bio: "مستشارة قانونية في القانون الجنائي والدفاع عن حقوق المتهمين" },
+  { id: "l3", firstName: "محمد", lastName: "العلي", profileImage: null, specialization: "قانون الشركات", bio: "خبير في تأسيس الشركات والاندماجات والاستحواذات" },
+  { id: "l4", firstName: "نورة", lastName: "القحطاني", profileImage: null, specialization: "حقوق الإنسان", bio: "ناشطة حقوقية ومحامية دولية متخصصة في حقوق الإنسان" },
+];
+
+const articleBodies = `<h2>مقدمة</h2><p>يُعد هذا الموضوع من أهم المواضيع القانونية التي تشغل بال الكثيرين في المجتمع العربي. سنتناول في هذا المقال الجوانب المختلفة لهذه القضية مع تحليل معمّق للنصوص القانونية ذات الصلة.</p><h2>الإطار القانوني</h2><p>ينظم القانون هذا الموضوع من خلال عدة نصوص تشريعية تهدف إلى حماية حقوق جميع الأطراف. وقد شهدت السنوات الأخيرة تطورات مهمة في هذا المجال، حيث صدرت عدة تعديلات تشريعية تواكب المتغيرات المجتمعية.</p><blockquote><p>«العدالة هي أساس الملك» — من المبادئ الأساسية في الفقه القانوني العربي</p></blockquote><h2>التطبيق العملي</h2><p>في الممارسة القضائية، نلاحظ أن المحاكم تتبع نهجاً متوازناً في تطبيق هذه النصوص، مع مراعاة الظروف الخاصة لكل قضية. ومن أبرز الأحكام القضائية في هذا الشأن...</p><h2>التوصيات</h2><ul><li>الاستعانة بمحامٍ متخصص عند مواجهة أي مسألة قانونية</li><li>التوثيق الكامل لجميع المعاملات والاتفاقيات</li><li>الاطلاع المستمر على التعديلات التشريعية الجديدة</li></ul><h2>الخلاصة</h2><p>يتضح مما سبق أن هذا الموضوع يتطلب فهماً عميقاً للنصوص القانونية وتطبيقاتها العملية. ننصح دائماً بالرجوع إلى المختصين للحصول على استشارة قانونية دقيقة.</p>`;
+
+export const MOCK_ARTICLES: Article[] = [
+  {
+    id: "art-1", title: "حقوق المرأة في قانون الأحوال الشخصية الجديد", slug: "womens-rights-personal-status",
+    excerpt: "تحليل شامل للتعديلات الأخيرة على قانون الأحوال الشخصية وأثرها على حقوق المرأة في النفقة والحضانة والطلاق",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[0], tags: ["أحوال شخصية", "حقوق المرأة", "حضانة"],
+    author: authors[0], status: "published", publishedAt: "2026-04-25T10:00:00Z",
+    submittedAt: "2026-04-20T10:00:00Z", createdAt: "2026-04-18T10:00:00Z", updatedAt: "2026-04-25T10:00:00Z",
+    readTimeMinutes: 7, totalReads: 3241, upvotes: 142, downvotes: 8, userVote: null,
+  },
+  {
+    id: "art-2", title: "دليلك الشامل لتأسيس شركة ذات مسؤولية محدودة", slug: "llc-formation-guide",
+    excerpt: "خطوات عملية ونصائح قانونية لتأسيس شركتك بشكل صحيح مع تجنب الأخطاء الشائعة في عقود التأسيس",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[2], tags: ["شركات", "تأسيس", "عقود"],
+    author: authors[2], status: "published", publishedAt: "2026-04-22T10:00:00Z",
+    submittedAt: "2026-04-18T10:00:00Z", createdAt: "2026-04-15T10:00:00Z", updatedAt: "2026-04-22T10:00:00Z",
+    readTimeMinutes: 12, totalReads: 5120, upvotes: 287, downvotes: 12, userVote: null,
+  },
+  {
+    id: "art-3", title: "حقوق العمال في ظل التحولات الاقتصادية", slug: "workers-rights-economic-changes",
+    excerpt: "كيف يحمي قانون العمل حقوق الموظفين أثناء الأزمات الاقتصادية وما هي الإجراءات القانونية المتاحة",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[8], tags: ["قانون العمل", "حقوق العمال", "فصل تعسفي"],
+    author: authors[1], status: "published", publishedAt: "2026-04-20T10:00:00Z",
+    submittedAt: "2026-04-16T10:00:00Z", createdAt: "2026-04-14T10:00:00Z", updatedAt: "2026-04-20T10:00:00Z",
+    readTimeMinutes: 9, totalReads: 2890, upvotes: 198, downvotes: 5, userVote: null,
+  },
+  {
+    id: "art-4", title: "الجرائم الإلكترونية: التعريف والعقوبات", slug: "cybercrime-definition-penalties",
+    excerpt: "نظرة قانونية على أنواع الجرائم الإلكترونية والعقوبات المقررة في التشريعات العربية الحديثة",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[1], tags: ["جرائم إلكترونية", "أمن سيبراني", "عقوبات"],
+    author: authors[1], status: "published", publishedAt: "2026-04-18T10:00:00Z",
+    submittedAt: "2026-04-14T10:00:00Z", createdAt: "2026-04-12T10:00:00Z", updatedAt: "2026-04-18T10:00:00Z",
+    readTimeMinutes: 8, totalReads: 4150, upvotes: 231, downvotes: 15, userVote: null,
+  },
+  {
+    id: "art-5", title: "إجراءات الحصول على الإقامة الدائمة", slug: "permanent-residency-procedures",
+    excerpt: "دليل قانوني مفصّل حول متطلبات وإجراءات الحصول على الإقامة الدائمة والجنسية",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1569974507005-6dc61f97fb5c?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[3], tags: ["هجرة", "إقامة", "جنسية"],
+    author: authors[3], status: "published", publishedAt: "2026-04-15T10:00:00Z",
+    submittedAt: "2026-04-11T10:00:00Z", createdAt: "2026-04-09T10:00:00Z", updatedAt: "2026-04-15T10:00:00Z",
+    readTimeMinutes: 10, totalReads: 6780, upvotes: 356, downvotes: 9, userVote: null,
+  },
+  {
+    id: "art-6", title: "حماية العلامات التجارية في العصر الرقمي", slug: "trademark-protection-digital",
+    excerpt: "كيف تحمي علامتك التجارية على الإنترنت ومنصات التواصل الاجتماعي من التقليد والانتهاك",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[5], tags: ["ملكية فكرية", "علامات تجارية", "تجارة إلكترونية"],
+    author: authors[2], status: "published", publishedAt: "2026-04-12T10:00:00Z",
+    submittedAt: "2026-04-08T10:00:00Z", createdAt: "2026-04-06T10:00:00Z", updatedAt: "2026-04-12T10:00:00Z",
+    readTimeMinutes: 6, totalReads: 2340, upvotes: 167, downvotes: 3, userVote: null,
+  },
+  {
+    id: "art-7", title: "النظام الضريبي الجديد وأثره على الأفراد", slug: "new-tax-system-individuals",
+    excerpt: "شرح مبسط للتغييرات الأخيرة في النظام الضريبي وكيفية حساب الضريبة المستحقة على الأفراد",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[6], tags: ["ضرائب", "دخل", "إعفاءات"],
+    author: authors[0], status: "published", publishedAt: "2026-04-10T10:00:00Z",
+    submittedAt: "2026-04-06T10:00:00Z", createdAt: "2026-04-04T10:00:00Z", updatedAt: "2026-04-10T10:00:00Z",
+    readTimeMinutes: 11, totalReads: 4560, upvotes: 245, downvotes: 18, userVote: null,
+  },
+  {
+    id: "art-8", title: "عقود البيع العقاري: ما يجب أن تعرفه", slug: "real-estate-sales-contracts",
+    excerpt: "الشروط الأساسية لعقد البيع العقاري الصحيح وكيفية تجنب النزاعات المحتملة",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[4], tags: ["عقارات", "عقود بيع", "تسجيل"],
+    author: authors[3], status: "published", publishedAt: "2026-04-08T10:00:00Z",
+    submittedAt: "2026-04-04T10:00:00Z", createdAt: "2026-04-02T10:00:00Z", updatedAt: "2026-04-08T10:00:00Z",
+    readTimeMinutes: 8, totalReads: 3890, upvotes: 203, downvotes: 7, userVote: null,
+  },
+  {
+    id: "art-9", title: "التحكيم التجاري الدولي: مزايا وتحديات", slug: "international-commercial-arbitration",
+    excerpt: "مقارنة بين التحكيم والقضاء العادي في المنازعات التجارية الدولية مع أمثلة عملية",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1436450412740-6b988f486c6b?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[9], tags: ["تحكيم", "تجارة دولية", "منازعات"],
+    author: authors[2], status: "published", publishedAt: "2026-04-05T10:00:00Z",
+    submittedAt: "2026-04-01T10:00:00Z", createdAt: "2026-03-30T10:00:00Z", updatedAt: "2026-04-05T10:00:00Z",
+    readTimeMinutes: 14, totalReads: 1950, upvotes: 134, downvotes: 4, userVote: null,
+  },
+  {
+    id: "art-draft-1", title: "مسودة: أحكام الميراث في القانون المدني", slug: "inheritance-civil-law-draft",
+    excerpt: "مسودة مقال حول أحكام الميراث والوصية في القانون المدني",
+    body: "<p>مسودة قيد الكتابة...</p>", coverImage: "",
+    category: ARTICLE_CATEGORIES[0], tags: ["ميراث", "وصية"],
+    author: authors[0], status: "draft", createdAt: "2026-04-28T10:00:00Z", updatedAt: "2026-04-29T10:00:00Z",
+    readTimeMinutes: 0, totalReads: 0, upvotes: 0, downvotes: 0, userVote: null,
+  },
+  {
+    id: "art-review-1", title: "الحماية القانونية للبيانات الشخصية", slug: "personal-data-protection",
+    excerpt: "تحليل لقوانين حماية البيانات الشخصية في الدول العربية ومقارنتها بالمعايير الدولية",
+    body: articleBodies, coverImage: "https://images.unsplash.com/photo-1563986768609-322da13575f2?w=800&h=450&fit=crop",
+    category: ARTICLE_CATEGORIES[5], tags: ["بيانات شخصية", "خصوصية", "GDPR"],
+    author: authors[1], status: "under_review", submittedAt: "2026-04-29T10:00:00Z",
+    createdAt: "2026-04-26T10:00:00Z", updatedAt: "2026-04-29T10:00:00Z",
+    readTimeMinutes: 9, totalReads: 0, upvotes: 0, downvotes: 0, userVote: null,
+  },
+];

@@ -18,6 +18,14 @@ export default defineConfig({
         secure: false, // only if the backend is HTTP, not HTTPS
         rewrite: (path) => path, // no rewrite needed if paths match
       },
+      "/chatbot-api": {
+        target:
+          process.env.VITE_CHATBOT_API_BASE_URL ||
+          "https://mayarwaleedd12--wakili-api-fastapi-app.modal.run",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/chatbot-api/, ""),
+      },
     },
   },
 });
