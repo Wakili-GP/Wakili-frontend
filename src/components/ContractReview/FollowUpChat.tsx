@@ -8,6 +8,7 @@ import {
   analyzeContractService,
   type HistoryEntry,
 } from "@/services/ai-review-service";
+import { useAuth } from "@/stores/auth.store";
 
 interface Message {
   id: number;
@@ -22,6 +23,8 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
   const { mutate: chat, isPending } = useMutation({
     mutationFn: analyzeContractService.chatWithContract,
   });
+
+  const { user } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -76,62 +79,66 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
         </p>
       </div>
 
-      <Card className="max-w-3xl mx-auto border-amber-900/20 bg-linear-to-br from-stone-100 via-stone-50 to-amber-50/70 shadow-lg overflow-hidden">
-        <CardHeader className="border-b border-amber-900/15 bg-white/65 backdrop-blur-sm">
-          <CardTitle className="flex items-center gap-2 text-slate-900">
-            <div className="w-7 h-7 rounded-full bg-amber-100 border border-amber-800/20 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-amber-700" />
+      <Card className="max-w-3xl mx-auto border-border bg-card shadow-lg overflow-hidden" dir="rtl">
+        <CardHeader className="border-b border-border bg-background backdrop-blur-sm">
+          <CardTitle className="flex items-center gap-2 text-foreground">
+            <div className="w-7 h-7 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center">
+              <Bot className="w-3.5 h-3.5 text-primary" />
             </div>
             محادثة حول العقد
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-background pt-4">
           {/* Messages */}
-          <div className="space-y-4 max-h-96 overflow-y-auto mb-4 p-2 rounded-2xl border border-amber-900/15 bg-white/70">
+          <div className="space-y-5 max-h-96 overflow-y-auto mb-4 p-2 rounded-2xl border border-transparent">
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                className={`flex gap-3 ${msg.role === "ai" ? "flex-row-reverse" : "flex-row"}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "ai"
-                      ? "bg-white border border-stone-300 text-slate-700"
-                      : "bg-slate-900 text-slate-100"
-                    }`}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 overflow-hidden ${
+                    msg.role === "ai"
+                      ? "bg-card border border-border text-foreground"
+                      : "bg-primary text-primary-foreground"
+                  }`}
                 >
                   {msg.role === "ai" ? (
-                    <Bot className="w-4 h-4 text-amber-700" />
+                    <Bot className="w-3.5 h-3.5" />
+                  ) : user?.profileImage ? (
+                    <img src={user.profileImage} alt="User" className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-4 h-4" />
+                    <User className="w-3.5 h-3.5" />
                   )}
                 </div>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "ai"
-                      ? "bg-white border border-stone-300/80 text-slate-800 rounded-tr-sm shadow-sm"
-                      : "bg-slate-900 text-slate-100 rounded-tl-sm shadow-md"
-                    }`}
+                  className={`max-w-[78%] rounded-2xl px-4 py-3 border text-xs md:text-sm leading-relaxed ${
+                    msg.role === "ai"
+                      ? "bg-card border-border rounded-tl-sm text-foreground shadow-sm"
+                      : "bg-primary text-primary-foreground border-primary rounded-tr-sm shadow-sm"
+                  }`}
                 >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  <p className="whitespace-pre-line text-right">{msg.content}</p>
                 </div>
               </div>
             ))}
             {isPending && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-white border border-stone-300 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-amber-700" />
+              <div className="flex gap-3 flex-row-reverse">
+                <div className="w-7 h-7 rounded-full overflow-hidden bg-card border border-border flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-3.5 h-3.5" />
                 </div>
-                <div className="bg-white border border-stone-300/80 rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
-                  <div className="flex gap-1">
+                <div className="bg-card border-border rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border">
+                  <div className="flex gap-1 items-center h-full">
                     <span
-                      className="w-2 h-2 bg-amber-700/50 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     />
                     <span
-                      className="w-2 h-2 bg-amber-700/50 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     />
                     <span
-                      className="w-2 h-2 bg-amber-700/50 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     />
                   </div>
@@ -142,12 +149,19 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
 
           {/* Input */}
           <div className="relative">
-            <div className="rounded-[30px] border border-amber-900/20 bg-white/90 p-2 shadow-sm transition focus-within:border-amber-700/40 focus-within:ring-2 focus-within:ring-amber-700/20">
+            <div className="flex items-end gap-2 rounded-2xl border border-border bg-card focus-within:border-primary/40 transition-colors p-2 shadow-sm">
               <Textarea
+                ref={(t) => {
+                  if (t) {
+                    t.style.height = "auto";
+                    t.style.height = Math.min(t.scrollHeight, 160) + "px";
+                  }
+                }}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="اكتب سؤالك هنا..."
-                className="min-h-12 max-h-24 resize-none border-0 bg-transparent pr-3 pl-14 text-slate-800 placeholder:text-slate-400 shadow-none focus-visible:ring-0"
+                className="flex-1 resize-none bg-transparent text-right px-3 py-2 text-xs md:text-sm text-foreground focus:outline-none placeholder:text-muted-foreground min-h-10 max-h-40 border-0 shadow-none focus-visible:ring-0"
+                rows={1}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -159,7 +173,7 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
                 size="icon"
                 onClick={handleSend}
                 disabled={!input.trim() || isPending}
-                className="absolute left-3 bottom-3 h-9 w-9 rounded-full bg-amber-700 text-white hover:bg-amber-800"
+                className="rounded-xl h-9 w-9 shrink-0 flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-4 h-4" />
               </Button>
