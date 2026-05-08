@@ -31,14 +31,12 @@ interface ApiResponse<T> {
   statusCode: number;
 }
 
-
 export interface ChatMeta {
   session_id: string;
   title: string;
   last_message: string;
   updated_at: string; // ISO string
 }
-
 
 export interface AskPayload {
   eastern_arabic_numerals?: boolean;
@@ -47,7 +45,6 @@ export interface AskPayload {
   session_id: string;
   user_id: string;
 }
-
 
 export interface LegalSource {
   article_id: string;
@@ -66,9 +63,20 @@ export interface AskResponse {
   sources: LegalSource[];
 }
 
+export interface LegalSource {
+  part: string;
+  chapter: string;
+  keywords: string;
+  law_name: string;
+  article_id: string;
+  legal_nature: string;
+  page_content: string;
+  article_number: string;
+}
 export interface HistoryMessage {
   role: "user" | "assistant";
   content: string;
+  sources: LegalSource[];
 }
 
 export interface HistoryResponse {
@@ -84,11 +92,14 @@ export const chatbotService = {
     return res.data.session_id || res.data.data || "";
   },
   async ask(payload: AskPayload): Promise<AskResponse> {
-    const { data } = await chatApiClient.post<ApiResponse<AskResponse>>("/ask", {
-      include_sources: true,
-      eastern_arabic_numerals: false,
-      ...payload,
-    });
+    const { data } = await chatApiClient.post<ApiResponse<AskResponse>>(
+      "/ask",
+      {
+        include_sources: true,
+        eastern_arabic_numerals: false,
+        ...payload,
+      },
+    );
     if (!data.data) {
       throw new Error(data.error || "Failed to get an answer from the server");
     }
@@ -106,11 +117,23 @@ export const chatbotService = {
   // Getting User's Chat History
   async getUserChatHistory(user_id: string): Promise<ChatMeta[]> {
     console.log("User Chat History user_id:", user_id);
-    const res = await chatApiClient.get<ApiResponse<ChatMeta[]>>("/chat-sessions", {
+    const res = await chatApiClient.get<ApiResponse<ChatMeta[]>>("/sessions", {
       params: { user_id },
     });
     console.log("User Chat History Response.data:", res.data);
     return res.data.data ?? [];
+  },
+  // Delete Chat by ID
+  async deleteChat(session_id: string): Promise<void> {
+    console.log("Delete Chat session_id:", session_id);
+    await chatApiClient.delete(`/session/${session_id}`);
+  },
+  // Rename Chat By ID
+  async renameChat(session_id: string, newTitle: string): Promise<void> {
+    console.log("Rename Chat session_id:", session_id, "newTitle:", newTitle);
+    await chatApiClient.put(`/session/${session_id}`, {
+      new_title: newTitle,
+    });
   },
   // Health
   async healthCheck(): Promise<boolean> {

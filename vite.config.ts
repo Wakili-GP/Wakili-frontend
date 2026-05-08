@@ -15,16 +15,17 @@ export default defineConfig({
       "/api": {
         target: "http://wakili.runasp.net",
         changeOrigin: true,
-        secure: false, // only if the backend is HTTP, not HTTPS
-        rewrite: (path) => path, // no rewrite needed if paths match
+        rewrite: (path) => path,
       },
       "/chatbot-api": {
-        target:
-          process.env.VITE_CHATBOT_API_BASE_URL ||
-          "https://mayarwaleedd12--wakili-api-fastapi-app.modal.run",
+        target: "https://mayarwaleedd12--wakili-api-fastapi-app.modal.run",
         changeOrigin: true,
-        secure: true,
         rewrite: (path) => path.replace(/^\/chatbot-api/, ""),
+      },
+      "/review-api": {
+        target: "https://nouraelkashif83--legal-ai-auditor-api.modal.run",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/review-api/, ""),
       },
     },
   },

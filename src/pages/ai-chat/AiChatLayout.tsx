@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,14 @@ import { getInitials, getAvatarColor } from "@/lib/avatarHelpers";
 import chatbotService, { type ChatMeta } from "@/services/chatbot-services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function AiChatLayout() {
   const { user } = useAuth();
@@ -31,6 +39,7 @@ export default function AiChatLayout() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
   // Fetching Health
   const { data: healthStatus } = useQuery({
@@ -40,10 +49,18 @@ export default function AiChatLayout() {
   });
 
   // Fetching Chat History
-  const { data: chatHistory } = useQuery({
+  const { data: rawChatHistory } = useQuery({
     queryKey: ["chatHistory", user?.id],
     queryFn: () => chatbotService.getUserChatHistory(user?.id as string),
   });
+
+  const chatHistory = useMemo(() => {
+    if (!rawChatHistory) return [];
+    return [...rawChatHistory].sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+    );
+  }, [rawChatHistory]);
 
   // Get a new Session Id
   const getSessionIdMutation = useMutation({
@@ -53,12 +70,14 @@ export default function AiChatLayout() {
       const newChat: ChatMeta = {
         session_id: session_id,
         title: "محادثة جديدة",
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         last_message: "",
       };
-      
-      queryClient.setQueryData<ChatMeta[]>(["chatHistory", user?.id], (old = []) => [newChat, ...old]);
+
+      queryClient.setQueryData<ChatMeta[]>(
+        ["chatHistory", user?.id],
+        (old = []) => [newChat, ...old],
+      );
       navigate(`/ai-chat/${session_id}`);
     },
     onError: (error) => {
@@ -68,20 +87,97 @@ export default function AiChatLayout() {
     onSettled: () => setIsCreating(false),
   });
 
-  // ── New chat ──────────────────────────────────────────────────────────────
-  const handleNewChat = () => {
-    if (isCreating || getSessionIdMutation.isPending) return;
-    getSessionIdMutation.mutate();
-  };
+  // Delete Chat Mutation
+  const deleteChatMutation = useMutation({
+    mutationFn: (session_id: string) => chatbotService.deleteChat(session_id),
+    onMutate: async (session_id) => {
+      await queryClient.cancelQueries({ queryKey: ["chatHistory", user?.id] });
+      const previousChats = queryClient.getQueryData<ChatMeta[]>([
+        "chatHistory",
+        user?.id,
+      ]);
 
-  // Delete Chat
+      queryClient.setQueryData<ChatMeta[]>(
+        ["chatHistory", user?.id],
+        (old) => old?.filter((c) => c.session_id !== session_id) ?? [],
+      );
+
+      return { previousChats };
+    },
+    onError: (err, _variables, context) => {
+      queryClient.setQueryData(
+        ["chatHistory", user?.id],
+        context?.previousChats,
+      );
+      console.error("Failed to delete chat:", err);
+      toast.error("حدث خطأ أثناء حذف المحادثة");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["chatHistory", user?.id] });
+    },
+    onSuccess: (_, session_id) => {
+      toast.success("تم حذف المحادثة بنجاح");
+      if (activeChatId === session_id) {
+        navigate("/ai-chat");
+      }
+    },
+  });
+
   const handleDelete = (e: React.MouseEvent, session_id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    toast.info("سيتم إضافة ميزة حذف المحادثة قريباً");
+    setChatToDelete(session_id);
   };
 
-  // Rename Chat
+  const confirmDelete = () => {
+    if (chatToDelete) {
+      deleteChatMutation.mutate(chatToDelete);
+      setChatToDelete(null);
+    }
+  };
+
+  // Rename Chat Mutation
+  const renameChatMutation = useMutation({
+    mutationFn: ({
+      session_id,
+      newTitle,
+    }: {
+      session_id: string;
+      newTitle: string;
+    }) => chatbotService.renameChat(session_id, newTitle),
+    onMutate: async ({ session_id, newTitle }) => {
+      await queryClient.cancelQueries({ queryKey: ["chatHistory", user?.id] });
+      const previousChats = queryClient.getQueryData<ChatMeta[]>([
+        "chatHistory",
+        user?.id,
+      ]);
+
+      queryClient.setQueryData<ChatMeta[]>(
+        ["chatHistory", user?.id],
+        (old) =>
+          old?.map((c) =>
+            c.session_id === session_id ? { ...c, title: newTitle } : c,
+          ) ?? [],
+      );
+
+      return { previousChats };
+    },
+    onError: (err, _variables, context) => {
+      queryClient.setQueryData(
+        ["chatHistory", user?.id],
+        context?.previousChats,
+      );
+      console.error("Failed to rename chat:", err);
+      toast.error("حدث خطأ أثناء تعديل المحادثة");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["chatHistory", user?.id] });
+    },
+    onSuccess: () => {
+      toast.success("تم تعديل عنوان المحادثة بنجاح");
+    },
+  });
+
   const startEdit = (e: React.MouseEvent, chat: ChatMeta) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,7 +189,8 @@ export default function AiChatLayout() {
     e.preventDefault();
     e.stopPropagation();
     if (!editTitle.trim()) return;
-    toast.info("سيتم إضافة ميزة تعديل عنوان المحادثة قريباً");
+
+    renameChatMutation.mutate({ session_id, newTitle: editTitle.trim() });
     setEditingId(null);
   };
 
@@ -218,7 +315,7 @@ export default function AiChatLayout() {
         {/* New Chat button */}
         <div className="px-3 mb-2">
           <button
-            onClick={handleNewChat}
+            onClick={() => navigate("/ai-chat")}
             disabled={isCreating || getSessionIdMutation.isPending}
             className={cn(
               "cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -273,8 +370,12 @@ export default function AiChatLayout() {
                           onChange={(e) => setEditTitle(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter")
-                              confirmEdit(e as any, chat.session_id);
-                            if (e.key === "Escape") cancelEdit(e as any);
+                              confirmEdit(
+                                e as unknown as React.MouseEvent,
+                                chat.session_id,
+                              );
+                            if (e.key === "Escape")
+                              cancelEdit(e as unknown as React.MouseEvent);
                           }}
                           className="flex-1 min-w-0 text-xs bg-background border border-primary/30 rounded px-1.5 py-0.5 outline-none focus:border-primary/60 text-foreground"
                         />
@@ -314,13 +415,13 @@ export default function AiChatLayout() {
                     <div className="absolute left-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => startEdit(e, chat)}
-                        className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-background/80"
+                        className="cusor-pointer p-1 rounded text-muted-foreground hover:text-foreground hover:bg-background/80"
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(e, chat.session_id)}
-                        className="p-1 rounded text-muted-foreground hover:text-rose-500 hover:bg-background/80"
+                        className="cursor-pointer p-1 rounded text-muted-foreground hover:text-rose-500 hover:bg-background/80"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -379,6 +480,36 @@ export default function AiChatLayout() {
       <main className="flex-1 min-w-0 flex flex-col">
         <Outlet />
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={!!chatToDelete}
+        onOpenChange={(open) => !open && setChatToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>حذف المحادثة</DialogTitle>
+            <DialogDescription>
+              هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 gap-2">
+            <button
+              onClick={() => setChatToDelete(null)}
+              className="px-4 py-2 text-sm font-medium rounded-md border border-border bg-background hover:bg-muted transition-colors"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={confirmDelete}
+              disabled={deleteChatMutation.isPending}
+              className="cursor-pointer px-4 py-2 text-sm font-medium rounded-md bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleteChatMutation.isPending ? "جارٍ الحذف..." : "حذف"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -63,7 +63,7 @@ export interface VerifyEmailRequest {
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    const response = await httpClient.post("/auth/login", {
+    const response = await httpClient.post("/Auth/login", {
       email: credentials.email,
       password: credentials.password,
     });
