@@ -263,7 +263,7 @@ const PaymentCalendar = ({
       </div>
 
       {/* Booking Modal */}
-      <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen}>
+      <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen} modal={false}>
         <DialogContent className="max-w-md">
           <DialogHeader className="mt-4">
             <DialogTitle className="text-xl text-center">

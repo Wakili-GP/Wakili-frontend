@@ -79,7 +79,10 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
         </p>
       </div>
 
-      <Card className="max-w-3xl mx-auto border-border bg-card shadow-lg overflow-hidden" dir="rtl">
+      <Card
+        className="max-w-3xl mx-auto border-border bg-card shadow-lg overflow-hidden"
+        dir="rtl"
+      >
         <CardHeader className="border-b border-border bg-background backdrop-blur-sm">
           <CardTitle className="flex items-center gap-2 text-foreground">
             <div className="w-7 h-7 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center">
@@ -106,7 +109,11 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
                   {msg.role === "ai" ? (
                     <Bot className="w-3.5 h-3.5" />
                   ) : user?.profileImage ? (
-                    <img src={user.profileImage} alt="User" className="w-full h-full object-cover" />
+                    <img
+                      src={user.profileImage}
+                      alt="User"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <User className="w-3.5 h-3.5" />
                   )}
@@ -118,7 +125,9 @@ export default function FollowUpChat({ analysisId }: FollowUpChatProps) {
                       : "bg-primary text-primary-foreground border-primary rounded-tr-sm shadow-sm"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-right">{msg.content}</p>
+                  <p className="whitespace-pre-line text-right">
+                    {msg.content}
+                  </p>
                 </div>
               </div>
             ))}

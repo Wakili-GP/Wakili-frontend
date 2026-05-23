@@ -90,6 +90,7 @@ const AccountSettingsModal = ({
         if (!v) reset();
         onOpenChange(v);
       }}
+      modal={false}
     >
       <DialogContent dir="rtl" className="sm:max-w-md">
         <DialogHeader className="mt-3">
