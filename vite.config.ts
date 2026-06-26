@@ -15,6 +15,14 @@ export default defineConfig({
       "/api": {
         target: "http://wakili.runasp.net",
         changeOrigin: true,
+        secure: false, // only if the backend is HTTP, not HTTPS
+        // rewrite: (path) => path, // no rewrite needed if paths match
+      },
+      "/hubs": {
+        target: "http://wakili.runasp.net",
+        changeOrigin: true,
+        secure: false,
+        ws: true, // proxy websockets
         rewrite: (path) => path,
       },
       "/chatbot-api": {

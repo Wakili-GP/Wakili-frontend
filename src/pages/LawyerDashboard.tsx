@@ -38,8 +38,11 @@ import {
   ownerUpcomingBookings,
   LawyerDashboardReviews,
 } from "@/data/data.ts";
+import { NotificationPopover } from "@/components/NotificationPopover";
 import ArticleDashboardPage from "./articles/ArticleDashboardPage";
 import ArticleSubmissionPage from "./articles/ArticleSubmissionPage";
+import FinancialsTab from "@/components/LawyerDashboard/FinancialsTab";
+import { DollarSign } from "lucide-react";
 
 const sidebarItems = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -47,6 +50,7 @@ const sidebarItems = [
   { id: "requests", label: "طلبات المواعيد", icon: Users },
   { id: "availability", label: "المواعيد المتاحة", icon: Clock },
   { id: "articles", label: "المقالات", icon: FileText },
+  { id: "financials", label: "المالية", icon: DollarSign },
   { id: "reviews", label: "التقييمات", icon: Star },
   { id: "settings", label: "إعدادات الملف", icon: Settings },
 ];
@@ -224,6 +228,7 @@ const LawyerDashboard = () => {
             {activeSectionLabel}
           </h1>
           <div className="mr-auto flex items-center gap-4">
+            <NotificationPopover />
             <nav className="hidden md:flex items-center gap-1">
               <button
                 onClick={() => navigate("/")}
@@ -483,6 +488,7 @@ const LawyerDashboard = () => {
               {activeSection === "availability" && <AvailibilityTab />}
               {activeSection === "articles" && <ArticleDashboardPage onNavigate={setActiveSection} />}
               {activeSection === "article-submission" && <ArticleSubmissionPage onNavigate={setActiveSection} />}
+              {activeSection === "financials" && <FinancialsTab />}
               {activeSection === "reviews" && (
                 <ReviewsTab lawyerId={user?.id ?? ""} reportButton={true} />
               )}

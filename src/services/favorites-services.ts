@@ -24,7 +24,7 @@ export const favoritesService = {
     const response =
       await httpClient.get<ApiResponse<FavoriteLawyer[]>>("/Favorites");
     console.log("From Favourites --- response.data:", response.data);
-    if(!response.data.success){
+    if (!response.data.success) {
       throw new Error(response.data.error || "Failed to fetch favorites");
     }
     return response.data.data ?? [];
