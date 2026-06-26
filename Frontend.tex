@@ -1,0 +1,387 @@
+% =============================================================================
+% Frontend.tex — Include in main document via: \input{Frontend}
+% Place screenshot images (U1.png–U28.png) alongside this file.
+% Required packages in main preamble: graphicx, float
+% Optional (recommended): hyperref, url
+% =============================================================================
+
+\section{Project Frontend}
+
+% -----------------------------------------------------------------------------
+\subsection{Introduction}
+% -----------------------------------------------------------------------------
+
+Wakili (\texttt{https://wakili.me}) is a graduation team project---a comprehensive legal services platform for Egypt connecting clients with verified lawyers, with AI-assisted tools and community features (forum, articles). As the frontend developer, I built all user-facing web interfaces and integrated the REST APIs provided by the backend and AI engineers.
+
+The deliverables are two React applications:
+\begin{itemize}
+    \item \textbf{Main Application} --- client and lawyer portal.
+    \item \textbf{Admin Panel} --- internal moderation and management dashboard.
+\end{itemize}
+This document covers frontend architecture, UI implementation, API consumption, and testing for both apps. Backend logic, database design, and AI model internals are documented by other team members.
+
+% -----------------------------------------------------------------------------
+\subsection{Technologies \& Tools}
+% -----------------------------------------------------------------------------
+
+Both apps are React~19 + TypeScript SPAs bundled with Vite~7. Key libraries are summarized below.
+
+\begin{itemize}
+    \item \textbf{Styling:} Tailwind CSS~4, Radix UI (shadcn-style), Lucide icons; Framer Motion and FullCalendar in the main app.
+    \item \textbf{Data \& state:} TanStack Query for server state; Zustand (main app) and React Context (admin) for auth; React Hook Form + Zod for forms.
+    \item \textbf{Testing:} Vitest + React Testing Library + MSW for fast, Vite-native component and API-mocked tests.
+    \item \textbf{Dev tooling:} ESLint, \texttt{@/} path aliases; Vite proxies \texttt{/api}, \texttt{/chatbot-api}, and \texttt{/review-api} for local development.
+\end{itemize}
+
+% -----------------------------------------------------------------------------
+\subsection{Frontend Requirements}
+% -----------------------------------------------------------------------------
+
+\begin{table}[H]
+    \centering
+    \caption{User roles and frontend interfaces.}
+    \label{tab:user-roles}
+    \begin{tabular}{lll}
+        \hline
+        \textbf{Role} & \textbf{App} & \textbf{Interfaces} \\
+        \hline
+        Client     & Main  & Search, booking, AI tools, forum, profile \\
+        Lawyer     & Main  & Onboarding, dashboard, public profile \\
+        Admin      & Admin & Verification, moderation, user management \\
+        SuperAdmin & Admin & All admin features + admin account CRUD \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Main app:} authentication, landing page, lawyer search/profiles, appointment booking and payment, AI chat, AI contract review, forum, articles, lawyer onboarding, lawyer dashboard, client profile, and post-appointment reviews.
+    \item \textbf{Admin panel:} admin login, dashboard with statistics, lawyer verification, credential review, specialization CRUD, user management, review moderation, and article approval.
+    \item \textbf{Non-functional:} RTL Arabic layout (\texttt{dir="rtl"}, Cairo font), responsive design, loading/error states, and role-based route guards.
+\end{itemize}
+
+% -----------------------------------------------------------------------------
+\subsection{Architecture \& Design}
+% -----------------------------------------------------------------------------
+
+The frontend is the presentation tier: both apps consume the backend REST API; the main app also calls AI microservices (FastAPI chatbot, contract auditor). Figure~\ref{fig:system-context} shows the main entry point.
+
+% [SCREENSHOT U1] Open http://localhost:5173/ — capture the landing page (hero + navbar).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U1.png}
+    \caption{Main application landing page.}
+    \label{fig:system-context}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Main app structure:} \texttt{pages/} (routes), \texttt{components/} (UI + features), \texttt{services/} (API modules), \texttt{stores/} (Zustand), \texttt{schemas/} (Zod), \texttt{routes/ProtectedRoute.tsx}. Routes are declared in \texttt{App.tsx}; protected routes enforce JWT auth and optional user type (\texttt{Client}/\texttt{Lawyer}).
+    \item \textbf{Admin structure:} \texttt{admin/} pages, \texttt{context/AuthContext.tsx}, nested routes under \texttt{AdminLayout} with sidebar navigation and login guard.
+    \item \textbf{State \& API:} JWT tokens in \texttt{localStorage}, attached via Axios interceptors. TanStack Query wraps all service calls. Dev proxies: \texttt{/api} $\rightarrow$ backend, \texttt{/chatbot-api} $\rightarrow$ chatbot, \texttt{/review-api} $\rightarrow$ contract auditor.
+    \item \textbf{UI/UX:} Legal-professional palette (deep blue, gold accents), RTL throughout, card-based layouts, Framer Motion animations, inline form validation errors.
+\end{itemize}
+
+% -----------------------------------------------------------------------------
+\subsection{Main Application Implementation}
+% -----------------------------------------------------------------------------
+
+\subsubsection{Core Setup, Layout \& Authentication}
+
+The app boots via \texttt{main.tsx} with \texttt{QueryClientProvider}. \texttt{HomeLayout} wraps secondary pages with shared navbar/footer. \texttt{AuthModals} handles login/register; successful login stores the JWT in Zustand. \texttt{ProtectedRoute} redirects unauthenticated users to \texttt{/} and wrong user types to \texttt{/forbidden}.
+
+% [SCREENSHOT U2] Click login in the navbar — capture the login modal.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U2.png}
+    \caption{Login modal.}
+    \label{fig:login-modal}
+\end{figure}
+
+The landing page (\texttt{/}) includes hero CTAs, services grid, featured lawyers marquee, testimonials, and a floating chatbot widget.
+
+% [SCREENSHOT U3] Capture the hero section with headline and CTA buttons.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U3.png}
+    \caption{Landing page hero section.}
+    \label{fig:landing-hero}
+\end{figure}
+
+\subsubsection{Lawyer Search, Profiles \& Booking}
+
+Search starts at \texttt{/find-lawyers}; results with filters appear at \texttt{/find-lawyers/results}. Lawyer profiles (\texttt{/lawyer/:id}) show bio, specialties, reviews, and a booking calendar (\texttt{PaymentCalendar}).
+
+% [SCREENSHOT U4] http://localhost:5173/find-lawyers
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U4.png}
+    \caption{Lawyer search page.}
+    \label{fig:lawyer-search}
+\end{figure}
+
+% [SCREENSHOT U5] http://localhost:5173/find-lawyers/results
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U5.png}
+    \caption{Search results with filters.}
+    \label{fig:lawyer-results}
+\end{figure}
+
+% [SCREENSHOT U6] http://localhost:5173/lawyer/<id> — profile + booking calendar.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U6.png}
+    \caption{Lawyer profile with booking calendar.}
+    \label{fig:lawyer-profile}
+\end{figure}
+
+Clients select a slot and consultation type (office/phone/video), pay, and land on \texttt{/payment/success}. Reviews are submitted at \texttt{/appointments/:id/review}.
+
+% [SCREENSHOT U7] http://localhost:5173/payment/success
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U7.png}
+    \caption{Payment success page.}
+    \label{fig:payment-success}
+\end{figure}
+
+\subsubsection{AI Chat \& Contract Review}
+
+\begin{itemize}
+    \item \textbf{AI Chat} (\texttt{/ai-chat}, auth required): sidebar conversation list, new chat on home, active thread at \texttt{/ai-chat/:id}. Messages go to the chatbot API via \texttt{chatbot-services.ts}.
+    \item \textbf{Contract Review} (\texttt{/ai-contract-review}): upload a document, view AI analysis, follow-up chat. Modular sections: hero, upload, results, follow-up, stats.
+\end{itemize}
+
+% [SCREENSHOT U8] http://localhost:5173/ai-chat (logged in)
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U8.png}
+    \caption{AI chat home with conversation sidebar.}
+    \label{fig:ai-chat-home}
+\end{figure}
+
+% [SCREENSHOT U9] http://localhost:5173/ai-chat/<id> — active conversation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U9.png}
+    \caption{Active AI chat conversation.}
+    \label{fig:ai-chat-conversation}
+\end{figure}
+
+% [SCREENSHOT U10] http://localhost:5173/ai-contract-review — upload section.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U10.png}
+    \caption{Contract review upload section.}
+    \label{fig:contract-upload}
+\end{figure}
+
+% [SCREENSHOT U11] After upload — analysis results visible.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U11.png}
+    \caption{Contract analysis results.}
+    \label{fig:contract-results}
+\end{figure}
+
+\subsubsection{Forum \& Articles}
+
+\begin{itemize}
+    \item \textbf{Forum:} landing (\texttt{/forum}), search (\texttt{/forum/search}), post detail (\texttt{/forum/:id}), question submission modal for authenticated users.
+    \item \textbf{Articles:} browse (\texttt{/articles}), search, reader (\texttt{/articles/:id}); lawyers submit via dashboard using a TipTap rich-text editor.
+\end{itemize}
+
+% [SCREENSHOT U12] http://localhost:5173/forum
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U12.png}
+    \caption{Forum landing page.}
+    \label{fig:forum-landing}
+\end{figure}
+
+% [SCREENSHOT U13] http://localhost:5173/forum/<id>
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U13.png}
+    \caption{Forum post detail.}
+    \label{fig:forum-post}
+\end{figure}
+
+% [SCREENSHOT U14] http://localhost:5173/articles
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U14.png}
+    \caption{Articles landing page.}
+    \label{fig:articles-landing}
+\end{figure}
+
+% [SCREENSHOT U15] http://localhost:5173/articles/<id>
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U15.png}
+    \caption{Article reader.}
+    \label{fig:article-reader}
+\end{figure}
+
+\subsubsection{Lawyer Onboarding, Dashboard \& Client Profile}
+
+\begin{itemize}
+    \item \textbf{Onboarding} (\texttt{/lawyer-onboarding}): five-step wizard (basic info, education, experience, verification, review) with server-side progress persistence.
+    \item \textbf{Dashboard} (\texttt{/lawyer/dashboard}): sidebar with overview, calendar (FullCalendar), appointment requests, availability, articles, reviews, and settings.
+    \item \textbf{Client profile} (\texttt{/profile}): editable personal info with Zod-validated form.
+\end{itemize}
+
+% [SCREENSHOT U16] http://localhost:5173/lawyer-onboarding (lawyer account)
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U16.png}
+    \caption{Lawyer onboarding wizard.}
+    \label{fig:lawyer-onboarding}
+\end{figure}
+
+% [SCREENSHOT U17] http://localhost:5173/lawyer/dashboard — overview tab.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U17.png}
+    \caption{Lawyer dashboard overview.}
+    \label{fig:lawyer-dashboard}
+\end{figure}
+
+% [SCREENSHOT U18] Dashboard — Calendar (التقويم) tab.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U18.png}
+    \caption{Lawyer dashboard calendar.}
+    \label{fig:lawyer-calendar}
+\end{figure}
+
+% [SCREENSHOT U19] http://localhost:5173/profile (client account)
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U19.png}
+    \caption{Client profile page.}
+    \label{fig:client-profile}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+\subsection{Admin Panel Implementation}
+% -----------------------------------------------------------------------------
+
+\begin{itemize}
+    \item \textbf{Project:} separate Vite app (\texttt{Wakili-frontend-admin}) sharing the same UI stack; uses React Context for auth.
+    \item \textbf{Deployment:} independent from the main app; calls backend admin endpoints only.
+    \item \textbf{Auth \& layout:} login at \texttt{/login}; \texttt{AdminLayout} provides the RTL sidebar shell.
+    \item \textbf{Dashboard:} platform statistics, activity feed, and SuperAdmin account management at \texttt{/dashboard}.
+    \item \textbf{Moderation pages:} lawyer verification, credential review, specializations, users, reviews, and articles---all using a table-and-dialog pattern.
+\end{itemize}
+
+% [SCREENSHOT U20] Admin app http://localhost:5173/login
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U20.png}
+    \caption{Admin login page.}
+    \label{fig:admin-login}
+\end{figure}
+
+% [SCREENSHOT U21] http://localhost:5173/dashboard
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U21.png}
+    \caption{Admin dashboard.}
+    \label{fig:admin-dashboard}
+\end{figure}
+
+% [SCREENSHOT U22] /verification — lawyer onboarding approvals.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U22.png}
+    \caption{Lawyer verification.}
+    \label{fig:admin-verification}
+\end{figure}
+
+% [SCREENSHOT U23] /credentials — education \& experience review.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U23.png}
+    \caption{Credential review.}
+    \label{fig:admin-credentials}
+\end{figure}
+
+% [SCREENSHOT U24] /specializations — legal category CRUD.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U24.png}
+    \caption{Specializations management.}
+    \label{fig:admin-specializations}
+\end{figure}
+
+% [SCREENSHOT U25] /users — user listing and deactivation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U25.png}
+    \caption{User management.}
+    \label{fig:admin-users}
+\end{figure}
+
+% [SCREENSHOT U26] /reviews — review moderation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U26.png}
+    \caption{Review moderation.}
+    \label{fig:admin-reviews}
+\end{figure}
+
+% [SCREENSHOT U27] /articles — article approval workflow.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U27.png}
+    \caption{Articles management.}
+    \label{fig:admin-articles}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+\subsection{Testing}
+% -----------------------------------------------------------------------------
+
+\begin{itemize}
+    \item \textbf{Stack:} Vitest + React Testing Library + MSW.
+    \item \textbf{Component tests:} verify rendering and user interactions.
+    \item \textbf{API mocking:} MSW intercepts requests so tests run without a live backend.
+    \item \textbf{Execution:} \texttt{npx vitest run} in each project directory; Vitest shares Vite's config for fast runs.
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \caption{Test suites across both applications.}
+    \label{tab:all-tests}
+    \small
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Suite} & \textbf{Verifies} \\
+        \hline
+        ProtectedRoute / AdminLayout  & Auth guards and role redirects \\
+        AuthModals / AdminLogin       & Form validation and login flow \\
+        LawyerSearch                  & Card rendering and filter updates \\
+        ForumLandingPage              & Categories and posts from API \\
+        ClientProfile                 & Form validation and update call \\
+        PaymentCalendar               & Slot rendering and selection \\
+        LawyerVerification            & Approve/reject actions \\
+        UserManagement                & Table rendering and filters \\
+        SpecializationsManagement     & CRUD form submission \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% [SCREENSHOT U28] Terminal output of `npx vitest run` showing passing tests.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{U28.png}
+    \caption{Vitest test run output.}
+    \label{fig:test-results}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{RTL layout:} custom overrides for LTR-only libraries (FullCalendar, TipTap).
+    \item \textbf{Role-based routing:} centralized \texttt{ProtectedRoute} for access control.
+    \item \textbf{Onboarding state:} TanStack Query sync for multi-step wizard progress.
+    \item \textbf{Multiple APIs:} separate Vite proxies per API origin.
+\end{itemize}

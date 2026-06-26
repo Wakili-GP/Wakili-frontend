@@ -17,7 +17,9 @@ import AiChatPage from "@/pages/ai-chat/AiChatPage";
 import LawyerSearchPage from "./pages/LawyersSearchPage";
 import LawyerSearch from "./components/LawyerSearch";
 import AiLegalReviewPage from "./pages/AiLegalReviewPage";
-import ForumPage from "./pages/ForumPage";
+import ForumLandingPage from "./pages/forum/ForumLandingPage";
+import ForumSearchPage from "./pages/forum/ForumSearchPage";
+import ForumPostPage from "./pages/forum/ForumPostPage";
 import ArticlesLandingPage from "./pages/articles/ArticlesLandingPage";
 import ArticlesSearchPage from "./pages/articles/ArticlesSearchPage";
 import ArticleReaderPage from "./pages/articles/ArticleReaderPage";
@@ -95,7 +97,23 @@ const App = () => {
             path="/forum"
             element={
               <SharedLayout>
-                <ForumPage />
+                <ForumLandingPage />
+              </SharedLayout>
+            }
+          />
+          <Route
+            path="/forum/search"
+            element={
+              <SharedLayout>
+                <ForumSearchPage />
+              </SharedLayout>
+            }
+          />
+          <Route
+            path="/forum/:id"
+            element={
+              <SharedLayout>
+                <ForumPostPage />
               </SharedLayout>
             }
           />
