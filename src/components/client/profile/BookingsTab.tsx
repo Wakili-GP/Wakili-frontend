@@ -235,14 +235,30 @@ const BookingsTab = ({ bookings, onOpenBookingDetails }: BookingsTabProps) => {
                     <BookingStatusBadge status={booking.status} />
                   </TableCell>
                   <TableCell className="text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => onOpenBookingDetails(booking)}
-                    >
-                      التفاصيل
-                    </Button>
+                    <div className="flex justify-center gap-2 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => onOpenBookingDetails(booking)}
+                      >
+                        التفاصيل
+                      </Button>
+                      {booking.status === "مكتمل" && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className={`text-xs text-white ${
+                            booking.isReviewed 
+                              ? "bg-secondary hover:bg-secondary-hover" 
+                              : "bg-primary hover:bg-primary-hover"
+                          }`}
+                          onClick={() => navigate(`/appointments/${booking.id}/review`)}
+                        >
+                          {booking.isReviewed ? "عرض التقييم" : "تقييم الجلسة"}
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );

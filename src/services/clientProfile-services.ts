@@ -47,6 +47,7 @@ export interface ClientBookingInterface {
   lawyerLastName: string;
   lawyerProfileImage: string | null;
   lawyerId: string;
+  isReviewed: boolean;
 }
 
 interface ClientBookingApiModel {
@@ -64,6 +65,7 @@ interface ClientBookingApiModel {
   lawyerLastName: string;
   lawyerProfileImage: string | null;
   lawyerId: string;
+  isReviewed: boolean;
 }
 
 const BOOKING_STATUS_MAP: Record<

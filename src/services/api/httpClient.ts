@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
-const baseURL = "http://wakili.runasp.net/api";
+const baseURL = "http://localhost:5133/api";
 // const baseURL =
 //   import.meta.env.MODE === "development"
 //     ? "/api"
