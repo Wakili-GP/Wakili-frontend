@@ -2,6 +2,7 @@
 @config "../tailwind.config.ts";
 @import "@/styles/sonner.css";
 @import "@/styles/fullcalendar.css";
+@import "@/styles/articles.css";
 @layer base {
   :root {
     /* Professional Legal Theme - Blues and Golds */

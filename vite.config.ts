@@ -23,6 +23,17 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         ws: true, // proxy websockets
+        rewrite: (path) => path,
+      },
+      "/chatbot-api": {
+        target: "https://mayarwaleedd12--wakili-api-fastapi-app.modal.run",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/chatbot-api/, ""),
+      },
+      "/review-api": {
+        target: "https://nouraelkashif83--legal-ai-auditor-api.modal.run",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/review-api/, ""),
       },
     },
   },

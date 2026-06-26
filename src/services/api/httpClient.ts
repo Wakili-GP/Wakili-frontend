@@ -7,7 +7,12 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
-const baseURL = "http://wakili.runasp.net/api";
+// const baseURL = "http://wakili.runasp.net/api";
+const baseURL =
+  import.meta.env.MODE === "development"
+    ? "/api"
+    : import.meta.env.VITE_API_BASE_URL || "https://wakili.runasp.net/api";
+
 const httpClient = axios.create({
   baseURL: baseURL,
   headers: {

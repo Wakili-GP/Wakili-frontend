@@ -39,12 +39,15 @@ import {
   LawyerDashboardReviews,
 } from "@/data/data.ts";
 import { NotificationPopover } from "@/components/NotificationPopover";
+import ArticleDashboardPage from "./articles/ArticleDashboardPage";
+import ArticleSubmissionPage from "./articles/ArticleSubmissionPage";
 
 const sidebarItems = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
   { id: "calendar", label: "التقويم", icon: CalendarIcon },
   { id: "requests", label: "طلبات المواعيد", icon: Users },
   { id: "availability", label: "المواعيد المتاحة", icon: Clock },
+  { id: "articles", label: "المقالات", icon: FileText },
   { id: "reviews", label: "التقييمات", icon: Star },
   { id: "settings", label: "إعدادات الملف", icon: Settings },
 ];
@@ -480,6 +483,8 @@ const LawyerDashboard = () => {
               {activeSection === "calendar" && <CalendarTab />}
               {activeSection === "requests" && <AppointmentsRequestsTab />}
               {activeSection === "availability" && <AvailibilityTab />}
+              {activeSection === "articles" && <ArticleDashboardPage onNavigate={setActiveSection} />}
+              {activeSection === "article-submission" && <ArticleSubmissionPage onNavigate={setActiveSection} />}
               {activeSection === "reviews" && (
                 <ReviewsTab lawyerId={user?.id ?? ""} reportButton={true} />
               )}

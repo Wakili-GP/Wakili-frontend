@@ -6,7 +6,7 @@ import MainNavbar from "./MainNavbar";
 const HomeLayout = ({ children }: { children?: ReactNode }) => {
   const { pathname } = useLocation();
   const isFullWidthPage =
-    pathname === "/find-lawyers" || pathname === "/find-lawyers/results" || pathname === "/ai-contract-review";
+    pathname === "/find-lawyers" || pathname === "/find-lawyers/results" || pathname === "/ai-contract-review" || pathname === "/articles" || pathname.startsWith("/articles/");
 
   return (
     <div className="min-h-screen overflow-x-clip bg-linear-to-b from-background to-muted/30">

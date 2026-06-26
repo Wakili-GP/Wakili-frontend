@@ -206,7 +206,7 @@ const ProfileEditModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent
         className="max-w-5xl max-h-screen overflow-y-auto"
         dir="rtl"
@@ -260,7 +260,7 @@ const ProfileEditModal = ({
             ) : (
               <div className="flex flex-col items-center gap-2">
                 {typeof currentData.profileImage === "string" &&
-                currentData.profileImage ? (
+                  currentData.profileImage ? (
                   <img
                     src={currentData.profileImage}
                     className="w-32 h-32 rounded-full object-cover border-4 border-border"

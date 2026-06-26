@@ -1,12 +1,17 @@
 import axios from "axios";
 
-const BASE_URL = "https://nouraelkashif83--legal-ai-auditor-api.modal.run";
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "/review-api"
+    : import.meta.env.VITE_REVIEW_API_BASE_URL ||
+      "https://nouraelkashif83--legal-ai-auditor-api.modal.run";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     accept: "application/json",
   },
+  withCredentials: false,
 });
 
 export type RiskLevel = "low" | "medium" | "high";

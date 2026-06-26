@@ -11,12 +11,16 @@ import ClientProfile from "./pages/ClientProfile";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import HomeLayout from "./components/HomeLayout";
-import AiChatPage from "./pages/AiChatPage";
+import AiChatLayout from "@/pages/ai-chat/AiChatLayout";
+import AiChatHome from "@/pages/ai-chat/AiChatHome";
+import AiChatPage from "@/pages/ai-chat/AiChatPage";
 import LawyerSearchPage from "./pages/LawyersSearchPage";
 import LawyerSearch from "./components/LawyerSearch";
 import AiLegalReviewPage from "./pages/AiLegalReviewPage";
 import ForumPage from "./pages/ForumPage";
-import ArticlesPage from "./pages/ArticlesPage";
+import ArticlesLandingPage from "./pages/articles/ArticlesLandingPage";
+import ArticlesSearchPage from "./pages/articles/ArticlesSearchPage";
+import ArticleReaderPage from "./pages/articles/ArticleReaderPage";
 import { useAuthStore } from "@/stores/auth.store";
 import PaymentSuccessfulPage from "./pages/PaymentSuccessfulPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -82,7 +86,10 @@ const App = () => {
           />
           <Route path="/appointments/:id/review" element={<LawyerReview />} />
           {/* Main Routes */}
-          <Route path="/ai-chat" element={<AiChatPage />} />
+          <Route path="/ai-chat" element={<AiChatLayout />}>
+            <Route index element={<AiChatHome />} />
+            <Route path=":id" element={<AiChatPage />} />
+          </Route>
           <Route
             path="/find-lawyers"
             element={
@@ -119,7 +126,23 @@ const App = () => {
             path="/articles"
             element={
               <SharedLayout>
-                <ArticlesPage />
+                <ArticlesLandingPage />
+              </SharedLayout>
+            }
+          />
+          <Route
+            path="/articles/search"
+            element={
+              <SharedLayout>
+                <ArticlesSearchPage />
+              </SharedLayout>
+            }
+          />
+          <Route
+            path="/articles/:id"
+            element={
+              <SharedLayout>
+                <ArticleReaderPage />
               </SharedLayout>
             }
           />
