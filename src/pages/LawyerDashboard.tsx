@@ -38,6 +38,7 @@ import {
   ownerUpcomingBookings,
   LawyerDashboardReviews,
 } from "@/data/data.ts";
+import { NotificationPopover } from "@/components/NotificationPopover";
 
 const sidebarItems = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -221,6 +222,7 @@ const LawyerDashboard = () => {
             {activeSectionLabel}
           </h1>
           <div className="mr-auto flex items-center gap-4">
+            <NotificationPopover />
             <nav className="hidden md:flex items-center gap-1">
               <button
                 onClick={() => navigate("/")}

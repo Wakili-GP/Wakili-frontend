@@ -16,7 +16,13 @@ export default defineConfig({
         target: "http://wakili.runasp.net",
         changeOrigin: true,
         secure: false, // only if the backend is HTTP, not HTTPS
-        rewrite: (path) => path, // no rewrite needed if paths match
+        // rewrite: (path) => path, // no rewrite needed if paths match
+      },
+      "/hubs": {
+        target: "http://wakili.runasp.net",
+        changeOrigin: true,
+        secure: false,
+        ws: true, // proxy websockets
       },
     },
   },

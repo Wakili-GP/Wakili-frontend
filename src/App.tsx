@@ -19,6 +19,8 @@ import ForumPage from "./pages/ForumPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import { useAuthStore } from "@/stores/auth.store";
 import PaymentSuccessfulPage from "./pages/PaymentSuccessfulPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import { useNotifications } from "./stores/notification.store";
 
 const SharedLayout = ({ children }: { children: ReactNode }) => (
   <HomeLayout>{children}</HomeLayout>
@@ -27,10 +29,21 @@ import AuthModals from "./components/AuthModals";
 
 const App = () => {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { connect, disconnect } = useNotifications();
 
   useEffect(() => {
     void initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (isAuthenticated && token) {
+      connect(token).catch(console.error);
+    } else {
+      disconnect().catch(console.error);
+    }
+  }, [isAuthenticated, connect, disconnect]);
 
   return (
     <TooltipProvider>
@@ -54,6 +67,16 @@ const App = () => {
             element={
               <ProtectedRoute requiredUserType="Client">
                 <ClientProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <SharedLayout>
+                  <NotificationsPage />
+                </SharedLayout>
               </ProtectedRoute>
             }
           />

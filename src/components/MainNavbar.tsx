@@ -16,6 +16,8 @@ import { Bell, ChevronDown, LayoutDashboard, LogOut, Scale, User } from "lucide-
 import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
+import { NotificationPopover } from "./NotificationPopover";
+
 interface MainNavbarProps {
   fixed?: boolean;
   onLoginClick?: () => void;
@@ -27,27 +29,6 @@ const navTabs = [
   { path: "/ai-contract-review", label: "حلل عقدا" },
   { path: "/forum", label: "اسئلة شائعة" },
   { path: "/articles", label: "مقالات" },
-];
-
-const notifications = [
-  {
-    id: 1,
-    title: "استشارة جديدة",
-    message: "لديك استشارة قانونية جديدة",
-    time: "منذ ساعة",
-  },
-  {
-    id: 2,
-    title: "تحديث الحالة",
-    message: "تم تحديث حالة القضية",
-    time: "منذ ساعتين",
-  },
-  {
-    id: 3,
-    title: "موعد قريب",
-    message: "لديك موعد غدا في المحكمة",
-    time: "منذ 3 ساعات",
-  },
 ];
 
 const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
@@ -117,49 +98,7 @@ const MainNavbar = ({ fixed = false, onLoginClick }: MainNavbarProps) => {
           <div className="flex items-center space-x-2 space-x-reverse">
             {isAuthenticated ? (
               <>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="cursor-pointer relative"
-                    >
-                      <Bell className="h-7 w-7" />
-                      {notifications.length > 0 && (
-                        <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs">
-                          {notifications.length}
-                        </Badge>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0" align="center">
-                    <div className="p-4 border-b">
-                      <h3 className="font-semibold">الإشعارات</h3>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className="p-4 border-b last:border-b-0 hover:bg-muted/50 cursor-pointer"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-medium text-sm">
-                                {notification.title}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {notification.message}
-                              </p>
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {notification.time}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <NotificationPopover />
 
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
