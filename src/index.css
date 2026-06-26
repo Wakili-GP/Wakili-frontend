@@ -3,6 +3,7 @@
 @import "@/styles/sonner.css";
 @import "@/styles/fullcalendar.css";
 @import "@/styles/articles.css";
+@import "./styles/forum.css";
 @layer base {
   :root {
     /* Professional Legal Theme - Blues and Golds */
