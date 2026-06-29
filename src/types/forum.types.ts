@@ -1,51 +1,43 @@
 // ── Forum Data Models ──
 
-export type ForumPostStatus = 'pending' | 'approved' | 'rejected';
-export type ReactionType = 'like' | 'helpful' | 'insightful';
+export type ForumPostStatus = 'Pending' | 'Approved' | 'Rejected';
+export type ReactionType = 'like'; // Simplified
 
-export interface ForumCategory {
-  id: string;
+export interface ForumSpecialization {
+  id: number;
   name: string;
-  nameAr: string;
-  slug: string;
-  color: string;
 }
 
 export interface ForumAuthor {
   id: string;
   firstName: string;
   lastName: string;
-  profileImage: string | null;
-  userType: 'Client' | 'Lawyer';
-  specialization?: string;
+  profileImageUrl: string | null;
 }
 
 export interface ForumPost {
   id: string;
   title: string;
   body: string;
-  category: ForumCategory;
+  specialization: ForumSpecialization;
   author: ForumAuthor;
-  status: ForumPostStatus;
+  status: string; // From backend (e.g. 'Approved')
   tags: string[];
   createdAt: string;
-  updatedAt: string;
   likesCount: number;
   commentsCount: number;
-  viewsCount: number;
   isLiked: boolean;
-  isBookmarked: boolean;
 }
 
 export interface ForumComment {
   id: string;
-  postId: string;
+  postId?: string;
   parentId: string | null;
   body: string;
   author: ForumAuthor;
   createdAt: string;
-  reactions: { like: number; helpful: number; insightful: number };
-  userReaction: ReactionType | null;
+  likesCount: number;
+  isLiked: boolean;
   replies: ForumComment[];
 }
 
@@ -53,9 +45,8 @@ export interface ForumComment {
 
 export interface ForumSearchParams {
   keyword?: string;
-  category?: string;
+  specializationId?: number;
   sortBy?: 'newest' | 'most_liked' | 'most_commented' | 'unanswered';
-  status?: ForumPostStatus;
   page?: number;
   limit?: number;
 }
@@ -63,15 +54,15 @@ export interface ForumSearchParams {
 export interface ForumPostSubmission {
   title: string;
   body: string;
-  categoryId: string;
+  specializationId: string;
   tags: string[];
 }
 
 export interface ForumPostsResponse {
-  posts: ForumPost[];
-  total: number;
+  items: ForumPost[];
+  totalCount: number;
   page: number;
-  totalPages: number;
+  pageSize: number;
 }
 
 export interface ForumStats {
@@ -81,17 +72,17 @@ export interface ForumStats {
   resolvedQuestions: number;
 }
 
-// ── Predefined Categories ──
+// ── Predefined Specializations (Matches Backend Seeds if applicable) ──
 
-export const FORUM_CATEGORIES: ForumCategory[] = [
-  { id: '1', name: 'Family Law', nameAr: 'قانون الأسرة', slug: 'family-law', color: '#E91E63' },
-  { id: '2', name: 'Criminal Law', nameAr: 'القانون الجنائي', slug: 'criminal-law', color: '#F44336' },
-  { id: '3', name: 'Corporate', nameAr: 'قانون الشركات', slug: 'corporate', color: '#2196F3' },
-  { id: '4', name: 'Immigration', nameAr: 'قانون الهجرة', slug: 'immigration', color: '#4CAF50' },
-  { id: '5', name: 'Real Estate', nameAr: 'العقارات', slug: 'real-estate', color: '#FF9800' },
-  { id: '6', name: 'Intellectual Property', nameAr: 'الملكية الفكرية', slug: 'intellectual-property', color: '#9C27B0' },
-  { id: '7', name: 'Tax Law', nameAr: 'قانون الضرائب', slug: 'tax-law', color: '#00BCD4' },
-  { id: '8', name: 'Human Rights', nameAr: 'حقوق الإنسان', slug: 'human-rights', color: '#FF5722' },
-  { id: '9', name: 'Labor Law', nameAr: 'قانون العمل', slug: 'labor-law', color: '#607D8B' },
-  { id: '10', name: 'Commercial Law', nameAr: 'القانون التجاري', slug: 'commercial-law', color: '#795548' },
+export const FORUM_SPECIALIZATIONS = [
+  { id: 1, name: 'Family Law', nameAr: 'قانون الأسرة' },
+  { id: 2, name: 'Criminal Law', nameAr: 'القانون الجنائي' },
+  { id: 3, name: 'Corporate', nameAr: 'قانون الشركات' },
+  { id: 4, name: 'Immigration', nameAr: 'قانون الهجرة' },
+  { id: 5, name: 'Real Estate', nameAr: 'العقارات' },
+  { id: 6, name: 'Intellectual Property', nameAr: 'الملكية الفكرية' },
+  { id: 7, name: 'Tax Law', nameAr: 'قانون الضرائب' },
+  { id: 8, name: 'Human Rights', nameAr: 'حقوق الإنسان' },
+  { id: 9, name: 'Labor Law', nameAr: 'قانون العمل' },
+  { id: 10, name: 'Commercial Law', nameAr: 'القانون التجاري' },
 ];

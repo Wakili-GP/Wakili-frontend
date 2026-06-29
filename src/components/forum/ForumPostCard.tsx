@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, MessageCircle, Eye, User, Clock } from "lucide-react";
+import { Heart, MessageCircle, User, Clock } from "lucide-react";
 import type { ForumPost } from "@/types/forum.types";
 import { useAuth } from "@/stores/auth.store";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
@@ -61,7 +61,7 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
 
   return (
     <motion.div
-      className="forum-post-card group block h-full"
+      className="forum-post-card group block h-full cursor-pointer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -71,9 +71,9 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
       <div className="forum-post-card__header">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {post.author.profileImage ? (
+            {post.author.profileImageUrl ? (
               <img
-                src={post.author.profileImage}
+                src={post.author.profileImageUrl}
                 alt={post.author.firstName}
                 className="w-full h-full object-cover"
               />
@@ -86,9 +86,6 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
               <span className="font-semibold text-sm">
                 {post.author.firstName} {post.author.lastName}
               </span>
-              <span className={`forum-author-badge ${post.author.userType === 'Lawyer' ? 'forum-author-badge--lawyer' : 'forum-author-badge--client'}`}>
-                {post.author.userType === 'Lawyer' ? 'محامي' : 'عميل'}
-              </span>
             </div>
             <div className="flex items-center text-xs text-muted-foreground mt-0.5 gap-1">
               <Clock className="w-3 h-3" />
@@ -96,9 +93,9 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
             </div>
           </div>
         </div>
-        {post.status !== 'approved' && (
-          <span className={`forum-status-badge ${post.status === 'pending' ? 'forum-status-badge--pending' : 'forum-status-badge--rejected'}`}>
-            {post.status === 'pending' ? 'قيد المراجعة' : 'مرفوض'}
+        {post.status !== 'Approved' && (
+          <span className={`forum-status-badge ${post.status === 'Pending' ? 'forum-status-badge--pending' : 'forum-status-badge--rejected'}`}>
+            {post.status === 'Pending' ? 'قيد المراجعة' : 'مرفوض'}
           </span>
         )}
       </div>
@@ -107,10 +104,9 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
         <div className="mb-3">
           <Badge 
             variant="outline" 
-            style={{ borderColor: post.category.color, color: post.category.color }}
-            className="mb-2"
+            className="mb-2 border-primary text-primary"
           >
-            {post.category.nameAr}
+            {post.specialization.name}
           </Badge>
           <h3 className="font-bold text-lg leading-snug line-clamp-2 group-hover:text-primary transition-colors">
             {post.title}
@@ -120,12 +116,12 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
           {post.body}
         </p>
         <div className="flex flex-wrap gap-2 mt-auto">
-          {post.tags.slice(0, 3).map(tag => (
+          {post.tags && post.tags.slice(0, 3).map(tag => (
             <span key={tag} className="text-[10px] bg-muted px-2 py-1 rounded-md text-muted-foreground">
               #{tag}
             </span>
           ))}
-          {post.tags.length > 3 && (
+          {post.tags && post.tags.length > 3 && (
              <span className="text-[10px] bg-muted px-2 py-1 rounded-md text-muted-foreground">
                +{post.tags.length - 3}
              </span>
@@ -142,13 +138,9 @@ const ForumPostCard = ({ post, onLike }: ForumPostCardProps) => {
           <span>{formatNumber(localLikesCount)}</span>
         </button>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
             <MessageCircle className="w-4 h-4" />
             {formatNumber(post.commentsCount)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Eye className="w-4 h-4" />
-            {formatNumber(post.viewsCount)}
           </span>
         </div>
       </div>

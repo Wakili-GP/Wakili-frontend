@@ -4,19 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FORUM_CATEGORIES } from "@/types/forum.types";
 import type { ForumPostSubmission } from "@/types/forum.types";
+import type { Specialization } from "@/services/specializations-services";
 
 interface ForumSubmitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ForumPostSubmission) => void;
+  specializations: Specialization[];
 }
 
-const ForumSubmitModal = ({ open, onOpenChange, onSubmit }: ForumSubmitModalProps) => {
+const ForumSubmitModal = ({ open, onOpenChange, onSubmit, specializations }: ForumSubmitModalProps) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [specializationId, setSpecializationId] = useState<string>("");
   const [tagsInput, setTagsInput] = useState("");
   const [error, setError] = useState("");
 
@@ -24,7 +25,7 @@ const ForumSubmitModal = ({ open, onOpenChange, onSubmit }: ForumSubmitModalProp
     e.preventDefault();
     setError("");
 
-    if (!title.trim() || !body.trim() || !categoryId) {
+    if (!title.trim() || !body.trim() || !specializationId) {
       setError("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
@@ -39,14 +40,14 @@ const ForumSubmitModal = ({ open, onOpenChange, onSubmit }: ForumSubmitModalProp
     onSubmit({
       title: title.trim(),
       body: body.trim(),
-      categoryId,
+      specializationId,
       tags
     });
 
     // Reset form
     setTitle("");
     setBody("");
-    setCategoryId("");
+    setSpecializationId("");
     setTagsInput("");
     onOpenChange(false);
   };
@@ -76,14 +77,14 @@ const ForumSubmitModal = ({ open, onOpenChange, onSubmit }: ForumSubmitModalProp
 
           <div className="space-y-2">
             <label className="text-sm font-medium">التخصص <span className="text-destructive">*</span></label>
-            <Select value={categoryId} onValueChange={setCategoryId} dir="rtl">
+            <Select value={specializationId} onValueChange={(val) => setSpecializationId(val)} dir="rtl">
               <SelectTrigger>
                 <SelectValue placeholder="اختر التخصص القانوني" />
               </SelectTrigger>
               <SelectContent>
-                {FORUM_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.nameAr}
+                {specializations.map((spec) => (
+                  <SelectItem key={spec.id} value={spec.id.toString()}>
+                    {spec.name}
                   </SelectItem>
                 ))}
               </SelectContent>

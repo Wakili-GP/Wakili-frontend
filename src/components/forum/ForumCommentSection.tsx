@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, ThumbsUp, CheckCircle, Lightbulb, MessageSquare, Reply } from "lucide-react";
+import { User, ThumbsUp, MessageSquare, Reply } from "lucide-react";
 import type { ForumComment, ReactionType } from "@/types/forum.types";
 import { useAuth } from "@/stores/auth.store";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
@@ -68,8 +68,8 @@ const CommentItem = ({
       <div className="forum-comment__header">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-            {comment.author.profileImage ? (
-              <img src={comment.author.profileImage} alt={comment.author.firstName} className="w-full h-full object-cover" />
+            {comment.author.profileImageUrl ? (
+              <img src={comment.author.profileImageUrl} alt={comment.author.firstName} className="w-full h-full object-cover" />
             ) : (
               <User className="w-4 h-4 text-primary" />
             )}
@@ -78,9 +78,6 @@ const CommentItem = ({
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm">
                 {comment.author.firstName} {comment.author.lastName}
-              </span>
-              <span className={`forum-author-badge ${comment.author.userType === 'Lawyer' ? 'forum-author-badge--lawyer' : 'forum-author-badge--client'}`}>
-                {comment.author.userType === 'Lawyer' ? 'محامي' : 'عميل'}
               </span>
             </div>
             <div className="text-xs text-muted-foreground mt-0.5">
@@ -97,27 +94,11 @@ const CommentItem = ({
       <div className="forum-comment__footer">
         <div className="flex flex-wrap items-center gap-2">
           <button 
-            className={`forum-reaction-btn forum-reaction-btn--like ${comment.userReaction === 'like' ? 'active' : ''}`}
+            className={`forum-reaction-btn forum-reaction-btn--like ${comment.isLiked ? 'active text-primary' : ''}`}
             onClick={() => handleReact('like')}
           >
             <ThumbsUp className="w-3.5 h-3.5" />
-            <span>{comment.reactions.like}</span>
-          </button>
-          
-          <button 
-            className={`forum-reaction-btn forum-reaction-btn--helpful ${comment.userReaction === 'helpful' ? 'active' : ''}`}
-            onClick={() => handleReact('helpful')}
-          >
-            <CheckCircle className="w-3.5 h-3.5" />
-            <span>{comment.reactions.helpful}</span>
-          </button>
-          
-          <button 
-            className={`forum-reaction-btn forum-reaction-btn--insightful ${comment.userReaction === 'insightful' ? 'active' : ''}`}
-            onClick={() => handleReact('insightful')}
-          >
-            <Lightbulb className="w-3.5 h-3.5" />
-            <span>{comment.reactions.insightful}</span>
+            <span>{comment.likesCount}</span>
           </button>
         </div>
 

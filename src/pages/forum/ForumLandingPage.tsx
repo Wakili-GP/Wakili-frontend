@@ -15,9 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import ForumPostCard from "@/components/forum/ForumPostCard";
 import ForumSubmitModal from "@/components/forum/ForumSubmitModal";
-import { FORUM_CATEGORIES } from "@/types/forum.types";
 import type { ForumPost, ForumStats, ForumPostSubmission } from "@/types/forum.types";
 import { forumService } from "@/services/forum-services";
+import { SpecializationService, type Specialization } from "@/services/specializations-services";
 import { useAuth } from "@/stores/auth.store";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
 import { toast } from "sonner";
@@ -52,6 +52,7 @@ const ForumLandingPage = () => {
 
   const [latestPosts, setLatestPosts] = useState<ForumPost[]>([]);
   const [stats, setStats] = useState<ForumStats | null>(null);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   useEffect(() => {
@@ -60,6 +61,9 @@ const ForumLandingPage = () => {
     });
     forumService.getForumStats().then((res) => {
       if (res.success && res.data) setStats(res.data);
+    });
+    SpecializationService.getSpecializations().then((res) => {
+      if (res.success && res.data) setSpecializations(res.data);
     });
   }, []);
 
@@ -77,6 +81,7 @@ const ForumLandingPage = () => {
       toast.success("تم إرسال سؤالك بنجاح", {
         description: "سيتم مراجعة السؤال من قبل الإدارة ونشره قريباً",
       });
+      setIsSubmitModalOpen(false);
     } else {
       toast.error("حدث خطأ أثناء إرسال السؤال");
     }
@@ -180,13 +185,13 @@ const ForumLandingPage = () => {
       <section className="container mx-auto px-4 pb-8">
         <h3 className="text-xl font-bold mb-4 text-center md:text-right">تصفح حسب التخصص</h3>
         <div className="flex flex-wrap justify-center md:justify-start gap-2">
-          {FORUM_CATEGORIES.map((cat) => (
+          {specializations.map((spec) => (
             <button
-              key={cat.id}
+              key={spec.id}
               className="px-4 py-2 rounded-full bg-muted hover:bg-primary/10 hover:text-primary text-sm font-medium transition-colors"
-              onClick={() => navigate(`/forum/search?category=${cat.slug}`)}
+              onClick={() => navigate(`/forum/search?specializationId=${spec.id}`)}
             >
-              {cat.nameAr}
+              {spec.name}
             </button>
           ))}
         </div>
@@ -265,6 +270,7 @@ const ForumLandingPage = () => {
         open={isSubmitModalOpen}
         onOpenChange={setIsSubmitModalOpen}
         onSubmit={handleQuestionSubmit}
+        specializations={specializations}
       />
     </div>
   );

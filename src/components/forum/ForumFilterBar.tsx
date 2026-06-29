@@ -2,15 +2,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FORUM_CATEGORIES } from "@/types/forum.types";
+import type { Specialization } from "@/services/specializations-services";
 
 interface ForumFilterBarProps {
   keyword: string;
   onKeywordChange: (kw: string) => void;
-  category: string;
-  onCategoryChange: (cat: string) => void;
+  specializationId: string | number;
+  onSpecializationChange: (id: string | number) => void;
   sortBy: string;
   onSortChange: (sort: string) => void;
+  specializations: Specialization[];
 }
 
 const SORT_OPTIONS = [
@@ -23,10 +24,11 @@ const SORT_OPTIONS = [
 const ForumFilterBar = ({
   keyword,
   onKeywordChange,
-  category,
-  onCategoryChange,
+  specializationId,
+  onSpecializationChange,
   sortBy,
   onSortChange,
+  specializations,
 }: ForumFilterBarProps) => {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -66,15 +68,15 @@ const ForumFilterBar = ({
               <div>
                 <label className="text-sm font-medium mb-1 block text-foreground">التخصص</label>
                 <select
-                  value={category}
-                  onChange={(e) => onCategoryChange(e.target.value)}
+                  value={specializationId}
+                  onChange={(e) => onSpecializationChange(e.target.value)}
                   className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   dir="rtl"
                 >
                   <option value="">جميع التخصصات</option>
-                  {FORUM_CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.slug}>
-                      {cat.nameAr}
+                  {specializations.map((spec) => (
+                    <option key={spec.id} value={spec.id}>
+                      {spec.name}
                     </option>
                   ))}
                 </select>
@@ -105,3 +107,4 @@ const ForumFilterBar = ({
 };
 
 export default ForumFilterBar;
+

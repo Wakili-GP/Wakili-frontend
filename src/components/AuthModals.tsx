@@ -283,7 +283,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
         </DialogHeader>
         {mode === "login" && (
           <div>
-            <Button
+            {/* <Button
               type="button"
               variant="secondary"
               className="w-full mb-4 cursor-pointer"
@@ -292,7 +292,7 @@ const AuthModals: React.FC<AuthModalProps> = ({
               <Globe className="ml-2" /> الدخول باستخدام Google
             </Button>
 
-            <Divider />
+            <Divider /> */}
 
             <form
               className="space-y-4"

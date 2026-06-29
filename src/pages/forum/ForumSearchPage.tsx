@@ -5,9 +5,9 @@ import { Loader, Scale, HelpCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ForumPostCard from "@/components/forum/ForumPostCard";
 import ForumFilterBar from "@/components/forum/ForumFilterBar";
-import { ARTICLE_CATEGORIES } from "@/types/article.types";
 import type { ForumPost, ForumSearchParams } from "@/types/forum.types";
 import { forumService } from "@/services/forum-services";
+import { SpecializationService, type Specialization } from "@/services/specializations-services";
 
 const SORT_OPTIONS = [
   { value: "newest", label: "الأحدث" },
@@ -23,20 +23,27 @@ const ForumSearchPage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
 
   // Filter state
   const [keyword, setKeyword] = useState(searchParams.get("keyword") || "");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [specializationId, setSpecializationId] = useState(searchParams.get("specializationId") || "");
   const [sortBy, setSortBy] = useState<ForumSearchParams["sortBy"]>(
     (searchParams.get("sortBy") as ForumSearchParams["sortBy"]) || "newest"
   );
+
+  useEffect(() => {
+    SpecializationService.getSpecializations().then((res) => {
+      if (res.success && res.data) setSpecializations(res.data);
+    });
+  }, []);
 
   const fetchPosts = useCallback(
     async (p = 1) => {
       setLoading(true);
       const params: ForumSearchParams = {
         keyword: keyword || undefined,
-        category: category || undefined,
+        specializationId: specializationId ? Number(specializationId) : undefined,
         sortBy,
         page: p,
         limit: 9,
@@ -45,17 +52,17 @@ const ForumSearchPage = () => {
       const res = await forumService.getPosts(params);
       if (res.success && res.data) {
         if (p === 1) {
-          setPosts(res.data.posts);
+          setPosts(res.data.items);
         } else {
-          setPosts((prev) => [...prev, ...res.data!.posts]);
+          setPosts((prev) => [...prev, ...res.data!.items]);
         }
-        setTotal(res.data.total);
-        setTotalPages(res.data.totalPages);
+        setTotal(res.data.totalCount);
+        setTotalPages(Math.ceil(res.data.totalCount / res.data.pageSize));
         setPage(p);
       }
       setLoading(false);
     },
-    [keyword, category, sortBy]
+    [keyword, specializationId, sortBy]
   );
 
   useEffect(() => {
@@ -69,15 +76,15 @@ const ForumSearchPage = () => {
   useEffect(() => {
     const params = new URLSearchParams();
     if (keyword) params.set("keyword", keyword);
-    if (category) params.set("category", category);
+    if (specializationId) params.set("specializationId", specializationId);
     if (sortBy && sortBy !== "newest") params.set("sortBy", sortBy);
     setSearchParams(params, { replace: true });
-  }, [keyword, category, sortBy, setSearchParams]);
+  }, [keyword, specializationId, sortBy, setSearchParams]);
 
   const activeFilters: { key: string; label: string }[] = [];
-  if (category) {
-    const cat = ARTICLE_CATEGORIES.find((c) => c.slug === category);
-    activeFilters.push({ key: "category", label: cat?.nameAr || category });
+  if (specializationId) {
+    const cat = specializations.find((c) => c.id.toString() === specializationId);
+    activeFilters.push({ key: "specializationId", label: cat?.name || specializationId });
   }
   if (sortBy && sortBy !== "newest") {
     const sort = SORT_OPTIONS.find((s) => s.value === sortBy);
@@ -85,13 +92,13 @@ const ForumSearchPage = () => {
   }
 
   const clearFilter = (key: string) => {
-    if (key === "category") setCategory("");
+    if (key === "specializationId") setSpecializationId("");
     if (key === "sortBy") setSortBy("newest");
   };
 
   const resetAllFilters = () => {
     setKeyword("");
-    setCategory("");
+    setSpecializationId("");
     setSortBy("newest");
   };
 
@@ -129,28 +136,29 @@ const ForumSearchPage = () => {
               <ForumFilterBar
                 keyword={keyword}
                 onKeywordChange={setKeyword}
-                category={category}
-                onCategoryChange={setCategory}
+                specializationId={specializationId}
+                onSpecializationChange={(val) => setSpecializationId(val.toString())}
                 sortBy={sortBy || "newest"}
                 onSortChange={(val) => setSortBy(val as any)}
+                specializations={specializations}
               />
             </div>
 
             {/* Category quick-picks */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
               <button
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${!category ? "bg-secondary text-secondary-foreground" : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/15"}`}
-                onClick={() => setCategory("")}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${!specializationId ? "bg-secondary text-secondary-foreground" : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/15"}`}
+                onClick={() => setSpecializationId("")}
               >
                 الكل
               </button>
-              {ARTICLE_CATEGORIES.slice(0, 5).map((cat) => (
+              {specializations.slice(0, 5).map((cat) => (
                 <button
                   key={cat.id}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${category === cat.slug ? "bg-secondary text-secondary-foreground" : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/15"}`}
-                  onClick={() => setCategory(category === cat.slug ? "" : cat.slug)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${specializationId === cat.id.toString() ? "bg-secondary text-secondary-foreground" : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/15"}`}
+                  onClick={() => setSpecializationId(specializationId === cat.id.toString() ? "" : cat.id.toString())}
                 >
-                  {cat.nameAr}
+                  {cat.name}
                 </button>
               ))}
             </div>

@@ -6,7 +6,6 @@ import {
   User,
   Clock,
   Heart,
-  Eye,
   MessageCircle,
   Share2,
   Bookmark,
@@ -65,10 +64,10 @@ const ForumPostPage = () => {
         setIsLiked(postRes.data.isLiked);
         setLikesCount(postRes.data.likesCount);
 
-        // Fetch related
-        forumService.getPosts({ category: postRes.data.category.slug, limit: 4 }).then((relRes) => {
+        // Fetch related by specializationId
+        forumService.getPosts({ specializationId: postRes.data.specialization.id, limit: 4 }).then((relRes) => {
           if (relRes.success && relRes.data) {
-            setRelatedPosts(relRes.data.posts.filter((p) => p.id !== id).slice(0, 3));
+            setRelatedPosts(relRes.data.items.filter((p) => p.id !== id).slice(0, 3));
           }
         });
       }
@@ -163,8 +162,8 @@ const ForumPostPage = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                    {post.author.profileImage ? (
-                      <img src={post.author.profileImage} alt={post.author.firstName} className="w-full h-full object-cover" />
+                    {post.author.profileImageUrl ? (
+                      <img src={post.author.profileImageUrl} alt={post.author.firstName} className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-6 h-6 text-primary" />
                     )}
@@ -174,9 +173,6 @@ const ForumPostPage = () => {
                       <span className="font-bold">
                         {post.author.firstName} {post.author.lastName}
                       </span>
-                      <span className={`forum-author-badge ${post.author.userType === 'Lawyer' ? 'forum-author-badge--lawyer' : 'forum-author-badge--client'}`}>
-                        {post.author.userType === 'Lawyer' ? 'محامي' : 'عميل'}
-                      </span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground mt-0.5 gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
@@ -185,16 +181,16 @@ const ForumPostPage = () => {
                   </div>
                 </div>
 
-                <Badge variant="outline" style={{ borderColor: post.category.color, color: post.category.color }}>
-                  {post.category.nameAr}
+                <Badge variant="outline" className="border-primary text-primary">
+                  {post.specialization.name}
                 </Badge>
               </div>
 
-              {post.status !== 'approved' && (
+              {post.status !== 'Approved' && (
                 <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${
-                  post.status === 'pending' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-red-50 text-red-800 border border-red-200'
+                  post.status === 'Pending' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-red-50 text-red-800 border border-red-200'
                 }`}>
-                  {post.status === 'pending' 
+                  {post.status === 'Pending' 
                     ? 'هذا السؤال قيد المراجعة ولن يظهر للعامة حتى يتم الموافقة عليه.' 
                     : 'تم رفض هذا السؤال لعدم استيفائه لشروط النشر.'}
                 </div>
@@ -208,7 +204,7 @@ const ForumPostPage = () => {
                 {post.body}
               </div>
 
-              {post.tags.length > 0 && (
+              {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-8">
                   {post.tags.map(tag => (
                     <span key={tag} className="bg-muted px-3 py-1.5 rounded-md text-muted-foreground text-sm">
@@ -230,10 +226,6 @@ const ForumPostPage = () => {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MessageCircle className="w-5 h-5" />
                     <span className="font-medium">{post.commentsCount} تعليق</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Eye className="w-5 h-5" />
-                    <span className="font-medium">{post.viewsCount} مشاهدة</span>
                   </div>
                 </div>
 
@@ -282,7 +274,7 @@ const ForumPostPage = () => {
               <Button
                 variant="outline"
                 className="w-full mt-4"
-                onClick={() => navigate(`/forum/search?category=${post.category.slug}`)}
+                onClick={() => navigate(`/forum/search?specializationId=${post.specialization.id}`)}
               >
                 عرض المزيد في هذا التخصص
               </Button>
