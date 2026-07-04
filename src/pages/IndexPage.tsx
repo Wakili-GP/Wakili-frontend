@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { FC } from "react";
 import {
   Scale,
@@ -15,7 +14,6 @@ import {
   Briefcase,
   Star,
   Phone,
-  Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +36,8 @@ import {
 import MainNavbar from "@/components/MainNavbar";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
 import Chatbot from "@/components/Chatbot";
-import { type FeatureStatistic, MOCK_STATISTICS } from "@/data/data.ts";
-import { MOCK_TOP_LAWYERS, type Lawyer as LawyerData } from "@/data/data.ts";
-import { type Testimonial, MOCK_TESTIMONIALS } from "@/data/data.ts";
+
+import { MOCK_TOP_LAWYERS, MOCK_TESTIMONIALS } from "@/data/data.ts";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/stores/auth.store";
 const IndexPage = () => {
@@ -549,8 +546,8 @@ const LawyerCard: FC<LawyerCardProps> = ({
   );
 };
 const Lawyers: FC = () => {
-  const [lawyers, setLawyers] = useState<LawyerData[]>(MOCK_TOP_LAWYERS);
-  const [isLoading, setIsLoading] = useState(false);
+  const lawyers = MOCK_TOP_LAWYERS;
+  const isLoading = false;
 
   return (
     <section id="lawyers" className="py-16 bg-muted">
@@ -598,9 +595,8 @@ const Lawyers: FC = () => {
   );
 };
 const Testimonials = () => {
-  const [testimonials, setTestimonials] =
-    useState<Testimonial[]>(MOCK_TESTIMONIALS);
-  const [isLoading, setIsLoading] = useState(false);
+  const testimonials = MOCK_TESTIMONIALS;
+  const isLoading = false;
 
   return (
     <section id="testimonials" className="py-20 bg-muted">
@@ -680,10 +676,6 @@ const Testimonials = () => {
   );
 };
 const Features = () => {
-  const [statistics, setStatistics] =
-    useState<FeatureStatistic[]>(MOCK_STATISTICS);
-  const [isLoading, setIsLoading] = useState(false);
-
   return (
     <section id="features" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

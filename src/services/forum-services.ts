@@ -67,7 +67,7 @@ export const forumService = {
 
   async reactToPost(
     postId: string,
-    reaction: ReactionType
+    _reaction: ReactionType
   ): Promise<ApiResponse<string>> {
     const response = await httpClient.post<ApiResponse<string>>(
       `/Forums/posts/${postId}/react`,
@@ -78,7 +78,7 @@ export const forumService = {
 
   async reactToComment(
     commentId: string,
-    reaction: ReactionType
+    _reaction: ReactionType
   ): Promise<ApiResponse<string>> {
     const response = await httpClient.post<ApiResponse<string>>(
       `/Forums/comments/${commentId}/react`,

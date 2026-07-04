@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getAvatarColor } from "@/lib/avatarHelpers";
-import type { FavoriteLawyer } from "@/services/favorites-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import favoritesService from "@/services/favorites-services";
@@ -92,11 +91,11 @@ const FavoritesTab = () => {
                       <div className="flex flex-wrap gap-1 mt-1">
                         {lawyer.specializations.slice(0, 2).map((s) => (
                           <Badge
-                            key={s.id}
+                            key={s}
                             variant="secondary"
                             className="text-xs"
                           >
-                            {s.name}
+                            {s}
                           </Badge>
                         ))}
                       </div>
@@ -116,12 +115,12 @@ const FavoritesTab = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       {lawyer.sessionTypes.map((type) => (
                         <Badge key={type} variant="outline" className="text-xs">
-                          {type === "InOffice" ? (
+                          {type === 0 ? (
                             <Building2 className="w-3 h-3 ml-1" />
                           ) : (
                             <Phone className="w-3 h-3 ml-1" />
                           )}
-                          {type === "InOffice" ? "مكتب" : "هاتف"}
+                          {type === 0 ? "مكتب" : "هاتف"}
                         </Badge>
                       ))}
                     </div>

@@ -1,7 +1,16 @@
 import lawyer_1 from "../assets/lawyer-1.jpg";
 import lawyer_2 from "../assets/lawyer-2.jpg";
 import lawyer_3 from "../assets/lawyer-3.jpg";
-// import { type Specialization } from "@/services/specialization-services";
+interface Specialization {
+  id: number;
+  name: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  createdBy: string | null;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
 
 export interface Testimonial {
   id: string;

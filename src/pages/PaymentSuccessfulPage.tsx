@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   Sparkles,
   Mail,
-  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -99,8 +98,7 @@ const BookingConfirmation = () => {
   };
 
   const handleDownloadReceipt = () => {
-    toast({
-      title: "تم تحميل الإيصال",
+    toast.success("تم تحميل الإيصال", {
       description: "تم إرسال نسخة إلى بريدك الإلكتروني أيضاً.",
     });
   };

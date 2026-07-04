@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   ChevronUp, ChevronDown, Eye, BookOpen, User, Share2,
   Flag, Bookmark, ArrowRight, Loader, BadgeCheck,

@@ -34,10 +34,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return;
     }
 
-    const baseURL = "http://wakili.runasp.net";
+    const hubBase =
+      import.meta.env.MODE === "development"
+        ? ""
+        : (import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, "") ||
+          "http://wakili.runasp.net");
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${baseURL}/hubs/notifications`, {
+      .withUrl(`${hubBase}/hubs/notifications`, {
         accessTokenFactory: () => token,
       })
       .withAutomaticReconnect()

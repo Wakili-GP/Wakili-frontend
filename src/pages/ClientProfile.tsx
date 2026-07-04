@@ -71,7 +71,7 @@ const ClientProfile = () => {
     toast.error("خطأ في تحميل المفضلة");
   }, [isFavoritesError]);
 
-  const favoritesLength = favoritesResponse?.data?.length ?? 0;
+  const favoritesLength = favoritesResponse?.length ?? 0;
 
   const {
     data: profile,

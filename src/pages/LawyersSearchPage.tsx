@@ -20,7 +20,7 @@ import {
   Award,
   TrendingUp,
   Clock,
-  Loader,
+
   ArrowUpRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

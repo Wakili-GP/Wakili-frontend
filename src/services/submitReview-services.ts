@@ -1,4 +1,3 @@
-import httpClient from "./api/httpClient";
 interface AiReview {
   isFlagged: boolean;
   confidence: number;

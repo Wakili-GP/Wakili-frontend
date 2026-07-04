@@ -88,10 +88,9 @@ export default function LawyerSearch() {
     queryKey: ["favorites"],
     queryFn: () => favoritesService.getFavorites(),
     enabled: isAuthenticated && user?.userType === "Client",
-    select: (response) => response.data || [],
   });
 
-  const favorites = favoritesData?.map((fav) => String(fav.id)) || [];
+  const favorites = favoritesData?.map((fav) => String(fav.id)) ?? [];
 
   const addFavoriteMutation = useMutation({
     mutationFn: (lawyerId: string) => favoritesService.addFavorite(lawyerId),

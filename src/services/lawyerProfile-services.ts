@@ -78,6 +78,9 @@ export const lawyerProfileServices = {
     );
     console.log("Raw API Response:", response.data);
     console.log("response.data.data:", response.data.data);
+    if (!response.data.data) {
+      throw new Error(response.data.error || "Failed to fetch lawyer profile");
+    }
     return response.data.data;
   },
 };

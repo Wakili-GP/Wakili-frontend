@@ -4,15 +4,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, ChevronDown, LayoutDashboard, LogOut, Scale, User } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, Scale, User } from "lucide-react";
 import { useAuth } from "@/stores/auth.store";
 import { toast } from "@/components/ui/sonner";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
