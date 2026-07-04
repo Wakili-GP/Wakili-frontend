@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { getAvatarColor } from "@/lib/avatarHelpers";
 import { getTimeRemaining } from "@/lib/utils";
-import BookingStatusBadge from "@/components/client/Profile/BookingStatusBadge";
+import BookingStatusBadge from "@/components/client/profile/BookingStatusBadge";
 import type { ClientBookingInterface } from "@/services/clientProfile-services";
 
 interface BookingDetailsDialogProps {

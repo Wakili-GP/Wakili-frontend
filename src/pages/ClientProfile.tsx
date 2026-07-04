@@ -22,15 +22,15 @@ import clientProfileService, {
   type ClientProfileInterface,
   type ClientProfileUpdatePayload,
 } from "@/services/clientProfile-services";
-import BookingsTab from "@/components/client/Profile/BookingsTab";
-import FavoritesTab from "@/components/client/Profile/FavoritesTab";
-import DocumentsTab from "@/components/client/Profile/DocumentsTab";
-import ActivityTab from "@/components/client/Profile/ActivityTab";
-import BookingDetailsDialog from "@/components/client/Profile/BookingDetailsDialog";
+import BookingsTab from "@/components/client/profile/BookingsTab";
+import FavoritesTab from "@/components/client/profile/FavoritesTab";
+import DocumentsTab from "@/components/client/profile/DocumentsTab";
+import ActivityTab from "@/components/client/profile/ActivityTab";
+import BookingDetailsDialog from "@/components/client/profile/BookingDetailsDialog";
 import ProfileEditModal, {
   type ProfileData,
-} from "../components/client/Profile/ProfileEditModal";
-import AccountSettingsModal from "@/components/client/Profile/AccountSettingsModal";
+} from "../components/client/profile/ProfileEditModal";
+import AccountSettingsModal from "@/components/client/profile/AccountSettingsModal";
 import favoritesService from "@/services/favorites-services";
 
 const TABS = [
