@@ -134,6 +134,8 @@ const Hero = ({ onOpenAiChat }: { onOpenAiChat: () => void }) => {
   );
 };
 const MobileApp = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative py-12 overflow-hidden bg-background">
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-accent/5 to-primary/5" />
@@ -148,58 +150,84 @@ const MobileApp = () => {
             transition={{ duration: 0.6 }}
             className="text-center md:text-right space-y-4"
           >
-            <div className="inline-block px-3 py-1.5 bg-primary/10 rounded-full mb-2">
-              <span className="text-primary font-semibold text-sm">
-                متوفر الآن
-              </span>
+            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+              <Badge className="bg-warning-amber/15 text-warning-amber border border-warning-amber/30 px-3 py-1 text-sm font-semibold">
+                تطبيق الموبايل — قريباً جداً
+              </Badge>
+              <Badge className="bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-sm font-semibold">
+                المنصة متاحة الآن على الويب
+              </Badge>
             </div>
 
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              الآن حمّل تطبيق الموبايل
+              تطبيق وكيلي للموبايل
+              <span className="block text-xl md:text-2xl text-warning-amber mt-2 font-semibold">
+                قريباً على App Store و Google Play
+              </span>
             </h2>
 
-            <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-              احمل وكيلك القانوني معك أينما كنت. احصل على استشارات فورية، تابع
-              قضاياك، وتواصل مع محاميك المفضل بضغطة زر واحدة.
+            <p className="text-base text-muted-foreground mb-4 leading-relaxed">
+              نعمل على إطلاق تطبيق iOS و Android ليصبح وكيلك القانوني معك أينما
+              كنت. لا تنتظر —{" "}
+              <span className="text-foreground font-semibold">
+                استخدم منصة وكيلي على الويب الآن
+              </span>{" "}
+              من أي متصفح على هاتفك أو حاسوبك: ابحث عن محامٍ، حلل عقدك، وتحدث
+              مع المساعد القانوني الذكي.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="#"
-                className="group relative px-6 py-3 bg-foreground text-background rounded-2xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 justify-center"
+            <Button
+              size="lg"
+              className="rounded-2xl font-bold shadow-lg"
+              onClick={() => navigate("/find-lawyers")}
+            >
+              استخدم المنصة الآن — متاحة على الويب
+            </Button>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start pt-2">
+              <div
+                aria-disabled="true"
+                className="relative px-6 py-3 bg-muted text-muted-foreground rounded-2xl font-bold text-base border border-border flex items-center gap-2 justify-center opacity-70 cursor-not-allowed"
               >
                 <Apple className="w-5 h-5" />
                 <div className="text-right">
-                  <div className="text-[10px] opacity-80">حمّل من</div>
+                  <div className="text-[10px] opacity-80">قريباً على</div>
                   <div className="text-sm">App Store</div>
                 </div>
-              </motion.a>
+                <Badge
+                  variant="secondary"
+                  className="absolute -top-2 -left-2 text-[10px] px-2 py-0.5 bg-warning-amber/20 text-warning-amber border-warning-amber/30"
+                >
+                  قريباً
+                </Badge>
+              </div>
 
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="#"
-                className="group relative px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 justify-center"
+              <div
+                aria-disabled="true"
+                className="relative px-6 py-3 bg-muted text-muted-foreground rounded-2xl font-bold text-base border border-border flex items-center gap-2 justify-center opacity-70 cursor-not-allowed"
               >
                 <Smartphone className="w-5 h-5" />
                 <div className="text-right">
-                  <div className="text-[10px] opacity-90">حمّل من</div>
+                  <div className="text-[10px] opacity-80">قريباً على</div>
                   <div className="text-sm">Google Play</div>
                 </div>
-              </motion.a>
+                <Badge
+                  variant="secondary"
+                  className="absolute -top-2 -left-2 text-[10px] px-2 py-0.5 bg-warning-amber/20 text-warning-amber border-warning-amber/30"
+                >
+                  قريباً
+                </Badge>
+              </div>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border/50">
               <div className="text-center md:text-right">
-                <div className="text-2xl font-bold text-primary">50K+</div>
-                <div className="text-xs text-muted-foreground">تحميل</div>
+                <div className="text-lg font-bold text-primary">الآن</div>
+                <div className="text-xs text-muted-foreground">منصة الويب</div>
               </div>
               <div className="text-center md:text-right">
-                <div className="text-2xl font-bold text-primary">4.8</div>
-                <div className="text-xs text-muted-foreground">التقييم</div>
+                <div className="text-lg font-bold text-warning-amber">قريباً</div>
+                <div className="text-xs text-muted-foreground">iOS & Android</div>
               </div>
               <div className="text-center md:text-right">
                 <div className="text-2xl font-bold text-primary">24/7</div>
@@ -230,9 +258,14 @@ const MobileApp = () => {
                     ease: "easeInOut",
                   }}
                   src={mobileMockup}
-                  alt="وكيلك على الموبايل"
-                  className="w-full h-96 max-w-[450px] mx-auto drop-shadow-2xl"
+                  alt="معاينة تطبيق وكيلي — قريباً"
+                  className="w-full h-96 max-w-[450px] mx-auto drop-shadow-2xl opacity-90"
                 />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                  <Badge className="bg-warning-amber text-foreground border-0 px-4 py-2 text-sm font-bold shadow-lg">
+                    قريباً جداً
+                  </Badge>
+                </div>
               </div>
 
               {/* Floating Elements */}
@@ -419,14 +452,17 @@ const Services = () => {
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                   <Smartphone className="h-6 w-6 text-secondary" />
                 </div>
-                <CardTitle className="text-xl text-foreground">
+                <CardTitle className="text-xl text-foreground flex items-center gap-2 flex-wrap">
                   تطبيق الهاتف المحمول
+                  <Badge className="bg-warning-amber/15 text-warning-amber border-warning-amber/30 text-xs">
+                    قريباً جداً
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-muted-foreground text-base leading-relaxed">
-                  تطبيق محمول متطور يتيح لك الوصول لجميع الخدمات من هاتفك بسهولة
-                  تامة
+                  تطبيق iOS و Android قيد الإطلاق. استخدم منصة وكيلي على الويب
+                  الآن من أي متصفح — كل الخدمات متاحة حالياً.
                 </CardDescription>
               </CardContent>
             </Card>
