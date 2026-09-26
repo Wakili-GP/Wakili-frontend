@@ -22,6 +22,7 @@ export interface AppointmentInterface {
 export interface AppointmentsMeta {
   total: number;
   pending: number;
+  awaitingAdminApproval: number;
   confirmed: number;
   cancelled: number;
   completed: number;

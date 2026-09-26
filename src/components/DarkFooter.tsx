@@ -1,4 +1,6 @@
+import { MessageCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+
 const DarkFooter = () => {
   return (
     <footer className="bg-foreground text-background py-12">
@@ -25,11 +27,20 @@ const DarkFooter = () => {
           {/* Infor */}
           <div>
             <h4 className="text-lg font-semibold mb-4">التواصل</h4>
-            <ul className="space-y-2 text-background/80">
-              <li>01144958064</li>
-              <li>info@wakili.me</li>
+            <ul className="space-y-2 text-background/80 mb-4">
+              <li>01067873327</li>
+              <li>anas.shaban.awaad@gmail.com</li>
               <li>اكتوبر, الجيزة, جمهورية مصر العربية</li>
             </ul>
+            <a
+              href="https://wa.me/201067873327"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white px-4 py-2 rounded-md transition-colors font-semibold"
+            >
+              <MessageCircle size={20} />
+              تواصل عبر واتساب
+            </a>
           </div>
         </div>
         <Separator className="my-8 bg-background/20" />

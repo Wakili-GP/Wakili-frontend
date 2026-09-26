@@ -1,3 +1,4 @@
+import { MessageCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const BlueFooter = () => {
@@ -45,11 +46,20 @@ const BlueFooter = () => {
             <h4 className="font-semibold mb-3 text-sm tracking-wide">
               اتصل بنا
             </h4>
-            <div className="space-y-2 text-primary-foreground/70 text-sm">
+            <div className="space-y-2 text-primary-foreground/70 text-sm mb-4">
               <p>القاهرة، مصر</p>
-              <p>support@wakilak.me</p>
-              <p>01144958064</p>
+              <p>anas.shaban.awaad@gmail.com</p>
+              <p>01067873327</p>
             </div>
+            <a
+              href="https://wa.me/201067873327"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white px-4 py-2 rounded-md transition-colors text-sm font-semibold"
+            >
+              <MessageCircle size={18} />
+              تواصل عبر واتساب
+            </a>
           </div>
         </div>
         <Separator className="my-8 bg-primary-foreground/20" />

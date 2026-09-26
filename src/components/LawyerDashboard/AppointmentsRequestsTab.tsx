@@ -39,13 +39,14 @@ import {
 // Constants
 const PAGE_SIZE = 6;
 
-type StatusFilter = "all" | 0 | 1 | 2 | 3;
+type StatusFilter = "all" | 0 | 1 | 2 | 3 | 4;
 
 const STATUS_MAP: Record<number, { label: string; class: string }> = {
   0: { label: "قيد الانتظار", class: "bg-amber-100 text-amber-700" },
-  1: { label: "مُؤكد", class: "bg-emerald-100 text-emerald-700" },
-  2: { label: "ملغي", class: "bg-red-100 text-red-700" },
-  3: { label: "مكتمل", class: "bg-blue-100 text-blue-700" },
+  1: { label: "بانتظار موافقة الإدارة", class: "bg-orange-100 text-orange-700" },
+  2: { label: "مُؤكد", class: "bg-emerald-100 text-emerald-700" },
+  3: { label: "ملغي", class: "bg-red-100 text-red-700" },
+  4: { label: "مكتمل", class: "bg-blue-100 text-blue-700" },
 };
 
 const SESSION_TYPE_MAP: Record<number, { label: string; badgeClass: string }> =
@@ -248,8 +249,15 @@ const AppointmentCard = ({
         </div>
       )}
 
-      {/* Action button for confirmed status */}
+      {/* Action button for Awaiting Admin Approval */}
       {appointment.status === 1 && (
+        <div className="flex gap-2 mt-4 pt-3 border-t border-border/50">
+          <p className="text-sm text-orange-600 font-medium">لا يمكن اتخاذ إجراء حتى تتم الموافقة من قبل الإدارة.</p>
+        </div>
+      )}
+
+      {/* Action button for confirmed status */}
+      {appointment.status === 2 && (
         <div className="flex gap-2 mt-4 pt-3 border-t border-border/50">
           <Button
             size="sm"
@@ -369,18 +377,24 @@ const AppointmentsRequestsTab = () => {
       },
       {
         key: 1,
+        label: "بانتظار الإدارة",
+        className: "bg-orange-500/10 text-orange-700",
+        value: meta?.awaitingAdminApproval, // you'll need to map this correctly if the backend returns it
+      },
+      {
+        key: 2,
         label: "مُؤكد",
         className: "bg-emerald-500/10 text-emerald-700",
         value: meta?.confirmed,
       },
       {
-        key: 2,
+        key: 3,
         label: "ملغي",
         className: "bg-red-500/10 text-red-700",
         value: meta?.cancelled,
       },
       {
-        key: 3,
+        key: 4,
         label: "مكتمل",
         className: "bg-blue-500/10 text-blue-700",
         value: meta?.completed,
