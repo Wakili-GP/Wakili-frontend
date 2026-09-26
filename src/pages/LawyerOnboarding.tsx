@@ -97,8 +97,8 @@ const LawyerOnboarding = () => {
                 <br />
                 <span className="font-bold text-foreground mt-1 inline-block mb-3" dir="ltr">+201067873327</span>
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full gap-2 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700 dark:border-green-600 dark:text-green-500 dark:hover:bg-green-950/30"
                 onClick={() => window.open('https://wa.me/201067873327', '_blank')}
               >
