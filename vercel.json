@@ -15,10 +15,6 @@
     {
       "source": "/review-api/:path*",
       "destination": "https://nouraelkashif83--legal-ai-auditor-api.modal.run/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
