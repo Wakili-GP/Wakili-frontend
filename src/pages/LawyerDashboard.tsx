@@ -261,7 +261,18 @@ const LawyerDashboard = () => {
               {/* Stats Card Overview */}
               {activeSection === "overview" && (
                 <div className="space-y-6">
-                  {/* Stats cards */}
+                  <Card className="p-10 flex flex-col items-center justify-center text-center space-y-4 border-dashed border-2 border-secondary/20 bg-secondary/5">
+                    <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center">
+                      <LayoutDashboard className="w-8 h-8 text-secondary" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-foreground mb-2">هذه الصفحة قيد التطوير</h2>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        نعمل حالياً على تطوير الإحصائيات الخاصة بك. شكراً لتفهمك.
+                      </p>
+                    </div>
+                  </Card>
+                  {/*
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     {[
                       {
@@ -323,9 +334,7 @@ const LawyerDashboard = () => {
                     })}
                   </div>
 
-                  {/* Two column: upcoming + recent reviews */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Upcoming */}
                     <Card className="p-6">
                       <div className="flex items-center justify-between mb-5">
                         <h3 className="text-base font-bold flex items-center gap-2">
@@ -380,7 +389,6 @@ const LawyerDashboard = () => {
                       )}
                     </Card>
 
-                    {/* Recent reviews */}
                     <Card className="p-6">
                       <div className="flex items-center justify-between mb-5">
                         <h3 className="text-base font-bold flex items-center gap-2">
@@ -436,7 +444,6 @@ const LawyerDashboard = () => {
                     </Card>
                   </div>
 
-                  {/* Quick Actions */}
                   <Card className="p-6">
                     <h3 className="text-base font-bold mb-4">إجراءات سريعة</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -480,6 +487,7 @@ const LawyerDashboard = () => {
                       })}
                     </div>
                   </Card>
+                  */}
                 </div>
               )}
 

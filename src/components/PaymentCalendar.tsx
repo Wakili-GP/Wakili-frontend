@@ -10,6 +10,7 @@ import {
   Clock,
   Video,
   CheckCircle,
+  Smartphone,
 } from "lucide-react";
 import {
   Dialog,
@@ -60,20 +61,21 @@ const PaymentCalendar = ({
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const handlePayment = async () => {
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  const handleManualBooking = async () => {
     const slot = availableTimes?.find((s) => s.startTime === selectedTime);
     if (!slot) return;
 
     setIsRedirecting(true);
     try {
-      const url = await paymentServices.getPaymentLink(
-        slot.id,
-        lawyer.lawyerId,
-      );
-      window.open(url, "_blank");
-    } catch (error: unknown) {
-      console.log("Error during payment process:", error);
-      toast.error("حدث خطأ أثناء إعداد عملية الدفع. يرجى المحاولة مرة أخرى.");
+      await paymentServices.createManualAppointment(lawyer.lawyerId, slot.id);
+      setBookingSuccess(true);
+      toast.success("تم تأكيد الحجز بنجاح، بانتظار مراجعة الإدارة");
+    } catch (error: any) {
+      console.log("Error during booking process:", error);
+      toast.error(error.response?.data?.detail || "حدث خطأ أثناء إتمام عملية الحجز. يرجى المحاولة مرة أخرى.");
+    } finally {
       setIsRedirecting(false);
     }
   };
@@ -265,14 +267,31 @@ const PaymentCalendar = ({
       {/* Booking Modal */}
       <Dialog open={bookingModalOpen} onOpenChange={setBookingModalOpen} modal={false}>
         <DialogContent className="max-w-md">
-          <DialogHeader className="mt-4">
-            <DialogTitle className="text-xl text-center">
-              تأكيد حجز الجلسة
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              راجع تفاصيل الموعد قبل المتابعة إلى الدفع.
-            </DialogDescription>
-          </DialogHeader>
+          {bookingSuccess ? (
+            <div className="p-6 text-center space-y-4">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+              <h3 className="text-xl font-bold text-foreground">تم تسجيل الحجز بنجاح!</h3>
+              <p className="text-sm text-muted-foreground">
+                يرجى الانتظار حتى تقوم الإدارة بمراجعة تأكيد الدفع واعتماد الجلسة.
+              </p>
+              <Button onClick={() => {
+                setBookingModalOpen(false);
+                setBookingSuccess(false);
+                setSelectedTime(null);
+              }} className="w-full h-11">
+                حسناً
+              </Button>
+            </div>
+          ) : (
+            <>
+              <DialogHeader className="mt-4">
+                <DialogTitle className="text-xl text-center">
+                  تأكيد حجز الجلسة
+                </DialogTitle>
+                <DialogDescription className="text-center">
+                  راجع تفاصيل الموعد قبل المتابعة للتأكيد.
+                </DialogDescription>
+              </DialogHeader>
 
           {/* Lawyer summary */}
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border">
@@ -360,6 +379,25 @@ const PaymentCalendar = ({
             </span>
           </div>
 
+          {/* Manual Payment Instructions */}
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-2 space-y-3">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+              <Smartphone className="w-4 h-4 inline-block ml-1" /> طريقة الدفع (مؤقتاً):
+            </p>
+            <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-2 list-disc list-inside">
+              <li>قم بتحويل المبلغ عبر <strong>فودافون كاش</strong> أو <strong>إنستاباي</strong> إلى الرقم: <span className="font-bold" dir="ltr">01067873327</span></li>
+              <li>أرسل صورة إيصال التحويل عبر الواتساب لنفس الرقم</li>
+              <li>اضغط على "تأكيد الحجز" أدناه</li>
+            </ul>
+            <Button 
+              variant="outline" 
+              className="w-full text-green-600 border-green-500 hover:bg-green-50 dark:hover:bg-green-950/30 gap-2 h-9 text-xs"
+              onClick={() => window.open('https://wa.me/201067873327', '_blank')}
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> فتح واتساب لإرسال الإيصال
+            </Button>
+          </div>
+
           <DialogFooter className="flex-row gap-2 sm:gap-2">
             <Button
               variant="outline"
@@ -370,23 +408,20 @@ const PaymentCalendar = ({
               إلغاء
             </Button>
             <Button
-              onClick={handlePayment}
+              onClick={handleManualBooking}
               disabled={isRedirecting}
-              className="flex-1 h-11 bg-gradient-to-r from-[#F26E21] to-[#F8A23C] text-white hover:opacity-95 hover:shadow-lg font-semibold shadow-md transition-all duration-300 group"
+              className="flex-1 h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-md transition-all duration-300"
             >
               {isRedirecting ? (
                 <Loader2 className="w-4 h-4 ml-2 animate-spin" />
               ) : (
-                <CreditCard className="w-4 h-4 ml-2 group-hover:scale-110 transition-transform" />
+                <CheckCircle className="w-4 h-4 ml-2" />
               )}
-              <span>{isRedirecting ? "جاري التحويل..." : "ادفع عبر"}</span>
-              {!isRedirecting && (
-                <span className="font-extrabold tracking-tight ml-1">
-                  Paymob
-                </span>
-              )}
+              <span>{isRedirecting ? "جاري التأكيد..." : "تأكيد الحجز"}</span>
             </Button>
           </DialogFooter>
+        </>
+        )}
         </DialogContent>
       </Dialog>
     </div>

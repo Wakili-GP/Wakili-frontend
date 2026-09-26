@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   User,
   GraduationCap,
@@ -37,6 +38,7 @@ interface ReviewStepProps {
 
 const ReviewStep = ({ onEdit, onSubmitted }: ReviewStepProps) => {
   const { user } = useAuth();
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const { data: progressData } = useQuery({
     queryKey: ["onboarding-progress"],
@@ -447,6 +449,29 @@ const ReviewStep = ({ onEdit, onSubmitted }: ReviewStepProps) => {
         </div>
       </ReviewCard>
 
+      {/* Agreement Section */}
+      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-4 mt-6">
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="terms"
+            checked={isAgreed}
+            onCheckedChange={(checked) => setIsAgreed(checked as boolean)}
+            className="mt-1"
+          />
+          <div className="space-y-1">
+            <label
+              htmlFor="terms"
+              className="text-sm font-semibold leading-none cursor-pointer text-foreground"
+            >
+              موافقة على شروط الاستخدام وعمولة المنصة
+            </label>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              أقر بموافقتي على الشروط والأحكام الخاصة بمنصة "وكيلك"، وأوافق على أن المنصة ستقوم باقتطاع نسبة <strong>20% كعمولة</strong> على جميع المعاملات المالية والجلسات التي تتم من خلال الموقع.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Navigation */}
       <div className="flex justify-between pt-2">
         <Button
@@ -459,7 +484,7 @@ const ReviewStep = ({ onEdit, onSubmitted }: ReviewStepProps) => {
         <Button
           className="cursor-pointer rounded-xl h-10 px-6 gap-2"
           onClick={() => submitMutation.mutate()}
-          disabled={submitMutation.isPending}
+          disabled={submitMutation.isPending || !isAgreed}
         >
           {submitMutation.isPending ? (
             <Loader className="w-4 h-4 animate-spin" />

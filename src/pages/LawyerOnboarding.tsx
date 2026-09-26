@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Scale, Clock } from "lucide-react";
+import { Scale, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OnboardingStepper from "@/components/onboarding/OnboardingStepper";
 import BasicInfoStep from "@/components/onboarding/BasicInfoStep";
@@ -86,16 +86,25 @@ const LawyerOnboarding = () => {
               تم إرسال طلبك بنجاح
             </h2>
             <p className="text-muted-foreground mb-6">
-              شكراً لتسجيلك معنا. يتم الآن مراجعة بياناتك ومستنداتك تلقائياً
-              بواسطة الذكاء الاصطناعي. ستتلقى إشعاراً فور اكتمال عملية التحقق.
+              شكراً لتسجيلك معنا. يتم الآن مراجعة بياناتك ومستنداتك من قبل الإدارة. ستتلقى إشعاراً فور اكتمال عملية التحقق.
             </p>
             <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/20 mb-6">
-              <p className="text-sm text-amber-700 dark:text-amber-300 font-medium">
-                حالة الطلب: جاري التحقق بواسطة الذكاء الاصطناعي
+              <p className="text-sm text-amber-700 dark:text-amber-300 font-medium mb-2">
+                حالة الطلب: قيد المراجعة الإدارية
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                عادة ما تستغرق هذه العملية بضع دقائق، وفي حال الحاجة سيتم تحويل الطلب للمراجعة اليدوية.
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                سيتم قبولك من قبل الإدارة، أو يمكنك التواصل مع الدعم الفني عبر الرقم:
+                <br />
+                <span className="font-bold text-foreground mt-1 inline-block mb-3" dir="ltr">+201067873327</span>
               </p>
+              <Button 
+                variant="outline" 
+                className="w-full gap-2 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700 dark:border-green-600 dark:text-green-500 dark:hover:bg-green-950/30"
+                onClick={() => window.open('https://wa.me/201067873327', '_blank')}
+              >
+                <MessageCircle className="w-4 h-4" />
+                تواصل عبر واتساب
+              </Button>
             </div>
             <Button onClick={() => navigate("/")}>
               العودة للصفحة الرئيسية

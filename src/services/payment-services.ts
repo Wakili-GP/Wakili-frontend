@@ -33,6 +33,13 @@ const paymentServices = {
     const url = `https://accept.paymob.com/api/acceptance/iframes/1036828?payment_token=${response.data.paymentKey}`;
     return url;
   },
+  async createManualAppointment(lawyerId: string, slotId: string) {
+    const response = await httpClient.post(`/Appointments`, {
+      lawyerId,
+      slotId,
+    });
+    return response.data;
+  }
 };
 
 export default paymentServices;

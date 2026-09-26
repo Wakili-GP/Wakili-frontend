@@ -13,13 +13,13 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://wakili.runasp.net",
+        target: "http://localhost:5133",
         changeOrigin: true,
         secure: false, // only if the backend is HTTP, not HTTPS
         // rewrite: (path) => path, // no rewrite needed if paths match
       },
       "/hubs": {
-        target: "http://wakili.runasp.net",
+        target: "http://localhost:5133",
         changeOrigin: true,
         secure: false,
         ws: true, // proxy websockets
