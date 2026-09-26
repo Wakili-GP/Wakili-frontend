@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart3,
   Calendar as CalendarIcon,
   Clock,
   Eye,
@@ -10,19 +9,14 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
-  MessageCircle,
-  Plus,
   Scale,
   Settings,
   Star,
-  TrendingUp,
   Users,
   Menu,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/stores/auth.store";
 import { getInitials, getAvatarColor } from "@/lib/avatarHelpers";
@@ -34,10 +28,7 @@ import AppointmentsRequestsTab from "@/components/LawyerDashboard/AppointmentsRe
 import ReviewsTab from "@/components/LawyerDashboard/ReviewsTab";
 import ProfileSettingsTab from "@/components/LawyerDashboard/ProfileSettingsTab";
 import CalendarTab from "@/components/LawyerDashboard/CalendarTab";
-import {
-  ownerUpcomingBookings,
-  LawyerDashboardReviews,
-} from "@/data/data.ts";
+
 import { NotificationPopover } from "@/components/NotificationPopover";
 import ArticleDashboardPage from "./articles/ArticleDashboardPage";
 import ArticleSubmissionPage from "./articles/ArticleSubmissionPage";
@@ -55,23 +46,7 @@ const sidebarItems = [
   { id: "settings", label: "إعدادات الملف", icon: Settings },
 ];
 
-const formatDateAr = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("ar-EG", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
-const slotTypeLabel = (type: string) =>
-  type === "phone" ? "هاتفية" : type === "video" ? "فيديو" : "مكتبية";
-
-const slotTypeBadgeClass = (type: string) =>
-  type === "phone"
-    ? "bg-blue-500/10 text-blue-700 border-blue-200"
-    : type === "video"
-      ? "bg-purple-500/10 text-purple-700 border-purple-200"
-      : "bg-emerald-500/10 text-emerald-700 border-emerald-200";
 
 const LawyerDashboard = () => {
   const navigate = useNavigate();
